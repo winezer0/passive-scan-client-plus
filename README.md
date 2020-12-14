@@ -2,7 +2,7 @@
 基于passive-scan-client-0.1改造的burpsuite流量转发插件
 
 
-使用方式，请关注NOVASEC微信公众号查看
+使用方式，请关注NOVASEC微信公众号查看，文章暂未发送，等等
 
 有任何问题、建议请留言
 
