@@ -19,8 +19,6 @@ public class GUI implements IMessageEditorController {
     private JTextField tfTimeout;
     private JLabel lbIntervalTime;
     private JTextField tfIntervalTime;
-    private JLabel lbReqUniq;
-    private JTextField tfReqUniq;
     private JLabel lbUsername;
     private JTextField tfUsername;
     private JLabel lbPassword;
@@ -28,6 +26,7 @@ public class GUI implements IMessageEditorController {
     private JTextField tfDomain;
     private JTextField tfExcludeSuffix;
     private JToggleButton btnConn;
+    private JToggleButton btnUniq;
     private JButton btnClear;
     private JSplitPane splitPane;
     public static HttpLogTable logTable;
@@ -68,7 +67,7 @@ public class GUI implements IMessageEditorController {
         GridBagLayout gbl_panel = new GridBagLayout();
         gbl_panel.columnWidths = new int[] { 40, 100, 0, 39, 33, 25, 0, 0, 0 };
         gbl_panel.rowHeights = new int[] { 0, 0 };
-        gbl_panel.columnWeights = new double[] { 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D,0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 1.0D, 0.0D,0.0D, Double.MIN_VALUE };
+        gbl_panel.columnWeights = new double[] { 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D,0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 1.0D, 0.0D,0.0D, Double.MIN_VALUE };
         gbl_panel.rowWeights = new double[] { 0.0D, Double.MIN_VALUE };
         ConfigPanel.setLayout(gbl_panel);
 
@@ -180,28 +179,32 @@ public class GUI implements IMessageEditorController {
         ConfigPanel.add(tfIntervalTime, gbc_tfIntervalTime);
 
         // 增加URL去重开关
-        lbReqUniq = new JLabel("ReqUniq:");
-        GridBagConstraints gbc_lbReqUniq = new GridBagConstraints();
-        gbc_lbReqUniq.fill = 2;
-        gbc_lbReqUniq.gridx = 12;
-        gbc_lbReqUniq.gridy = 0;
-        ConfigPanel.add(lbReqUniq, gbc_lbReqUniq);
+        btnUniq = new JToggleButton("UNIQ");
+        btnUniq.addChangeListener(new ChangeListener() {
+            public void stateChanged(ChangeEvent arg0) {
+                boolean isSelected = btnUniq.isSelected();
+                if(isSelected){
+                    Config.REQ_UNIQ = true;
+                    btnUniq.setText("UNIQ");
+                }else{
+                    Config.REQ_UNIQ = false;
+                    btnUniq.setText("UNIQ");
+                }
+                btnUniq.setSelected(isSelected);
+            }
+        });
 
-        tfReqUniq = new JTextField();
-        tfReqUniq.setText(REQ_UNIQ);
-        tfReqUniq.setColumns(5);
-        GridBagConstraints gbc_tfReqUniq = new GridBagConstraints();
-        gbc_tfReqUniq.fill = 2;
-        gbc_tfReqUniq.insets = new Insets(0, 0, 0, 5);
-        gbc_tfReqUniq.gridx = 13;
-        gbc_tfReqUniq.gridy = 0;
-        ConfigPanel.add(tfReqUniq, gbc_tfReqUniq);
-
+        GridBagConstraints gbc_btnUniq = new GridBagConstraints();
+        gbc_btnUniq.fill = 2;
+        gbc_btnUniq.insets = new Insets(0, 0, 0, 5);
+        gbc_btnUniq.gridx = 12;
+        gbc_btnUniq.gridy = 0;
+        ConfigPanel.add(btnUniq, gbc_btnUniq);
         ///////////////////////////////
         GridBagConstraints gbc_lb1 = new GridBagConstraints();
         gbc_lb1.anchor = 15;
         gbc_lb1.insets = new Insets(0, 0, 0, 5);
-        gbc_lb1.gridx = 14;
+        gbc_lb1.gridx = 13;
         gbc_lb1.gridy = 0;
         ConfigPanel.add(new JLabel(""), gbc_lb1);
         ///////////////////////////////
@@ -221,7 +224,6 @@ public class GUI implements IMessageEditorController {
                     Config.DOMAIN_REGX = tfDomain.getText();
                     Config.SUFFIX_REGX = tfExcludeSuffix.getText();
                     Config.INTERVAL_TIME = Integer.valueOf(tfIntervalTime.getText());
-                    Config.REQ_UNIQ = tfReqUniq.getText().trim();
                     setAllEnabled(false);
                 }else{
                     btnConn.setText("Run");
@@ -235,7 +237,7 @@ public class GUI implements IMessageEditorController {
         GridBagConstraints gbc_btnConn = new GridBagConstraints();
         gbc_btnConn.fill = 2;
         gbc_btnConn.insets = new Insets(0, 0, 0, 5);
-        gbc_btnConn.gridx = 15;
+        gbc_btnConn.gridx = 14;
         gbc_btnConn.gridy = 0;
         ConfigPanel.add(btnConn, gbc_btnConn);
 
@@ -264,7 +266,7 @@ public class GUI implements IMessageEditorController {
         GridBagConstraints gbc_btnClear = new GridBagConstraints();
         gbc_btnClear.fill = 2;
         gbc_btnClear.insets = new Insets(0, 0, 0, 5);
-        gbc_btnClear.gridx = 16;
+        gbc_btnClear.gridx = 15;
         gbc_btnClear.gridy = 0;
         ConfigPanel.add(btnClear, gbc_btnClear);
         ////////////////////////////////////////////////////////////////////
@@ -457,7 +459,6 @@ public class GUI implements IMessageEditorController {
         tfDomain.setEnabled(is);
         tfExcludeSuffix.setEnabled(is);
         tfIntervalTime.setEnabled(is);
-        tfReqUniq.setEnabled(is);
     }
 
     //新增URL去重
