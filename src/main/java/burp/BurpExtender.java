@@ -13,8 +13,8 @@ import javax.swing.table.TableColumnModel;
 
 
 public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContextMenuFactory {
-    public final static String extensionName = "Passive Scan Client";
-    public final static String version ="0.4.1";
+    public final static String extensionName = Config.extensionName;
+    public final static String version = Config.version;
     public static IBurpExtenderCallbacks callbacks;
     public static IExtensionHelpers helpers;
     public static PrintWriter stdout;
@@ -84,7 +84,9 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
                                 //向代理转发请求
                                 Map<String, String> mapResult = null;
                                 try {
-                                    mapResult = HttpAndHttpsProxy.Proxy(message);
+                                    //mapResult = HttpAndHttpsProxy.Proxy(message);
+                                    mapResult = HttpAndHttpsProxy.Proxy(message , Config.reqBodyHashSet);
+
                                 } catch (InterruptedException interruptedException) {
                                     interruptedException.printStackTrace();
                                 }
@@ -119,7 +121,7 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
 
     @Override
     public Component getUiComponent() {
-        return gui.getComponet();
+        return gui.getComponent();
     }
 
     public void processProxyMessage(boolean messageIsRequest, final IInterceptedProxyMessage iInterceptedProxyMessage) {
@@ -138,7 +140,7 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
                 return;
             }
 
-            final IHttpRequestResponse resrsp = iInterceptedProxyMessage.getMessageInfo();
+            final IHttpRequestResponse req_resp = iInterceptedProxyMessage.getMessageInfo();
 
             //final LogEntry logEntry = new LogEntry(1,callbacks.saveBuffersToTempFiles(iInterceptedProxyMessage.getMessageInfo()),helpers.analyzeRequest(resrsp).getUrl());
 
@@ -148,10 +150,12 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
                 public void run() {
                     synchronized(log) {
                         int row = log.size();
-                        String method = helpers.analyzeRequest(resrsp).getMethod();
+                        String method = helpers.analyzeRequest(req_resp).getMethod();
                         Map<String, String> mapResult = null;
                         try {
-                            mapResult = HttpAndHttpsProxy.Proxy(resrsp);
+                            //mapResult = HttpAndHttpsProxy.Proxy(resrsp); //增加重复元素过滤功能
+                            mapResult = HttpAndHttpsProxy.Proxy(req_resp , Config.reqBodyHashSet);
+
                         } catch (InterruptedException e) {
                             // TODO Auto-generated catch block
                             e.printStackTrace();
@@ -159,7 +163,7 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
 
                         //log.add(new LogEntry(iInterceptedProxyMessage.getMessageReference(),
                         log.add(new LogEntry(row + 1,
-                                callbacks.saveBuffersToTempFiles(resrsp), helpers.analyzeRequest(resrsp).getUrl(),
+                                callbacks.saveBuffersToTempFiles(req_resp), helpers.analyzeRequest(req_resp).getUrl(),
                                 method,
                                 mapResult)
                         );

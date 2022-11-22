@@ -2,9 +2,31 @@
 
 
 
-## 更新简述:
+## 0x00 更新记录
 
-v0.4.1 基于c0ny1的passive-scan-client-0.3.0合并更新Pull #27 #21 #22, 参考#34 .  详情: https://github.com/c0ny1/passive-scan-client/pulls.
+v0.4.1 合并更新
+
+```
+1、基于c0ny1的passive-scan-client-0.3.0合并更新Pull #27 #21 #22.  详情: https://github.com/c0ny1/passive-scan-client/pulls.
+```
+
+v0.4.2 修复新增
+
+```
+1、参考#34 修复代理用户名密码为空时判断BUG.  详情: https://github.com/c0ny1/passive-scan-client/pulls.
+
+2、对所有请求基于URL及Body hash进行hash记录，当下一次遇到相同请求时忽略请求报文,  注：点击clear按钮可清空hashset. 
+```
+
+v0.4.3 请求去重
+
+```
+1、优化变量名称
+
+2、添加ReqUinq 框，仅当ReqUinq 内容设置为 true 时，对请求基于URL及Body hash进行hash记录。注: 不会记录40X、50X、访问拒绝等响应状态码。 
+```
+
+
 
 
 

@@ -7,6 +7,8 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import static burp.Config.*;
+
 public class GUI implements IMessageEditorController {
     private JPanel contentPane;
     private JLabel lbHost;
@@ -17,6 +19,8 @@ public class GUI implements IMessageEditorController {
     private JTextField tfTimeout;
     private JLabel lbIntervalTime;
     private JTextField tfIntervalTime;
+    private JLabel lbReqUniq;
+    private JTextField tfReqUniq;
     private JLabel lbUsername;
     private JTextField tfUsername;
     private JLabel lbPassword;
@@ -29,7 +33,7 @@ public class GUI implements IMessageEditorController {
     public static HttpLogTable logTable;
     public static IHttpRequestResponse currentlyDisplayedItem;
     public static JLabel lbRequestCount;
-    public static JLabel lbSuccesCount;
+    public static JLabel lbSuccessCount;
     public static JLabel lbFailCount;
 
     public static IMessageEditor requestViewer;
@@ -64,7 +68,7 @@ public class GUI implements IMessageEditorController {
         GridBagLayout gbl_panel = new GridBagLayout();
         gbl_panel.columnWidths = new int[] { 40, 100, 0, 39, 33, 25, 0, 0, 0 };
         gbl_panel.rowHeights = new int[] { 0, 0 };
-        gbl_panel.columnWeights = new double[] { 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D,0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 1.0D, 0.0D,0.0D, Double.MIN_VALUE };
+        gbl_panel.columnWeights = new double[] { 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D,0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 1.0D, 0.0D,0.0D, Double.MIN_VALUE };
         gbl_panel.rowWeights = new double[] { 0.0D, Double.MIN_VALUE };
         ConfigPanel.setLayout(gbl_panel);
 
@@ -78,7 +82,7 @@ public class GUI implements IMessageEditorController {
 
         tfHost = new JTextField();
         tfHost.setColumns(10);
-        tfHost.setText("127.0.0.1");
+        tfHost.setText(PROXY_HOST);
         GridBagConstraints gbc_tfHost = new GridBagConstraints();
         gbc_tfHost.fill = 2;
         gbc_tfHost.insets = new Insets(0, 0, 0, 5);
@@ -95,7 +99,7 @@ public class GUI implements IMessageEditorController {
         ConfigPanel.add(lbPort, gbc_lbPort);
 
         tfPort = new JTextField();
-        tfPort.setText("9898");
+        tfPort.setText(String.valueOf(PROXY_PORT));
         tfPort.setColumns(10);
         GridBagConstraints gbc_tfPort = new GridBagConstraints();
         gbc_tfPort.fill = 2;
@@ -148,7 +152,7 @@ public class GUI implements IMessageEditorController {
         ConfigPanel.add(lbTimeout, gbc_lbTimeout);
 
         tfTimeout = new JTextField();
-        tfTimeout.setText("5000");
+        tfTimeout.setText(String.valueOf(PROXY_TIMEOUT));
         tfTimeout.setColumns(5);
         GridBagConstraints gbc_tfTimeout = new GridBagConstraints();
         gbc_tfTimeout.fill = 2;
@@ -158,7 +162,7 @@ public class GUI implements IMessageEditorController {
         ConfigPanel.add(tfTimeout, gbc_tfTimeout);
 
         // 增加间隔时间
-        lbIntervalTime = new JLabel("Interva lTime:");
+        lbIntervalTime = new JLabel("Interval lTime:");
         GridBagConstraints gbc_lbIntervalTime = new GridBagConstraints();
         gbc_lbIntervalTime.fill = 2;
         gbc_lbIntervalTime.gridx = 10;
@@ -166,7 +170,7 @@ public class GUI implements IMessageEditorController {
         ConfigPanel.add(lbIntervalTime, gbc_lbIntervalTime);
 
         tfIntervalTime = new JTextField();
-        tfIntervalTime.setText("5000");
+        tfIntervalTime.setText(String.valueOf(INTERVAL_TIME));
         tfIntervalTime.setColumns(5);
         GridBagConstraints gbc_tfIntervalTime = new GridBagConstraints();
         gbc_tfIntervalTime.fill = 2;
@@ -175,14 +179,32 @@ public class GUI implements IMessageEditorController {
         gbc_tfIntervalTime.gridy = 0;
         ConfigPanel.add(tfIntervalTime, gbc_tfIntervalTime);
 
-        
+        // 增加URL去重开关
+        lbReqUniq = new JLabel("ReqUniq:");
+        GridBagConstraints gbc_lbReqUniq = new GridBagConstraints();
+        gbc_lbReqUniq.fill = 2;
+        gbc_lbReqUniq.gridx = 12;
+        gbc_lbReqUniq.gridy = 0;
+        ConfigPanel.add(lbReqUniq, gbc_lbReqUniq);
+
+        tfReqUniq = new JTextField();
+        tfReqUniq.setText(REQ_UNIQ);
+        tfReqUniq.setColumns(5);
+        GridBagConstraints gbc_tfReqUniq = new GridBagConstraints();
+        gbc_tfReqUniq.fill = 2;
+        gbc_tfReqUniq.insets = new Insets(0, 0, 0, 5);
+        gbc_tfReqUniq.gridx = 13;
+        gbc_tfReqUniq.gridy = 0;
+        ConfigPanel.add(tfReqUniq, gbc_tfReqUniq);
+
+        ///////////////////////////////
         GridBagConstraints gbc_lb1 = new GridBagConstraints();
         gbc_lb1.anchor = 15;
         gbc_lb1.insets = new Insets(0, 0, 0, 5);
-        gbc_lb1.gridx = 12;
+        gbc_lb1.gridx = 14;
         gbc_lb1.gridy = 0;
         ConfigPanel.add(new JLabel(""), gbc_lb1);
-
+        ///////////////////////////////
         btnConn = new JToggleButton("Run");
         btnConn.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent arg0) {
@@ -191,14 +213,15 @@ public class GUI implements IMessageEditorController {
                 if(isSelected){
                     btnConn.setText("Stop");
                     Config.IS_RUNNING = true;
-                    Config.PROXY_HOST = tfHost.getText();
-                    Config.PROXY_PORT = Integer.valueOf(tfPort.getText());
-                    Config.PROXY_TIMEOUT = Integer.valueOf(tfTimeout.getText());
+                    PROXY_HOST = tfHost.getText();
+                    PROXY_PORT = Integer.valueOf(tfPort.getText());
+                    PROXY_TIMEOUT = Integer.valueOf(tfTimeout.getText());
                     Config.PROXY_USERNAME = tfUsername.getText();
                     Config.PROXY_PASSWORD = tfPassword.getText();
                     Config.DOMAIN_REGX = tfDomain.getText();
                     Config.SUFFIX_REGX = tfExcludeSuffix.getText();
                     Config.INTERVAL_TIME = Integer.valueOf(tfIntervalTime.getText());
+                    Config.REQ_UNIQ = tfReqUniq.getText().trim();
                     setAllEnabled(false);
                 }else{
                     btnConn.setText("Run");
@@ -206,13 +229,13 @@ public class GUI implements IMessageEditorController {
                     setAllEnabled(true);
                 }
                 btnConn.setSelected(isSelected);
-
             }
         });
+
         GridBagConstraints gbc_btnConn = new GridBagConstraints();
         gbc_btnConn.fill = 2;
         gbc_btnConn.insets = new Insets(0, 0, 0, 5);
-        gbc_btnConn.gridx = 13;
+        gbc_btnConn.gridx = 15;
         gbc_btnConn.gridy = 0;
         ConfigPanel.add(btnConn, gbc_btnConn);
 
@@ -220,12 +243,12 @@ public class GUI implements IMessageEditorController {
         btnClear.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                int n = JOptionPane.showConfirmDialog(null, "Are you sure you want to clear the data？", "Passvie Scan Client prompt", JOptionPane.YES_NO_OPTION);
+                int n = JOptionPane.showConfirmDialog(null, "Are you sure you want to clear the data？", "Passive Scan Client prompt", JOptionPane.YES_NO_OPTION);
                 if(n == 0) {
                     Config.REQUEST_TOTAL = 0;
                     lbRequestCount.setText("0");
                     Config.SUCCESS_TOTAL = 0;
-                    lbSuccesCount.setText("0");
+                    lbSuccessCount.setText("0");
                     Config.FAIL_TOTAL = 0;
                     lbFailCount.setText("0");
                     BurpExtender.log.clear();
@@ -234,13 +257,14 @@ public class GUI implements IMessageEditorController {
                     requestViewer.setMessage("".getBytes(),true);
                     responseViewer.setMessage("".getBytes(),false);
                     proxyRspViewer.setText("".getBytes());
+                    clearHashSet(true);  //新增URL去重
                 }
             }
         });
         GridBagConstraints gbc_btnClear = new GridBagConstraints();
         gbc_btnClear.fill = 2;
         gbc_btnClear.insets = new Insets(0, 0, 0, 5);
-        gbc_btnClear.gridx = 14;
+        gbc_btnClear.gridx = 16;
         gbc_btnClear.gridy = 0;
         ConfigPanel.add(btnClear, gbc_btnClear);
         ////////////////////////////////////////////////////////////////////
@@ -288,7 +312,7 @@ public class GUI implements IMessageEditorController {
         FilterPanel.add(lbExcludeSuffix, gbc_lbExcludeSuffix);
 
         tfExcludeSuffix = new JTextField(35);
-        tfExcludeSuffix.setText("js|css|jpeg|gif|jpg|png|pdf|rar|zip|docx|doc|svg|jpeg|ico|woff|woff2|ttf|otf");
+        tfExcludeSuffix.setText(SUFFIX_REGX);
         GridBagConstraints gbc_tfExcludeSuffix = new GridBagConstraints();
         gbc_tfExcludeSuffix.insets = new Insets(0, 0, 0, 5);
         gbc_tfExcludeSuffix.fill = 2;
@@ -329,22 +353,22 @@ public class GUI implements IMessageEditorController {
         gbc_vb2.gridy = 0;
         FilterPanel.add(Box.createVerticalBox(), gbc_vb);
 
-        JLabel lbSucces = new JLabel("Success:");
-        GridBagConstraints gbc_lbSucces = new GridBagConstraints();
-        gbc_lbSucces.insets = new Insets(0, 0, 0, 5);
-        gbc_lbSucces.fill = 2;
-        gbc_lbSucces.gridx = 8;
-        gbc_lbSucces.gridy = 0;
-        FilterPanel.add(lbSucces, gbc_lbSucces);
+        JLabel lbSuccess = new JLabel("Success:");
+        GridBagConstraints gbc_lbSuccess = new GridBagConstraints();
+        gbc_lbSuccess.insets = new Insets(0, 0, 0, 5);
+        gbc_lbSuccess.fill = 2;
+        gbc_lbSuccess.gridx = 8;
+        gbc_lbSuccess.gridy = 0;
+        FilterPanel.add(lbSuccess, gbc_lbSuccess);
 
-        lbSuccesCount = new JLabel("0");
-        lbSuccesCount.setForeground(new Color(0, 255, 0));
-        GridBagConstraints gbc_lbSuccesCount = new GridBagConstraints();
-        gbc_lbSuccesCount.insets = new Insets(0, 0, 0, 5);
-        gbc_lbSuccesCount.fill = 2;
-        gbc_lbSuccesCount.gridx = 9;
-        gbc_lbSuccesCount.gridy = 0;
-        FilterPanel.add(lbSuccesCount, gbc_lbSuccesCount);
+        lbSuccessCount = new JLabel("0");
+        lbSuccessCount.setForeground(new Color(0, 255, 0));
+        GridBagConstraints gbc_lbSuccessCount = new GridBagConstraints();
+        gbc_lbSuccessCount.insets = new Insets(0, 0, 0, 5);
+        gbc_lbSuccessCount.fill = 2;
+        gbc_lbSuccessCount.gridx = 9;
+        gbc_lbSuccessCount.gridy = 0;
+        FilterPanel.add(lbSuccessCount, gbc_lbSuccessCount);
 
         GridBagConstraints gbc_vb3 = new GridBagConstraints();
         gbc_vb3.insets = new Insets(0, 0, 0, 5);
@@ -372,7 +396,7 @@ public class GUI implements IMessageEditorController {
 
         contentPane.add(topPanel,BorderLayout.NORTH);
         ////////////////////////////////////////////////////////////////////
-        // topPanl end
+        // topPanel end
         ////////////////////////////////////////////////////////////////////
 
         splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
@@ -408,7 +432,7 @@ public class GUI implements IMessageEditorController {
         BurpExtender.callbacks.customizeUiComponent(contentPane);
     }
 
-    public Component getComponet(){
+    public Component getComponent(){
         return contentPane;
     }
 
@@ -433,5 +457,14 @@ public class GUI implements IMessageEditorController {
         tfDomain.setEnabled(is);
         tfExcludeSuffix.setEnabled(is);
         tfIntervalTime.setEnabled(is);
+        tfReqUniq.setEnabled(is);
+    }
+
+    //新增URL去重
+    public void clearHashSet(boolean bool){
+        if(bool){
+            reqBodyHashSet.clear();
+            BurpExtender.stdout.println("[*] Clear ReqBody HashSet By Button");
+        }
     }
 }
