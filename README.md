@@ -4,6 +4,15 @@
 
 ## 0x00 更新记录
 
+未解决问题
+
+```
+对于jdk17启动的burpsuite,依旧无法运行本程序.
+jdk11启动burpsuite 2022.6.1  可以运行PSC
+jdk12启动burpsuite 2022.11.1  可以运行PSC
+jdk17启动burpsuite 2022.11.1  不可运行PSC
+```
+
 v0.4.1 合并更新
 
 ```
