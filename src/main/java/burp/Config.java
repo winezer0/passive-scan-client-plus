@@ -5,11 +5,12 @@ import java.util.Set;
 
 public class Config {
     public static String extensionName = "Passive Scan Client";
-    public static String version ="0.4.4";
+    public static String version ="0.4.5";
     public static Set reqBodyHashSet = new HashSet<String>();
 
     public static boolean IS_RUNNING = false;
     public static boolean REQ_UNIQ = false;
+    public static boolean REQ_PARAM = false;
 
     public static String PROXY_HOST = "127.0.0.1";
     public static Integer PROXY_PORT = 7777;

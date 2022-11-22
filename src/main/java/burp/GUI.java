@@ -27,6 +27,7 @@ public class GUI implements IMessageEditorController {
     private JTextField tfExcludeSuffix;
     private JToggleButton btnConn;
     private JToggleButton btnUniq;
+    private JToggleButton btnParam;
     private JButton btnClear;
     private JSplitPane splitPane;
     public static HttpLogTable logTable;
@@ -67,7 +68,7 @@ public class GUI implements IMessageEditorController {
         GridBagLayout gbl_panel = new GridBagLayout();
         gbl_panel.columnWidths = new int[] { 40, 100, 0, 39, 33, 25, 0, 0, 0 };
         gbl_panel.rowHeights = new int[] { 0, 0 };
-        gbl_panel.columnWeights = new double[] { 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D,0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 1.0D, 0.0D,0.0D, Double.MIN_VALUE };
+        gbl_panel.columnWeights = new double[] { 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D,0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 1.0D, 0.0D,0.0D, Double.MIN_VALUE };
         gbl_panel.rowWeights = new double[] { 0.0D, Double.MIN_VALUE };
         ConfigPanel.setLayout(gbl_panel);
 
@@ -200,11 +201,35 @@ public class GUI implements IMessageEditorController {
         gbc_btnUniq.gridx = 12;
         gbc_btnUniq.gridy = 0;
         ConfigPanel.add(btnUniq, gbc_btnUniq);
+
+        // 增加无参数URL去除开关
+        btnParam = new JToggleButton("PARAM");
+        btnParam.addChangeListener(new ChangeListener() {
+            public void stateChanged(ChangeEvent arg0) {
+                boolean isSelected = btnParam.isSelected();
+                if(isSelected){
+                    Config.REQ_PARAM = true;
+                    btnParam.setText("PARAM");
+                }else{
+                    Config.REQ_PARAM = false;
+                    btnParam.setText("PARAM");
+                }
+                btnParam.setSelected(isSelected);
+            }
+        });
+
+        GridBagConstraints gbc_btnParam = new GridBagConstraints();
+        gbc_btnParam.fill = 2;
+        gbc_btnParam.insets = new Insets(0, 0, 0, 5);
+        gbc_btnParam.gridx = 13;
+        gbc_btnParam.gridy = 0;
+        ConfigPanel.add(btnParam, gbc_btnParam);
+
         ///////////////////////////////
         GridBagConstraints gbc_lb1 = new GridBagConstraints();
         gbc_lb1.anchor = 15;
         gbc_lb1.insets = new Insets(0, 0, 0, 5);
-        gbc_lb1.gridx = 13;
+        gbc_lb1.gridx = 14;
         gbc_lb1.gridy = 0;
         ConfigPanel.add(new JLabel(""), gbc_lb1);
         ///////////////////////////////
@@ -237,7 +262,7 @@ public class GUI implements IMessageEditorController {
         GridBagConstraints gbc_btnConn = new GridBagConstraints();
         gbc_btnConn.fill = 2;
         gbc_btnConn.insets = new Insets(0, 0, 0, 5);
-        gbc_btnConn.gridx = 14;
+        gbc_btnConn.gridx = 15;
         gbc_btnConn.gridy = 0;
         ConfigPanel.add(btnConn, gbc_btnConn);
 
@@ -266,7 +291,7 @@ public class GUI implements IMessageEditorController {
         GridBagConstraints gbc_btnClear = new GridBagConstraints();
         gbc_btnClear.fill = 2;
         gbc_btnClear.insets = new Insets(0, 0, 0, 5);
-        gbc_btnClear.gridx = 15;
+        gbc_btnClear.gridx = 16;
         gbc_btnClear.gridy = 0;
         ConfigPanel.add(btnClear, gbc_btnClear);
         ////////////////////////////////////////////////////////////////////

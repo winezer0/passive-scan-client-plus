@@ -23,6 +23,7 @@ public class HttpAndHttpsProxy {
 
     //修改 输出url去重处理
     public static Map<String,String> Proxy(IHttpRequestResponse requestResponse, Set reqBodyHashSet) throws InterruptedException{
+
         byte[] req = requestResponse.getRequest();
         String url = null;
         byte[] reqbody = null;
@@ -32,32 +33,42 @@ public class HttpAndHttpsProxy {
 
         IHttpService httpService = requestResponse.getHttpService();
         IRequestInfo reqInfo = BurpExtender.helpers.analyzeRequest(httpService,req);
+
+        url = reqInfo.getUrl().toString();
+        headers = reqInfo.getHeaders();
+
+        //忽略无参数目标
+        if(Config.REQ_PARAM){
+            //判断是否存在参数
+            List<IParameter> Parameters = reqInfo.getParameters();
+            if(Parameters.size()<=0){
+                BurpExtender.stdout.println(String.format("[-] REQ Param None Ignored: %s", url));
+                return null;
+            }
+        }
+
         if(reqInfo.getMethod().equals("POST")){
             int bodyOffset = reqInfo.getBodyOffset();
             String body = null;
             try {
                 body = new String(req, bodyOffset, req.length - bodyOffset, "UTF-8");
                 reqbody = body.getBytes("UTF-8");
-                if(Config.REQ_UNIQ){
-                    body_hash = Utils.MD5(body); //新增 输出url去重处理
-                }
+
+                if(Config.REQ_UNIQ){ body_hash = Utils.MD5(body);  }//新增 输出url去重处理
 
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
         }
-        //BurpExtender.stderr.println("[+] url: " + resInfo.getUrl());
-        headers = reqInfo.getHeaders();
-        url = reqInfo.getUrl().toString();
 
         if(Config.REQ_UNIQ) {
             //新增 输出url去重处理  记录请求URL和body对应hash
             url_body = url + "&" + body_hash;
-            BurpExtender.stdout.println("[+] REQ URL&Body(md5):" + url_body);
             if (reqBodyHashSet.contains(url_body)) {
-                BurpExtender.stdout.println("[-] REQ URL Repeat, Ignore Processing");
+                BurpExtender.stdout.println(String.format("[-] REQ URL&Body(md5) Ignored: %s", url_body));
                 return null;
             } else {
+                BurpExtender.stdout.println(String.format("[+] REQ URL&Body(md5) Firstly: %s", url_body));
                 reqBodyHashSet.add(url_body);
             }
         }
@@ -189,7 +200,7 @@ public class HttpAndHttpsProxy {
                 if (status.startsWith("40") || status.startsWith("50")){
                     if(reqBodyHashSet.contains(url_body)){
                         reqBodyHashSet.remove(url_body);//新增
-                        BurpExtender.stdout.println(String.format("[*] Remove reqBodyHashSet By 40X - 50X : %s", url_body) );
+                        BurpExtender.stdout.println(String.format("[!] Remove 40X - 50X: %s", url_body) );
                     }
                 }
             }
@@ -201,10 +212,10 @@ public class HttpAndHttpsProxy {
 
             if(Config.REQ_UNIQ) {
                 //新增 请求URL去重处理 不记录连接拒绝的请求
-                if (e.getMessage().contains("Connection refused")){
+                if (e.getMessage().toLowerCase().contains("refused")){
                     if(reqBodyHashSet.contains(url_body)){
                         reqBodyHashSet.remove(url_body);//新增
-                        BurpExtender.stdout.println(String.format("[*] Remove reqBodyHashSet By Connection refused : %s", url_body) );
+                        BurpExtender.stdout.println(String.format("[!] Remove Conn Refused: %s", url_body) );
                     }
                 }
             }
@@ -354,7 +365,7 @@ public class HttpAndHttpsProxy {
                 if (status.startsWith("40") || status.startsWith("50")) {
                     if (reqBodyHashSet.contains(url_body)) {
                         reqBodyHashSet.remove(url_body);//新增
-                        BurpExtender.stdout.println(String.format("[*] Remove reqBodyHashSet By 40X - 50X : %s", url_body));
+                        BurpExtender.stdout.println(String.format("[!] Remove 40X - 50X: %s", url_body));
                     }
                 }
             }
@@ -367,10 +378,10 @@ public class HttpAndHttpsProxy {
 
             if(Config.REQ_UNIQ) {
                 //新增 请求URL去重处理 不记录连接拒绝的请求
-                if (e.getMessage().contains("Connection refused")) {
+                if (e.getMessage().toLowerCase().contains("refused")) {
                     if (reqBodyHashSet.contains(url_body)) {
                         reqBodyHashSet.remove(url_body);//新增
-                        BurpExtender.stdout.println(String.format("[*] Remove reqBodyHashSet By Connection refused: %s", url_body));
+                        BurpExtender.stdout.println(String.format("[!] Remove Conn refused: %s", url_body));
                     }
                 }
             }
