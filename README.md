@@ -52,6 +52,7 @@ v0.4.5 无参数请求过滤
 ```
 1、增加PARAM框，支持过滤没有参数的请求，默认关闭
 ```
+![v0.4.5](./doc/v0.4.5.png)
 
 
 
@@ -81,7 +82,7 @@ mvn package
 
 [Conanjun](https://github.com/Conanjun/passive-scan-client-and-sendto/commits?author=Conanjun)师傅的项目[Passive Scan Client and Sendto](https://github.com/Conanjun/passive-scan-client-and-sendto)，增加了右键手动转发的菜单，拓展了插件的灵活性，已将该功能添加到本项目中。
 
-![image-20220511142914622](README.assets/image-20220511142914622.png)
+![image-20220511142914622](./doc/image-20220511142914622.png)
 
 ## 0x04 一些被动式漏洞扫描器
 
