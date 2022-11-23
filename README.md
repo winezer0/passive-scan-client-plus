@@ -24,11 +24,20 @@ jdk17启动burpsuite 2022.11.1  不可运行PSC
 ##### v0.3.0 原版更新20210728
 
 ```
-https://github.com/c0ny1/passive-scan-client/
-v0.3 增加请求转发间隔时间
 v0.1 支持流量过滤（域名和后缀）
 v0.1 支持用户名密码认证代理
+v0.3 增加请求转发间隔时间
+原Git地址：https://github.com/c0ny1/passive-scan-client/
 ```
+
+##### v0.4.0 R4ph4e1-0x01 pull
+
+```
+v0.4.0 更新详情: https://github.com/c0ny1/passive-scan-client/pull/27
+基于https://github.com/Conanjun/passive-scan-client-and-sendto，增加右键手动转发的菜单，拓展插件的灵活性。
+```
+
+![image-20220511142914622](./doc/image-20220511142914622.png)
 
 ##### v0.4.1 合并更新 20221122
 
@@ -89,9 +98,7 @@ mvn package
 
 ![动图演示](./doc/show.gif)
 
-[Conanjun](https://github.com/Conanjun/passive-scan-client-and-sendto/commits?author=Conanjun)师傅的项目[Passive Scan Client and Sendto](https://github.com/Conanjun/passive-scan-client-and-sendto)，增加了右键手动转发的菜单，拓展了插件的灵活性，已将该功能添加到本项目中。
 
-![image-20220511142914622](./doc/image-20220511142914622.png)
 
 ## 0x04 一些被动式漏洞扫描器
 
@@ -102,3 +109,11 @@ mvn package
 * [SQLiScanner](https://github.com/0xbug/SQLiScanner) 一款基于sqlmapapi和Charles的被动SQL注入漏洞扫描工具
 * [sqli-hunter](https://github.com/zt2/sqli-hunter) 基于sqlmapapi，ruby编写的漏洞代理型检测工具
 * [passive_scan](https://github.com/netxfly/passive_scan) 基于http代理的web漏洞扫描器的实现
+
+## 0x05 NEED STAR And ISSUE
+
+```
+1、右上角点击Star支持更新.
+2、ISSUE或NOVASEC提更新需求.
+```
+
