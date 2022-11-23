@@ -4,53 +4,62 @@
 
 ## 0x00 更新记录
 
-Jar包下载
+##### 更新下载
 
 ```
 release文件夹
 ```
 
-未解决问题
+##### 顽固问题
 
 ```
-对于jdk17启动的burpsuite,依旧无法运行本程序.
+对于jdk17启动的burpsuite,依旧无法运行本程序，原因未知，请使用jdk8-jdk15
 jdk11启动burpsuite 2022.6.1  可以运行PSC
 jdk12启动burpsuite 2022.11.1  可以运行PSC
 jdk17启动burpsuite 2022.11.1  不可运行PSC
+
+问题详情：https://github.com/c0ny1/passive-scan-client/issues
 ```
 
-v0.4.1 合并更新
+##### v0.3.0 原版更新20210728
 
 ```
-1、基于c0ny1的passive-scan-client-0.3.0合并更新Pull #27 #21 #22.  详情: https://github.com/c0ny1/passive-scan-client/pulls.
+https://github.com/c0ny1/passive-scan-client/
+v0.3 增加请求转发间隔时间
+v0.1 支持流量过滤（域名和后缀）
+v0.1 支持用户名密码认证代理
 ```
 
-v0.4.2 修复新增
+##### v0.4.1 合并更新 20221122
 
 ```
-1、参考#34 修复代理用户名密码为空时判断BUG.  详情: https://github.com/c0ny1/passive-scan-client/pulls.
+1、基于c0ny1的passive-scan-client-0.3.0合并更新Pull #27 #21 #22. 更新详情: https://github.com/c0ny1/passive-scan-client/pulls.
+```
 
+##### v0.4.2 修复新增 20221122
+
+```
+1、参考#34 修复代理用户名密码为空时判断BUG.  更新详情: https://github.com/c0ny1/passive-scan-client/pulls.
 2、对所有请求基于URL及Body hash进行hash记录，当下一次遇到相同请求时忽略请求报文,  注：点击clear按钮可清空hashset. 
 ```
 
-v0.4.3 请求去重
+##### v0.4.3 请求去重 20221122
 
 ```
 1、优化变量名称
-
 2、添加ReqUinq 框，仅当ReqUinq 内容设置为 true 时，对请求基于URL及Body hash进行hash记录。注: 不会记录40X、50X、访问拒绝等响应状态码。 
 ```
 
-v0.4.4 请求去重
+##### v0.4.4 重复请求过滤按钮 20221122
 
 ```
-1、修改ReqUinq框为UNIQ按钮，并设置默认关闭请求去重功能
+1、修改ReqUinq框为UNIQ按钮，默认关闭。 PS：点击UNIQ按钮后，将不会转发已经转发过的请求。
 ```
 
-v0.4.5 无参数请求过滤
+##### v0.4.5 无参数请求过滤按钮20221122
 
 ```
-1、增加PARAM框，支持过滤没有参数的请求，默认关闭
+1、增加PARAM框，支持过滤没有参数的请求，默认关闭。 PS：点击PARAM按钮后，将不会转发没有参数的请求。
 ```
 ![v0.4.5](./doc/v0.4.5.png)
 
