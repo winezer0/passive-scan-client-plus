@@ -72,6 +72,30 @@ v0.4.0 更新详情: https://github.com/c0ny1/passive-scan-client/pull/27
 ```
 ![v0.4.5](./doc/v0.4.5.png)
 
+**v0.4.6 优化URL后缀匹配规则**
+
+```
+    public static boolean isMatchExtension(String regx, String path){
+        String ext = getPathExtension(path);
+        //无后缀情况全部放行
+        if("".equalsIgnoreCase(ext)){
+            return false;
+        }else {
+            Pattern pat = Pattern.compile("^("+regx+")$",Pattern.CASE_INSENSITIVE);//正则判断
+            Matcher mc= pat.matcher(ext);//条件匹配
+            if(mc.find()){
+                return true;
+            }else{
+                return false;
+            }
+        }
+    }
+
+获取URL后缀后再进行正则匹配,防止URL路径中存在类似后缀名的目录时产生的误报。
+```
+
+
+
 
 
 ## 0x01 插件简介

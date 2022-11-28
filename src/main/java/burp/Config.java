@@ -5,7 +5,7 @@ import java.util.Set;
 
 public class Config {
     public static String extensionName = "Passive Scan Client";
-    public static String version ="0.4.5";
+    public static String version ="0.4.6";
     public static Set reqBodyHashSet = new HashSet<String>();
 
     public static boolean IS_RUNNING = false;

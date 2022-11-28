@@ -44,13 +44,60 @@ public class Utils {
         return bannerInfo;
     }
 
-    public static boolean isMathch(String regx,String str){
+    public static boolean isMatchDomain(String regx, String str){
         Pattern pat = Pattern.compile("([\\w]+[\\.]|)("+regx+")",Pattern.CASE_INSENSITIVE);//正则判断
         Matcher mc= pat.matcher(str);//条件匹配
         if(mc.find()){
             return true;
         }else{
             return false;
+        }
+    }
+
+    public static String getPathExtension(String path) {
+        String extension="";
+        String[] pathContents = path.split("[\\\\/]");
+        if(pathContents != null){
+            int pathContentsLength = pathContents.length;
+            String lastPart = pathContents[pathContentsLength-1];
+            String[] lastPartContents = lastPart.split("\\.");
+            if(lastPartContents != null && lastPartContents.length > 1){
+                int lastPartContentLength = lastPartContents.length;
+                //extension
+                String name = "";
+                for (int i = 0; i < lastPartContentLength; i++) {
+                    // System.out.println("Last Part " + i + ": "+ lastPartContents[i]);
+                    if(i < (lastPartContents.length -1)){
+                        name += lastPartContents[i] ;
+                        if(i < (lastPartContentLength -2)){
+                            name += ".";
+                        }
+                    }
+                }
+                extension = lastPartContents[lastPartContentLength -1];
+                //String filename = name + "." + extension;
+                //System.out.println("Name: " + name);
+                //System.out.println("Filename: " + filename);
+            }
+        }
+        //System.out.println("Extension: " + extension);
+        return extension;
+    }
+
+    public static boolean isMatchExtension(String regx, String path){
+        String ext = getPathExtension(path);
+        //无后缀情况全部放行
+        if("".equalsIgnoreCase(ext)){
+            return false;
+        }else {
+            //Pattern pat = Pattern.compile("([\\w]+[\\.]|)("+regx+")",Pattern.CASE_INSENSITIVE);//正则判断
+            Pattern pat = Pattern.compile("^("+regx+")$",Pattern.CASE_INSENSITIVE);//正则判断
+            Matcher mc= pat.matcher(ext);//条件匹配
+            if(mc.find()){
+                return true;
+            }else{
+                return false;
+            }
         }
     }
 

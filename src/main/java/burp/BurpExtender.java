@@ -129,14 +129,16 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
             IHttpRequestResponse reprsp = iInterceptedProxyMessage.getMessageInfo();
             IHttpService httpService = reprsp.getHttpService();
             String host = reprsp.getHttpService().getHost();
+
             //stdout.println(Config.DOMAIN_REGX);
-            if(!Utils.isMathch(Config.DOMAIN_REGX,host)){
+            if(!Utils.isMatchDomain(Config.DOMAIN_REGX,host)){
                 return;
             }
 
-            String  url = helpers.analyzeRequest(httpService,reprsp.getRequest()).getUrl().toString();
-            url = url.indexOf("?") > 0 ? url.substring(0, url.indexOf("?")) : url;
-            if(Utils.isMathch(Config.SUFFIX_REGX,url)){
+            //String  url = helpers.analyzeRequest(httpService,reprsp.getRequest()).getUrl().toString();
+            //url = url.indexOf("?") > 0 ? url.substring(0, url.indexOf("?")) : url;
+            String  path = helpers.analyzeRequest(httpService,reprsp.getRequest()).getUrl().getPath();
+            if(Utils.isMatchExtension(Config.SUFFIX_REGX,path)){
                 return;
             }
 
