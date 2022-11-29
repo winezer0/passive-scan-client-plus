@@ -28,6 +28,17 @@ jdk17启动burpsuite 2022.11.1  不可运行PSC
 ```
 优先从插件所在目录读取config.yml文件
 文件不存在时,从jar包内部读取(建议使用)
+
+DEFAULT_EXTENSION_NAME: "Passive Scan Client" 
+DEFAULT_VERSION: "0.4.7"
+DEFAULT_PROXY_HOST: "127.0.0.1"
+DEFAULT_PROXY_PORT: 7777
+DEFAULT_PROXY_USERNAME: ""
+DEFAULT_PROXY_PASSWORD: ""
+DEFAULT_PROXY_TIMEOUT: 5000
+DEFAULT_DOMAIN_REGX: ""
+DEFAULT_SUFFIX_REGX: "js|css|jpeg|gif|jpg|png|pdf|rar|zip|docx|doc|svg|jpeg|ico|woff|woff2|ttf|otf"
+DEFAULT_INTERVAL_TIME: 5000
 ```
 
 **v0.4.6 优化URL后缀匹配规则**
