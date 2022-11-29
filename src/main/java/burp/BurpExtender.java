@@ -13,8 +13,6 @@ import javax.swing.table.TableColumnModel;
 
 
 public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContextMenuFactory {
-    public final static String extensionName = Config.extensionName;
-    public final static String version = Config.version;
     public static IBurpExtenderCallbacks callbacks;
     public static IExtensionHelpers helpers;
     public static PrintWriter stdout;
@@ -23,6 +21,9 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
     public static final List<LogEntry> log = new ArrayList<LogEntry>();
     public static BurpExtender burpExtender;
     private ExecutorService executorService;
+
+    public static String extensionName;
+    public static String version;
 
     @Override
     public void registerExtenderCallbacks(IBurpExtenderCallbacks callbacks) {
@@ -33,15 +34,44 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
         this.stderr = new PrintWriter(callbacks.getStderr(),true);
         callbacks.registerContextMenuFactory(this);//必须注册右键菜单Factory
 
-        callbacks.setExtensionName(extensionName + " " + version);
+        //读取配置文件
+        Config.EXTENSION_NAME = YamlReader.getInstance(callbacks).getString("DEFAULT_EXTENSION_NAME");
+        Config.VERSION = YamlReader.getInstance(callbacks).getString("DEFAULT_VERSION");
+        Config.PROXY_HOST = YamlReader.getInstance(callbacks).getString("DEFAULT_PROXY_HOST");
+        Config.PROXY_PORT = YamlReader.getInstance(callbacks).getInteger("DEFAULT_PROXY_PORT");
+        Config.PROXY_USERNAME = YamlReader.getInstance(callbacks).getString("DEFAULT_PROXY_USERNAME");
+        Config.PROXY_PASSWORD = YamlReader.getInstance(callbacks).getString("DEFAULT_PROXY_PASSWORD");
+        Config.PROXY_TIMEOUT = YamlReader.getInstance(callbacks).getInteger("DEFAULT_PROXY_TIMEOUT");
+        Config.DOMAIN_REGX = YamlReader.getInstance(callbacks).getString("DEFAULT_DOMAIN_REGX");
+        Config.SUFFIX_REGX = YamlReader.getInstance(callbacks).getString("DEFAULT_SUFFIX_REGX");
+        Config.INTERVAL_TIME = YamlReader.getInstance(callbacks).getInteger("DEFAULT_INTERVAL_TIME");
+
+
+        this.version = Config.VERSION;
+        this.extensionName= Config.EXTENSION_NAME;
+        callbacks.setExtensionName(this.extensionName + " " + this.version);
         BurpExtender.this.gui = new GUI();
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 BurpExtender.this.callbacks.addSuiteTab(BurpExtender.this);
                 BurpExtender.this.callbacks.registerProxyListener(BurpExtender.this);
                 stdout.println(Utils.getBanner());
+
+                stdout.println(String.format("[*] INIT DEFAULT_EXTENSION_NAME: %s", Config.EXTENSION_NAME));
+                stdout.println(String.format("[*] INIT DEFAULT_VERSION: %s", Config.VERSION));
+                stdout.println(String.format("[*] INIT DEFAULT_PROXY_HOST: %s", Config.PROXY_HOST));
+                stdout.println(String.format("[*] INIT DEFAULT_PROXY_PORT: %s", Config.PROXY_PORT));
+                stdout.println(String.format("[*] INIT DEFAULT_PROXY_USERNAME: %s", Config.PROXY_USERNAME));
+                stdout.println(String.format("[*] INIT DEFAULT_PROXY_PASSWORD: %s", Config.PROXY_PASSWORD));
+                stdout.println(String.format("[*] INIT DEFAULT_PROXY_TIMEOUT: %s", Config.PROXY_TIMEOUT));
+                stdout.println(String.format("[*] INIT DEFAULT_DOMAIN_REGX: %s", Config.DOMAIN_REGX));
+                stdout.println(String.format("[*] INIT DEFAULT_SUFFIX_REGX: %s", Config.SUFFIX_REGX));
+                stdout.println(String.format("[*] INIT DEFAULT_INTERVAL_TIME: %s", Config.INTERVAL_TIME));
+                stdout.println("[*] ####################################");
             }
         });
+
+
         executorService = Executors.newSingleThreadExecutor();
         //必须等插件界面显示完毕，重置JTable列宽才生效
         SwingUtilities.invokeLater(new Runnable() {
@@ -116,7 +146,7 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
 
     @Override
     public String getTabCaption() {
-        return extensionName;
+        return this.extensionName;
     }
 
     @Override

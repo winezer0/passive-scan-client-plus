@@ -1,5 +1,6 @@
 package burp;
 
+import java.io.File;
 import java.security.MessageDigest;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -118,4 +119,6 @@ public class Utils {
             GUI.lbFailCount.setText(String.valueOf(Config.FAIL_TOTAL));
         }
     }
+
+
 }
