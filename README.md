@@ -21,14 +21,58 @@ jdk17启动burpsuite 2022.11.1  不可运行PSC
 问题详情：https://github.com/c0ny1/passive-scan-client/issues
 ```
 
-##### v0.3.0 原版更新20210728
+
+
+**v0.4.7 增加自定义默认配置文件功能**
 
 ```
-v0.1 支持流量过滤（域名和后缀）
-v0.1 支持用户名密码认证代理
-v0.3 增加请求转发间隔时间
-原Git地址：https://github.com/c0ny1/passive-scan-client/
+优先从插件所在目录读取config.yml文件
+文件不存在时,从jar包内部读取(建议使用)
 ```
+
+**v0.4.6 优化URL后缀匹配规则**
+
+```
+//无后缀情况全部放行
+//正则判断
+Pattern pat = Pattern.compile("^("+regx+")$",Pattern.CASE_INSENSITIVE);
+获取URL后缀后再进行正则匹配,防止URL路径中存在类似后缀名的目录时产生的误报。
+```
+##### v0.4.5 无参数请求过滤按钮20221122
+
+```
+1、增加PARAM框，支持过滤没有参数的请求，默认关闭。 PS：点击PARAM按钮后，将不会转发没有参数的请求。
+```
+![v0.4.5](./doc/v0.4.5.png)
+
+
+##### v0.4.4 重复请求过滤按钮 20221122
+
+```
+1、修改ReqUinq框为UNIQ按钮，默认关闭。 PS：点击UNIQ按钮后，将不会转发已经转发过的请求。
+```
+
+##### v0.4.3 请求去重 20221122
+
+```
+1、优化变量名称
+2、添加ReqUinq 框，仅当ReqUinq 内容设置为 true 时，对请求基于URL及Body hash进行hash记录。注: 不会记录40X、50X、访问拒绝等响应状态码。 
+```
+
+##### v0.4.2 修复新增 20221122
+
+```
+1、参考#34 修复代理用户名密码为空时判断BUG.  更新详情: https://github.com/c0ny1/passive-scan-client/pulls.
+2、对所有请求基于URL及Body hash进行hash记录，当下一次遇到相同请求时忽略请求报文,  注：点击clear按钮可清空hashset. 
+```
+
+
+##### v0.4.1 合并更新 20221122
+
+```
+1、基于c0ny1的passive-scan-client-0.3.0合并更新Pull #27 #21 #22. 更新详情: https://github.com/c0ny1/passive-scan-client/pulls.
+```
+
 
 ##### v0.4.0 R4ph4e1-0x01 pull
 
@@ -39,69 +83,14 @@ v0.4.0 更新详情: https://github.com/c0ny1/passive-scan-client/pull/27
 
 ![image-20220511142914622](./doc/image-20220511142914622.png)
 
-##### v0.4.1 合并更新 20221122
+##### v0.3.0 原版更新20210728
 
 ```
-1、基于c0ny1的passive-scan-client-0.3.0合并更新Pull #27 #21 #22. 更新详情: https://github.com/c0ny1/passive-scan-client/pulls.
+v0.1 支持流量过滤（域名和后缀）
+v0.1 支持用户名密码认证代理
+v0.3 增加请求转发间隔时间
+原Git地址：https://github.com/c0ny1/passive-scan-client/
 ```
-
-##### v0.4.2 修复新增 20221122
-
-```
-1、参考#34 修复代理用户名密码为空时判断BUG.  更新详情: https://github.com/c0ny1/passive-scan-client/pulls.
-2、对所有请求基于URL及Body hash进行hash记录，当下一次遇到相同请求时忽略请求报文,  注：点击clear按钮可清空hashset. 
-```
-
-##### v0.4.3 请求去重 20221122
-
-```
-1、优化变量名称
-2、添加ReqUinq 框，仅当ReqUinq 内容设置为 true 时，对请求基于URL及Body hash进行hash记录。注: 不会记录40X、50X、访问拒绝等响应状态码。 
-```
-
-##### v0.4.4 重复请求过滤按钮 20221122
-
-```
-1、修改ReqUinq框为UNIQ按钮，默认关闭。 PS：点击UNIQ按钮后，将不会转发已经转发过的请求。
-```
-
-##### v0.4.5 无参数请求过滤按钮20221122
-
-```
-1、增加PARAM框，支持过滤没有参数的请求，默认关闭。 PS：点击PARAM按钮后，将不会转发没有参数的请求。
-```
-![v0.4.5](./doc/v0.4.5.png)
-
-**v0.4.6 优化URL后缀匹配规则**
-
-```
-    public static boolean isMatchExtension(String regx, String path){
-        String ext = getPathExtension(path);
-        //无后缀情况全部放行
-        if("".equalsIgnoreCase(ext)){
-            return false;
-        }else {
-            Pattern pat = Pattern.compile("^("+regx+")$",Pattern.CASE_INSENSITIVE);//正则判断
-            Matcher mc= pat.matcher(ext);//条件匹配
-            if(mc.find()){
-                return true;
-            }else{
-                return false;
-            }
-        }
-    }
-
-获取URL后缀后再进行正则匹配,防止URL路径中存在类似后缀名的目录时产生的误报。
-```
-
-**v0.4.7 增加自定义默认配置文件功能**
-
-```
-优先从插件所在目录读取config.yml文件
-文件不存在时,从jar包内部读取(建议使用)
-```
-
-
 
 ## 0x01 插件简介
 
