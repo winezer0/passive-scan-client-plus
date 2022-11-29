@@ -14,14 +14,14 @@ public class YamlReader {
     private static Map<String, Map<String, Object>> properties = new HashMap<>();
 
     private YamlReader(IBurpExtenderCallbacks callbacks) throws FileNotFoundException, UnsupportedEncodingException {
-        String config = getExtensionFilePath(callbacks) + "config.yml";
+        String config = getExtensionFilePath(callbacks) + "psc.config.yml";
         File file = new File(config);
         if(file.exists()){
             BurpExtender.stdout.println(String.format("[+] Custom Config File Path: %s", file.getPath()));
             properties = new Yaml().load(new FileInputStream(file));
         } else {
             BurpExtender.stdout.println(String.format("[+] User Inner Config File Path: %s", file.getPath()));
-            InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("config.yml");
+            InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("psc.config.yml");
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream, "GBK");
             properties = new Yaml().load(inputStreamReader);
         }

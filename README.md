@@ -26,8 +26,8 @@ jdk17启动burpsuite 2022.11.1  不可运行PSC
 **v0.4.7 增加自定义默认配置文件功能**
 
 ```
-优先从插件所在目录读取config.yml文件
-文件不存在时,从jar包内部读取(建议使用)
+优先从插件所在目录读取psc.config.yml文件
+文件不存在时,从jar包内部读取psc.config.yml文件(建议使用)
 
 DEFAULT_EXTENSION_NAME: "Passive Scan Client" 
 DEFAULT_VERSION: "0.4.7"
