@@ -21,7 +21,12 @@ jdk17启动burpsuite 2022.11.1  不可运行PSC
 问题详情：https://github.com/c0ny1/passive-scan-client/issues
 ```
 
+**v0.4.8 修复BUG**
 
+```
+1、对于没有成功发送到代理服务器的请求,不计入hashset.
+2、修复GetPathExt函数处理Path为[/]时产生的异常.
+```
 
 **v0.4.7 增加自定义默认配置文件功能**
 

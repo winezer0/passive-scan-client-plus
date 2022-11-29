@@ -57,29 +57,38 @@ public class Utils {
 
     public static String getPathExtension(String path) {
         String extension="";
-        String[] pathContents = path.split("[\\\\/]");
-        if(pathContents != null){
-            int pathContentsLength = pathContents.length;
-            String lastPart = pathContents[pathContentsLength-1];
-            String[] lastPartContents = lastPart.split("\\.");
-            if(lastPartContents != null && lastPartContents.length > 1){
-                int lastPartContentLength = lastPartContents.length;
-                //extension
-                String name = "";
-                for (int i = 0; i < lastPartContentLength; i++) {
-                    // System.out.println("Last Part " + i + ": "+ lastPartContents[i]);
-                    if(i < (lastPartContents.length -1)){
-                        name += lastPartContents[i] ;
-                        if(i < (lastPartContentLength -2)){
-                            name += ".";
+
+        if("/".equals(path)){
+            return extension;
+        }
+
+        try {
+            String[] pathContents = path.split("[\\\\/]");
+            if(pathContents != null){
+                int pathContentsLength = pathContents.length;
+                String lastPart = pathContents[pathContentsLength-1];
+                String[] lastPartContents = lastPart.split("\\.");
+                if(lastPartContents != null && lastPartContents.length > 1){
+                    int lastPartContentLength = lastPartContents.length;
+                    //extension
+                    String name = "";
+                    for (int i = 0; i < lastPartContentLength; i++) {
+                        // System.out.println("Last Part " + i + ": "+ lastPartContents[i]);
+                        if(i < (lastPartContents.length -1)){
+                            name += lastPartContents[i] ;
+                            if(i < (lastPartContentLength -2)){
+                                name += ".";
+                            }
                         }
                     }
+                    extension = lastPartContents[lastPartContentLength -1];
+                    //String filename = name + "." + extension;
+                    //System.out.println("Name: " + name);
+                    //System.out.println("Filename: " + filename);
                 }
-                extension = lastPartContents[lastPartContentLength -1];
-                //String filename = name + "." + extension;
-                //System.out.println("Name: " + name);
-                //System.out.println("Filename: " + filename);
             }
+        }catch (Exception exception){
+            BurpExtender.stderr.println(String.format("[*] GetPathExtension [%s] Occur Error [%s]", path, exception.getMessage()));
         }
         //System.out.println("Extension: " + extension);
         return extension;
