@@ -58,7 +58,7 @@ public class Utils {
     public static String getPathExtension(String path) {
         String extension="";
 
-        if("/".equals(path)){
+        if("/".equals(path)||"".equals(path)){
             return extension;
         }
 
