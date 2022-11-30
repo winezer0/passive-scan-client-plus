@@ -21,9 +21,25 @@ jdk17启动burpsuite 2022.11.1  不可运行PSC
 问题详情：https://github.com/c0ny1/passive-scan-client/issues
 ```
 
+##### v0.4.8.2 扩展默认启动项配置
 
+```
+1、可在配置文件配置是否默认启用UNIQ和PARAM按钮
+DEFAULT_EXTENSION_NAME: "PSC"
+DEFAULT_VERSION: "0.4.8.2"
+DEFAULT_PROXY_HOST: "127.0.0.1"
+DEFAULT_PROXY_PORT: 7777
+DEFAULT_PROXY_USERNAME: ""
+DEFAULT_PROXY_PASSWORD: ""
+DEFAULT_PROXY_TIMEOUT: 5000
+DEFAULT_DOMAIN_REGX: ""
+DEFAULT_SUFFIX_REGX: "js|css|jpeg|gif|jpg|png|pdf|rar|zip|docx|doc|svg|jpeg|ico|woff|woff2|ttf|otf"
+DEFAULT_INTERVAL_TIME: 5000
+DEFAULT_SELECTED_UNIQ: false //新增
+DEFAULT_SELECTED_PARAM: false //新增
+```
 
-**v0.4.8.1 优化文件**
+##### v0.4.8.1 优化文件
 
 ```
 1、清理release文件夹
@@ -31,14 +47,14 @@ jdk17启动burpsuite 2022.11.1  不可运行PSC
 3、清理测试代码
 ```
 
-**v0.4.8 修复BUG**
+##### v0.4.8 修复BUG
 
 ```
 1、对于没有成功发送到代理服务器的请求,不计入hashset.
 2、修复GetPathExt函数处理Path为[/]时产生的异常.
 ```
 
-**v0.4.7 增加自定义默认配置文件功能**
+##### v0.4.7 增加自定义默认配置文件功能
 
 ```
 优先从插件所在目录读取psc.config.yml文件
@@ -56,7 +72,7 @@ DEFAULT_SUFFIX_REGX: "js|css|jpeg|gif|jpg|png|pdf|rar|zip|docx|doc|svg|jpeg|ico|
 DEFAULT_INTERVAL_TIME: 5000
 ```
 
-**v0.4.6 优化URL后缀匹配规则**
+##### v0.4.6 优化URL后缀匹配规则
 
 ```
 //无后缀情况全部放行
