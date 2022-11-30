@@ -45,7 +45,8 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
         Config.DOMAIN_REGX = YamlReader.getInstance(callbacks).getString("DEFAULT_DOMAIN_REGX");
         Config.SUFFIX_REGX = YamlReader.getInstance(callbacks).getString("DEFAULT_SUFFIX_REGX");
         Config.INTERVAL_TIME = YamlReader.getInstance(callbacks).getInteger("DEFAULT_INTERVAL_TIME");
-
+        Config.SELECTED_UNIQ = YamlReader.getInstance(callbacks).getBoolean("DEFAULT_SELECTED_UNIQ");
+        Config.SELECTED_PARAM = YamlReader.getInstance(callbacks).getBoolean("DEFAULT_SELECTED_PARAM");
 
         this.version = Config.VERSION;
         this.extensionName= Config.EXTENSION_NAME;
@@ -67,6 +68,8 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
                 stdout.println(String.format("[*] INIT DEFAULT_DOMAIN_REGX: %s", Config.DOMAIN_REGX));
                 stdout.println(String.format("[*] INIT DEFAULT_SUFFIX_REGX: %s", Config.SUFFIX_REGX));
                 stdout.println(String.format("[*] INIT DEFAULT_INTERVAL_TIME: %s", Config.INTERVAL_TIME));
+                stdout.println(String.format("[*] INIT DEFAULT_SELECTED_UNIQ: %s", Config.SELECTED_UNIQ));
+                stdout.println(String.format("[*] INIT DEFAULT_SELECTED_PARAM: %s", Config.SELECTED_PARAM));
                 stdout.println("[*] ####################################");
             }
         });
@@ -97,7 +100,7 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
     @Override
     public List<JMenuItem> createMenuItems(IContextMenuInvocation invocation) {
         final IHttpRequestResponse[] messages = invocation.getSelectedMessages();
-        JMenuItem i1 = new JMenuItem("Send to PassiveScanner");
+        JMenuItem i1 = new JMenuItem(String.format("Send to %s", Config.EXTENSION_NAME));
         i1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {

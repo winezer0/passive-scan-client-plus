@@ -195,12 +195,18 @@ public class GUI implements IMessageEditorController {
             }
         });
 
+        //根据配置文件设置UNIQ按钮的默认选择行为
+        if(SELECTED_UNIQ){
+            btnUniq.setSelected(true);
+        }
+
         GridBagConstraints gbc_btnUniq = new GridBagConstraints();
         gbc_btnUniq.fill = 2;
         gbc_btnUniq.insets = new Insets(0, 0, 0, 5);
         gbc_btnUniq.gridx = 12;
         gbc_btnUniq.gridy = 0;
         ConfigPanel.add(btnUniq, gbc_btnUniq);
+
 
         // 增加无参数URL去除开关
         btnParam = new JToggleButton("PARAM");
@@ -217,6 +223,11 @@ public class GUI implements IMessageEditorController {
                 btnParam.setSelected(isSelected);
             }
         });
+
+        //根据配置文件设置PARAM按钮的默认选择行为
+        if(SELECTED_PARAM){
+            btnParam.setSelected(true);
+        }
 
         GridBagConstraints gbc_btnParam = new GridBagConstraints();
         gbc_btnParam.fill = 2;

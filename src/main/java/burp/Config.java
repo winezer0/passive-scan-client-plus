@@ -25,8 +25,6 @@ public class Config {
     public static String DOMAIN_REGX; //从配置文件获取
     public static String SUFFIX_REGX; //从配置文件获取
     public static Integer INTERVAL_TIME; //从配置文件获取
-
-
-    
-
+    public static Boolean SELECTED_UNIQ;
+    public static Boolean SELECTED_PARAM;
 }
