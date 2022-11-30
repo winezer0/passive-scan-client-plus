@@ -7,8 +7,6 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import static burp.Config.*;
-
 public class GUI implements IMessageEditorController {
     private JPanel contentPane;
     private JLabel lbHost;
@@ -28,6 +26,7 @@ public class GUI implements IMessageEditorController {
     private JToggleButton btnConn;
     private JToggleButton btnUniq;
     private JToggleButton btnParam;
+    private JToggleButton btnSmart;
     private JButton btnClear;
     private JSplitPane splitPane;
     public static HttpLogTable logTable;
@@ -68,7 +67,7 @@ public class GUI implements IMessageEditorController {
         GridBagLayout gbl_panel = new GridBagLayout();
         gbl_panel.columnWidths = new int[] { 40, 100, 0, 39, 33, 25, 0, 0, 0 };
         gbl_panel.rowHeights = new int[] { 0, 0 };
-        gbl_panel.columnWeights = new double[] { 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D,0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 1.0D, 0.0D,0.0D, Double.MIN_VALUE };
+        gbl_panel.columnWeights = new double[] { 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D,0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 1.0D, 0.0D,0.0D, Double.MIN_VALUE };
         gbl_panel.rowWeights = new double[] { 0.0D, Double.MIN_VALUE };
         ConfigPanel.setLayout(gbl_panel);
 
@@ -82,7 +81,7 @@ public class GUI implements IMessageEditorController {
 
         tfHost = new JTextField();
         tfHost.setColumns(10);
-        tfHost.setText(PROXY_HOST);
+        tfHost.setText(Config.PROXY_HOST);
         GridBagConstraints gbc_tfHost = new GridBagConstraints();
         gbc_tfHost.fill = 2;
         gbc_tfHost.insets = new Insets(0, 0, 0, 5);
@@ -99,7 +98,7 @@ public class GUI implements IMessageEditorController {
         ConfigPanel.add(lbPort, gbc_lbPort);
 
         tfPort = new JTextField();
-        tfPort.setText(String.valueOf(PROXY_PORT));
+        tfPort.setText(String.valueOf(Config.PROXY_PORT));
         tfPort.setColumns(10);
         GridBagConstraints gbc_tfPort = new GridBagConstraints();
         gbc_tfPort.fill = 2;
@@ -152,7 +151,7 @@ public class GUI implements IMessageEditorController {
         ConfigPanel.add(lbTimeout, gbc_lbTimeout);
 
         tfTimeout = new JTextField();
-        tfTimeout.setText(String.valueOf(PROXY_TIMEOUT));
+        tfTimeout.setText(String.valueOf(Config.PROXY_TIMEOUT));
         tfTimeout.setColumns(5);
         GridBagConstraints gbc_tfTimeout = new GridBagConstraints();
         gbc_tfTimeout.fill = 2;
@@ -170,7 +169,7 @@ public class GUI implements IMessageEditorController {
         ConfigPanel.add(lbIntervalTime, gbc_lbIntervalTime);
 
         tfIntervalTime = new JTextField();
-        tfIntervalTime.setText(String.valueOf(INTERVAL_TIME));
+        tfIntervalTime.setText(String.valueOf(Config.INTERVAL_TIME));
         tfIntervalTime.setColumns(5);
         GridBagConstraints gbc_tfIntervalTime = new GridBagConstraints();
         gbc_tfIntervalTime.fill = 2;
@@ -196,7 +195,7 @@ public class GUI implements IMessageEditorController {
         });
 
         //根据配置文件设置UNIQ按钮的默认选择行为
-        if(SELECTED_UNIQ){
+        if(Config.SELECTED_UNIQ){
             btnUniq.setSelected(true);
         }
 
@@ -225,7 +224,7 @@ public class GUI implements IMessageEditorController {
         });
 
         //根据配置文件设置PARAM按钮的默认选择行为
-        if(SELECTED_PARAM){
+        if(Config.SELECTED_PARAM){
             btnParam.setSelected(true);
         }
 
@@ -236,11 +235,39 @@ public class GUI implements IMessageEditorController {
         gbc_btnParam.gridy = 0;
         ConfigPanel.add(btnParam, gbc_btnParam);
 
+        // 增加重复参数URL去除开关
+        btnSmart = new JToggleButton("SMART");
+        btnSmart.addChangeListener(new ChangeListener() {
+            public void stateChanged(ChangeEvent arg0) {
+                boolean isSelected = btnSmart.isSelected();
+                if(isSelected){
+                    Config.REQ_SMART = true;
+                    btnSmart.setText("SMART");
+                }else{
+                    Config.REQ_SMART = false;
+                    btnSmart.setText("SMART");
+                }
+                btnSmart.setSelected(isSelected);
+            }
+        });
+
+        //根据配置文件设置SMART按钮的默认选择行为
+        if(Config.SELECTED_SMART){
+            btnSmart.setSelected(true);
+        }
+
+        GridBagConstraints gbc_btnSmart = new GridBagConstraints();
+        gbc_btnSmart.fill = 2;
+        gbc_btnSmart.insets = new Insets(0, 0, 0, 5);
+        gbc_btnSmart.gridx = 14;
+        gbc_btnSmart.gridy = 0;
+        ConfigPanel.add(btnSmart, gbc_btnSmart);
+
         ///////////////////////////////
         GridBagConstraints gbc_lb1 = new GridBagConstraints();
         gbc_lb1.anchor = 15;
         gbc_lb1.insets = new Insets(0, 0, 0, 5);
-        gbc_lb1.gridx = 14;
+        gbc_lb1.gridx = 15;
         gbc_lb1.gridy = 0;
         ConfigPanel.add(new JLabel(""), gbc_lb1);
         ///////////////////////////////
@@ -252,9 +279,9 @@ public class GUI implements IMessageEditorController {
                 if(isSelected){
                     btnConn.setText("Stop");
                     Config.IS_RUNNING = true;
-                    PROXY_HOST = tfHost.getText();
-                    PROXY_PORT = Integer.valueOf(tfPort.getText());
-                    PROXY_TIMEOUT = Integer.valueOf(tfTimeout.getText());
+                    Config.PROXY_HOST = tfHost.getText();
+                    Config.PROXY_PORT = Integer.valueOf(tfPort.getText());
+                    Config.PROXY_TIMEOUT = Integer.valueOf(tfTimeout.getText());
                     Config.PROXY_USERNAME = tfUsername.getText();
                     Config.PROXY_PASSWORD = tfPassword.getText();
                     Config.DOMAIN_REGX = tfDomain.getText();
@@ -273,7 +300,7 @@ public class GUI implements IMessageEditorController {
         GridBagConstraints gbc_btnConn = new GridBagConstraints();
         gbc_btnConn.fill = 2;
         gbc_btnConn.insets = new Insets(0, 0, 0, 5);
-        gbc_btnConn.gridx = 15;
+        gbc_btnConn.gridx = 16;
         gbc_btnConn.gridy = 0;
         ConfigPanel.add(btnConn, gbc_btnConn);
 
@@ -302,7 +329,7 @@ public class GUI implements IMessageEditorController {
         GridBagConstraints gbc_btnClear = new GridBagConstraints();
         gbc_btnClear.fill = 2;
         gbc_btnClear.insets = new Insets(0, 0, 0, 5);
-        gbc_btnClear.gridx = 16;
+        gbc_btnClear.gridx = 17;
         gbc_btnClear.gridy = 0;
         ConfigPanel.add(btnClear, gbc_btnClear);
         ////////////////////////////////////////////////////////////////////
@@ -350,7 +377,7 @@ public class GUI implements IMessageEditorController {
         FilterPanel.add(lbExcludeSuffix, gbc_lbExcludeSuffix);
 
         tfExcludeSuffix = new JTextField(35);
-        tfExcludeSuffix.setText(SUFFIX_REGX);
+        tfExcludeSuffix.setText(Config.SUFFIX_REGX);
         GridBagConstraints gbc_tfExcludeSuffix = new GridBagConstraints();
         gbc_tfExcludeSuffix.insets = new Insets(0, 0, 0, 5);
         gbc_tfExcludeSuffix.fill = 2;
@@ -500,8 +527,9 @@ public class GUI implements IMessageEditorController {
     //新增URL去重
     public void clearHashSet(boolean bool){
         if(bool){
-            reqBodyHashSet.clear();
-            BurpExtender.stdout.println("[*] Clear ReqBody HashSet By Button");
+            Config.reqInfoHashSet.clear();
+            Config.reqInfoHashMap.clear();
+            BurpExtender.stdout.println("[*] Clear req Info HashSet And HashMap By Button");
         }
     }
 }

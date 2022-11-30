@@ -1,14 +1,16 @@
 package burp;
 
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Set;
 
 public class Config {
-    public static Set reqBodyHashSet = new HashSet<String>();
+    public static HashMap<String, String> reqInfoHashMap = new HashMap();
+    public static HashSet<String> reqInfoHashSet = new HashSet<>();
 
     public static boolean IS_RUNNING = false;
     public static boolean REQ_UNIQ = false;
     public static boolean REQ_PARAM = false;
+    public static boolean REQ_SMART = false;
 
     public static Integer REQUEST_TOTAL = 0;
     public static Integer SUCCESS_TOTAL = 0;
@@ -27,4 +29,5 @@ public class Config {
     public static Integer INTERVAL_TIME; //从配置文件获取
     public static Boolean SELECTED_UNIQ;
     public static Boolean SELECTED_PARAM;
+    public static Boolean SELECTED_SMART;
 }

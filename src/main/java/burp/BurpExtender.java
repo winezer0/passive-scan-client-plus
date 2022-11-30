@@ -47,6 +47,7 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
         Config.INTERVAL_TIME = YamlReader.getInstance(callbacks).getInteger("DEFAULT_INTERVAL_TIME");
         Config.SELECTED_UNIQ = YamlReader.getInstance(callbacks).getBoolean("DEFAULT_SELECTED_UNIQ");
         Config.SELECTED_PARAM = YamlReader.getInstance(callbacks).getBoolean("DEFAULT_SELECTED_PARAM");
+        Config.SELECTED_SMART = YamlReader.getInstance(callbacks).getBoolean("DEFAULT_SELECTED_SMART");
 
         this.version = Config.VERSION;
         this.extensionName= Config.EXTENSION_NAME;
@@ -70,6 +71,7 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
                 stdout.println(String.format("[*] INIT DEFAULT_INTERVAL_TIME: %s", Config.INTERVAL_TIME));
                 stdout.println(String.format("[*] INIT DEFAULT_SELECTED_UNIQ: %s", Config.SELECTED_UNIQ));
                 stdout.println(String.format("[*] INIT DEFAULT_SELECTED_PARAM: %s", Config.SELECTED_PARAM));
+                stdout.println(String.format("[*] INIT DEFAULT_SELECTED_SMART: %s", Config.SELECTED_SMART));
                 stdout.println("[*] ####################################");
             }
         });
@@ -117,8 +119,8 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
                                 //向代理转发请求
                                 Map<String, String> mapResult = null;
                                 try {
-                                    //mapResult = HttpAndHttpsProxy.Proxy(message);
-                                    mapResult = HttpAndHttpsProxy.Proxy(message , Config.reqBodyHashSet);
+                                    mapResult = HttpAndHttpsProxy.Proxy(message);
+                                    //mapResult = HttpAndHttpsProxy.Proxy(message , Config.reqBodyHashSet);
 
                                 } catch (InterruptedException interruptedException) {
                                     interruptedException.printStackTrace();
@@ -188,8 +190,8 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
                         String method = helpers.analyzeRequest(req_resp).getMethod();
                         Map<String, String> mapResult = null;
                         try {
-                            //mapResult = HttpAndHttpsProxy.Proxy(resrsp); //增加重复元素过滤功能
-                            mapResult = HttpAndHttpsProxy.Proxy(req_resp , Config.reqBodyHashSet);
+                            mapResult = HttpAndHttpsProxy.Proxy(req_resp); //增加重复元素过滤功能
+                            //mapResult = HttpAndHttpsProxy.Proxy(req_resp , Config.reqBodyHashSet);
 
                         } catch (InterruptedException e) {
                             // TODO Auto-generated catch block

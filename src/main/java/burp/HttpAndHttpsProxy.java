@@ -22,69 +22,77 @@ import javax.net.ssl.X509TrustManager;
 public class HttpAndHttpsProxy {
 
     //修改 输出url去重处理
-    public static Map<String,String> Proxy(IHttpRequestResponse requestResponse, Set reqBodyHashSet) throws InterruptedException{
-
-        byte[] req = requestResponse.getRequest();
-        String url = null;
-        byte[] reqbody = null;
-        List<String> headers = null;
-        String body_hash = ""; //新增 输出url去重处理
-        String url_body = ""; //新增 输出url去重处理
+    public static Map<String,String> Proxy(IHttpRequestResponse requestResponse) throws InterruptedException{
+        //public static Map<String,String> Proxy(IHttpRequestResponse requestResponse, Set reqBodyHashSet) throws InterruptedException{
+        byte[] request = requestResponse.getRequest();
+        String reqUrl = null;
+        byte[] reqBody = null;
+        List<String> reqHeaders = null;
 
         IHttpService httpService = requestResponse.getHttpService();
-        IRequestInfo reqInfo = BurpExtender.helpers.analyzeRequest(httpService,req);
+        IRequestInfo reqInfo = BurpExtender.helpers.analyzeRequest(httpService,request);
 
-        url = reqInfo.getUrl().toString();
-        headers = reqInfo.getHeaders();
+        reqUrl = reqInfo.getUrl().toString();
+        reqHeaders = reqInfo.getHeaders();
+        List<IParameter> reqParams = reqInfo.getParameters();
 
         //忽略无参数目标
         if(Config.REQ_PARAM){
             //判断是否存在参数
-            List<IParameter> Parameters = reqInfo.getParameters();
-            if(Parameters.size()<=0){
-                BurpExtender.stdout.println(String.format("[-] REQ Param None Ignored: %s", url));
+            if(reqParams.size()<=0){
+                BurpExtender.stderr.println(String.format("[-] Ignored By Param Blank: %s", reqUrl));
+                return null;
+            }
+        }
+
+        //忽略重复参数的请求
+        if(Config.REQ_SMART) {
+            String reqUrlNoParam = reqUrl.split("\\?",2)[0];
+            String reqParamsJsonStr = Utils.getReqParamsJsonStr(reqParams);
+            Boolean isUniq = Utils.isUniqReqInfo(Config.reqInfoHashMap, reqUrlNoParam, reqParamsJsonStr);
+            if(!isUniq){
+                BurpExtender.stderr.println(String.format("[-] Ignored By Param Duplication: %s %s", reqUrlNoParam, Utils.MD5(reqParamsJsonStr)));
                 return null;
             }
         }
 
         if(reqInfo.getMethod().equals("POST")){
             int bodyOffset = reqInfo.getBodyOffset();
-            String body = null;
+            String body;
             try {
-                body = new String(req, bodyOffset, req.length - bodyOffset, "UTF-8");
-                reqbody = body.getBytes("UTF-8");
-
-                if(Config.REQ_UNIQ){ body_hash = Utils.MD5(body);  }//新增 输出url去重处理
-
+                body = new String(request, bodyOffset, request.length - bodyOffset, "UTF-8");
+                reqBody = body.getBytes("UTF-8");
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
         }
 
+        //输出url去重处理
         if(Config.REQ_UNIQ) {
+            String url_body = Utils.getReqInfoHash(reqUrl, reqBody);
             //新增 输出url去重处理  记录请求URL和body对应hash
-            url_body = url + "&" + body_hash;
-            if (reqBodyHashSet.contains(url_body)) {
-                BurpExtender.stdout.println(String.format("[-] REQ URL&Body(md5) Ignored: %s", url_body));
+            if (Config.reqInfoHashSet.contains(url_body)) {
+                BurpExtender.stderr.println(String.format("[-] Ignored By URL&Body(md5): %s", url_body));
                 return null;
             } else {
-                BurpExtender.stdout.println(String.format("[+] REQ URL&Body(md5) Firstly: %s", url_body));
-                reqBodyHashSet.add(url_body);
+                //BurpExtender.stdout.println(String.format("[+] Firstly REQ URL&Body(md5): %s", url_body));
+                Config.reqInfoHashSet.add(url_body);
             }
         }
 
-        Thread.sleep(Config.INTERVAL_TIME);
+            Thread.sleep(Config.INTERVAL_TIME);
         if(httpService.getProtocol().equals("https")){
             //修改 输出url去重处理
-            return HttpsProxy(reqBodyHashSet, url_body, url, headers, reqbody, Config.PROXY_HOST, Config.PROXY_PORT,Config.PROXY_USERNAME,Config.PROXY_PASSWORD);
+            return HttpsProxy(reqUrl, reqHeaders, reqBody, Config.PROXY_HOST, Config.PROXY_PORT,Config.PROXY_USERNAME,Config.PROXY_PASSWORD);
         }else {
             //修改 输出url去重处理
-            return HttpProxy(reqBodyHashSet, url_body, url, headers, reqbody, Config.PROXY_HOST, Config.PROXY_PORT,Config.PROXY_USERNAME,Config.PROXY_PASSWORD);
+            return HttpProxy(reqUrl, reqHeaders, reqBody, Config.PROXY_HOST, Config.PROXY_PORT,Config.PROXY_USERNAME,Config.PROXY_PASSWORD);
         }
     }
 
     //感谢chen1sheng的pr，已经修改了我漏修复的https转发bug，并解决了header截断的bug。
-    public static Map<String,String> HttpsProxy(Set reqBodyHashSet, String url_body, String url, List<String> headers,byte[] body, String proxy, int port,String username,String password){
+    public static Map<String,String> HttpsProxy(String url, List<String> headers,byte[] body, String proxy, int port,String username,String password){
+    //public static Map<String,String> HttpsProxy(Set reqBodyHashSet, String url_body, String url, List<String> headers,byte[] body, String proxy, int port,String username,String password){
         Map<String,String> mapResult = new HashMap<String,String>();
         String status = "";
         String rspHeader = "";
@@ -221,9 +229,10 @@ public class HttpAndHttpsProxy {
             BurpExtender.stderr.println("[*] Second Times: " + e.getMessage());
             //新增 不记录错误响应的请求
             if(Config.REQ_UNIQ) {
-                if(reqBodyHashSet.contains(url_body)){
-                    reqBodyHashSet.remove(url_body);//新增
-                    BurpExtender.stderr.println(String.format("[!] Remove Conn: %s", url_body) );
+                String url_body = Utils.getReqInfoHash(url, body);
+                if(Config.reqInfoHashSet.contains(url_body)){
+                    Config.reqInfoHashSet.remove(url_body);//新增
+                    BurpExtender.stderr.println(String.format("[!] Remove Hashset Record: %s", url_body) );
                 }
             }
         }
@@ -234,7 +243,8 @@ public class HttpAndHttpsProxy {
         return mapResult;
     }
 
-    public static Map<String,String> HttpProxy(Set reqBodyHashSet, String url_body,String url,List<String> headers,byte[] body, String proxy, int port,String username,String password) {
+    public static Map<String,String> HttpProxy(String url,List<String> headers,byte[] body, String proxy, int port,String username,String password) {
+        //public static Map<String,String> HttpProxy(Set reqBodyHashSet, String url_body,String url,List<String> headers,byte[] body, String proxy, int port,String username,String password) {
         Map<String,String> mapResult = new HashMap<String,String>();
         String status = "";
         String rspHeader = "";
@@ -262,9 +272,6 @@ public class HttpAndHttpsProxy {
                 BurpExtender.stdout.println(String.format("[*] Set [%s] Proxy-Authorization Data: [%s]", user_pass, headerValue));
                 httpConn.setRequestProperty(headerKey, headerValue);
             }
-
-
-
 
             //设置控制请求方法的Flag
             String methodFlag = "";
@@ -371,9 +378,10 @@ public class HttpAndHttpsProxy {
             BurpExtender.stderr.println("[*] Second Times: " + e.getMessage());
             //新增 不记录错误响应的请求
             if(Config.REQ_UNIQ) {
-                if(reqBodyHashSet.contains(url_body)){
-                    reqBodyHashSet.remove(url_body);//新增
-                    BurpExtender.stderr.println(String.format("[!] Remove Conn: %s", url_body) );
+                String url_body = Utils.getReqInfoHash(url, body);
+                if(Config.reqInfoHashSet.contains(url_body)){
+                    Config.reqInfoHashSet.remove(url_body);//新增
+                    BurpExtender.stderr.println(String.format("[!] Remove Hashset Record: %s", url_body) );
                 }
             }
         }
@@ -383,7 +391,6 @@ public class HttpAndHttpsProxy {
         mapResult.put("result",result);
         return mapResult;
     }
-
 
     private static class TrustAnyTrustManager implements X509TrustManager {
 

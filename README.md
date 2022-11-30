@@ -21,6 +21,22 @@ jdk17启动burpsuite 2022.11.1  不可运行PSC
 问题详情：https://github.com/c0ny1/passive-scan-client/issues
 ```
 
+##### v0.4.9 增加SMART按钮
+
+```
+通过判断请求的参数是否已经请求过，来进行过滤请求报文转发
+示例 如:
+请求1 http://www.baidu.com/index.php?a=1&b=2  放行
+HashMap记录 http://www.baidu.com/index.php {a:true,b:true}
+请求2 http://www.baidu.com/index.php?a=2  过滤
+请求3 http://www.baidu.com/index.php?b=2  过滤
+请求4 http://www.baidu.com/index.php?c=2  放行
+HashMap记录  http://www.baidu.com/index.php {a:true,b:true,c:true}
+DEFAULT_SELECTED_SAMRT: false //新增
+```
+
+
+
 ##### v0.4.8.2 扩展默认启动项配置
 
 ```
