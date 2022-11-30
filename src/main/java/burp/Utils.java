@@ -71,6 +71,10 @@ public class Utils {
                 if(lastPartContents != null && lastPartContents.length > 1){
                     int lastPartContentLength = lastPartContents.length;
                     //extension
+                    extension = lastPartContents[lastPartContentLength -1];
+
+                    /*
+                    //name
                     String name = "";
                     for (int i = 0; i < lastPartContentLength; i++) {
                         // System.out.println("Last Part " + i + ": "+ lastPartContents[i]);
@@ -81,10 +85,9 @@ public class Utils {
                             }
                         }
                     }
-                    extension = lastPartContents[lastPartContentLength -1];
-                    //String filename = name + "." + extension;
-                    //System.out.println("Name: " + name);
-                    //System.out.println("Filename: " + filename);
+                    String filename = name + "." + extension;
+                    System.out.println("Name: " + name);
+                    System.out.println("Filename: " + filename); */
                 }
             }
         }catch (Exception exception){
