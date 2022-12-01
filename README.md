@@ -33,6 +33,10 @@ V0.4.9下只对JSon参数做一层解封处理,对于多级Json参数无法处�
 
 被记录的数据:
 {"inner.inner.ocid":"1","inner.inner.targetType":"1","inner.inner.user":"1","inner.ocid":"1","inner.targetType":"1","inner.user":"1","ocid":"1","targetType":"1","user":"1"}
+
+按钮优先级:
+PARAM >SMART> UNIQ
+SMART 和 UNIQUE 两个二选一即可, 多选只是增加计算量.
 ```
 
 ##### v0.4.9 增加SMART按钮
