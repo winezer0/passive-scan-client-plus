@@ -21,6 +21,12 @@ jdk17启动burpsuite 2022.11.1  不可运行PSC
 问题详情：https://github.com/c0ny1/passive-scan-client/issues
 ```
 
+##### v0.4.9.1 优化SAMRT过滤
+
+```
+V0.4.9下只对JSon参数做一层解封处理,对于多级Json参数无法处理.本版本实现Json请求包的递归解析.
+```
+
 ##### v0.4.9 增加SMART按钮
 
 ```

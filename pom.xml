@@ -6,7 +6,7 @@
 
     <groupId>me.gv7.tools.burpextend</groupId>
     <artifactId>passive-scan-client</artifactId>
-    <version>0.4.9</version>
+    <version>0.4.9.1</version>
 
     <dependencies>
         <!-- https://mvnrepository.com/artifact/net.portswigger.burp.extender/burp-extender-api -->
@@ -18,7 +18,7 @@
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
-            <version>1.23</version>
+            <version>1.33</version>
         </dependency>
         <!-- fastjson -->
         <dependency>

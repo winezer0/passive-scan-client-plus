@@ -11,6 +11,8 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 
 public class Utils {
 
+    private static final Object FLAG_EXIST = "1";
+
     public static String MD5(String key) {
         //import java.security.MessageDigest;
         char hexDigits[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
@@ -49,6 +51,25 @@ public class Utils {
         return bannerInfo;
     }
 
+    public static void updateSuccessCount(){
+        synchronized(Config.FAIL_TOTAL){
+            Config.REQUEST_TOTAL++;
+            Config.SUCCESS_TOTAL++;
+            GUI.lbRequestCount.setText(String.valueOf(Config.REQUEST_TOTAL));
+            GUI.lbSuccessCount.setText(String.valueOf(Config.SUCCESS_TOTAL));
+        }
+    }
+
+    public static void updateFailCount(){
+        synchronized(Config.SUCCESS_TOTAL){
+            Config.REQUEST_TOTAL++;
+            Config.FAIL_TOTAL++;
+            GUI.lbRequestCount.setText(String.valueOf(Config.REQUEST_TOTAL));
+            GUI.lbFailCount.setText(String.valueOf(Config.FAIL_TOTAL));
+        }
+    }
+
+    //域名匹配
     public static boolean isMatchDomain(String regx, String str){
         Pattern pat = Pattern.compile("([\\w]+[\\.]|)("+regx+")",Pattern.CASE_INSENSITIVE);//正则判断
         Matcher mc= pat.matcher(str);//条件匹配
@@ -57,6 +78,72 @@ public class Utils {
         }else{
             return false;
         }
+    }
+
+    //获取请求路径的扩展名
+    public static String getPathExtension(String path) {
+        String extension="";
+
+        if("/".equals(path)||"".equals(path)){
+            return extension;
+        }
+
+        try {
+            String[] pathContents = path.split("[\\\\/]");
+            if(pathContents != null){
+                int pathContentsLength = pathContents.length;
+                String lastPart = pathContents[pathContentsLength-1];
+                String[] lastPartContents = lastPart.split("\\.");
+                if(lastPartContents != null && lastPartContents.length > 1){
+                    int lastPartContentLength = lastPartContents.length;
+                    //extension
+                    extension = lastPartContents[lastPartContentLength -1];
+
+                    /*
+                    //name
+                    String name = "";
+                    for (int i = 0; i < lastPartContentLength; i++) {
+                        // BurpExtender.out.println("Last Part " + i + ": "+ lastPartContents[i]);
+                        if(i < (lastPartContents.length -1)){
+                            name += lastPartContents[i] ;
+                            if(i < (lastPartContentLength -2)){
+                                name += ".";
+                            }
+                        }
+                    }
+                    String filename = name + "." + extension;
+                    BurpExtender.out.println("Name: " + name);
+                    BurpExtender.out.println("Filename: " + filename); */
+                }
+            }
+        }catch (Exception exception){
+            BurpExtender.stderr.println(String.format("[*] GetPathExtension [%s] Occur Error [%s]", path, exception.getMessage()));
+        }
+        //BurpExtender.out.println("Extension: " + extension);
+        return extension;
+    }
+
+    //后缀匹配
+    public static boolean isMatchExtension(String regx, String path){
+        String ext = getPathExtension(path);
+        //无后缀情况全部放行
+        if("".equalsIgnoreCase(ext)){
+            return false;
+        }else {
+            //Pattern pat = Pattern.compile("([\\w]+[\\.]|)("+regx+")",Pattern.CASE_INSENSITIVE);//正则判断
+            Pattern pat = Pattern.compile("^("+regx+")$",Pattern.CASE_INSENSITIVE);//正则判断
+            Matcher mc= pat.matcher(ext);//条件匹配
+            if(mc.find()){
+                return true;
+            }else{
+                return false;
+            }
+        }
+    }
+
+    //判断字符串是否为空
+    public static boolean isEmpty(CharSequence str) {
+        return str == null || str.length() == 0;
     }
 
     //获取请求信息的HASH
@@ -74,13 +161,13 @@ public class Utils {
         return url_body;
     }
 
-    //获取请求信息的URL和参数JSON
-    public static String getReqParamsJsonStr(List<IParameter> reqParams) {
+    //获取所有请求信息的URL和参数JSON
+    public static String getReqCommonParamsJsonStr(List<IParameter> reqParams) {
         // 后续需要考虑无参数情况
         // 组合成参数json
         JSONObject reqParamsJson = new JSONObject();
         for (IParameter param:reqParams) {
-            System.out.println(param.toString());
+            BurpExtender.stdout.println(param.toString());
             //param.getValue(); 当前根据是否存在值，后续可考虑改成参数是否存在列表[false,true] 参数类型列表[None,int,string,bytes等]
             reqParamsJson.put(param.getName(), true);
         }
@@ -89,11 +176,6 @@ public class Utils {
         String reqParamsJsonStr = JSON.toJSONString(reqParamsJson, SerializerFeature.MapSortField);
         //BurpExtender.stdout.println("reqParamsJson：" + reqParamsJsonStr );
         return reqParamsJsonStr;
-    }
-
-
-    public static boolean isEmpty(CharSequence str) {
-        return str == null || str.length() == 0;
     }
 
     //判断Json是否已经在HashMap中,是返回false，不是返回true
@@ -152,83 +234,87 @@ public class Utils {
         }
     }
 
+    //根据请求参数:值键值对,获取参数对应的参数Json
+    public static String getReqParamsMapJsonStr(HashMap<String,String> reqParams) {
+        // 组合成参数json
+        JSONObject reqParamsJson = new JSONObject();
 
-    public static String getPathExtension(String path) {
-        String extension="";
-
-        if("/".equals(path)||"".equals(path)){
-            return extension;
+        for(String key : reqParams.keySet()) {
+            //BurpExtender.stdout.println(String.format("key:%s,vaule:%s", key, reqParams.get(key)));
+            reqParamsJson.put(key, reqParams.get(key));
         }
 
-        try {
-            String[] pathContents = path.split("[\\\\/]");
-            if(pathContents != null){
-                int pathContentsLength = pathContents.length;
-                String lastPart = pathContents[pathContentsLength-1];
-                String[] lastPartContents = lastPart.split("\\.");
-                if(lastPartContents != null && lastPartContents.length > 1){
-                    int lastPartContentLength = lastPartContents.length;
-                    //extension
-                    extension = lastPartContents[lastPartContentLength -1];
-
-                    /*
-                    //name
-                    String name = "";
-                    for (int i = 0; i < lastPartContentLength; i++) {
-                        // System.out.println("Last Part " + i + ": "+ lastPartContents[i]);
-                        if(i < (lastPartContents.length -1)){
-                            name += lastPartContents[i] ;
-                            if(i < (lastPartContentLength -2)){
-                                name += ".";
-                            }
-                        }
-                    }
-                    String filename = name + "." + extension;
-                    System.out.println("Name: " + name);
-                    System.out.println("Filename: " + filename); */
-                }
-            }
-        }catch (Exception exception){
-            BurpExtender.stderr.println(String.format("[*] GetPathExtension [%s] Occur Error [%s]", path, exception.getMessage()));
-        }
-        //System.out.println("Extension: " + extension);
-        return extension;
+        //排序输出URL JSON
+        String reqParamsJsonStr = JSON.toJSONString(reqParamsJson, SerializerFeature.MapSortField);
+        //BurpExtender.stdout.println("reqParamsJson：" + reqParamsJsonStr );
+        return reqParamsJsonStr;
     }
 
-    public static boolean isMatchExtension(String regx, String path){
-        String ext = getPathExtension(path);
-        //无后缀情况全部放行
-        if("".equalsIgnoreCase(ext)){
-            return false;
-        }else {
-            //Pattern pat = Pattern.compile("([\\w]+[\\.]|)("+regx+")",Pattern.CASE_INSENSITIVE);//正则判断
-            Pattern pat = Pattern.compile("^("+regx+")$",Pattern.CASE_INSENSITIVE);//正则判断
-            Matcher mc= pat.matcher(ext);//条件匹配
-            if(mc.find()){
+    //判断字符串是否是Json格式
+    public static boolean isJson(Object obj) {
+        try{
+            String str = obj.toString().trim();
+            if (str.charAt(0) == '{' && str.charAt(str.length() - 1) == '}') {
+                JSONObject.parseObject(str);
                 return true;
-            }else{
-                return false;
+            }
+            return false;
+        }catch (Exception e){
+            return false;
+        }
+    }
+
+    //处理JSon格式的参数字符串
+    public static HashMap handleJsonParamsStr(String ParamsStr) {
+        HashMap paramHashMap = new HashMap<>();
+        Map<String, String> map = JSONObject.parseObject(ParamsStr, Map.class);
+        for(Map.Entry<String, String> obj : map.entrySet()){
+            //BurpExtender.stdout.println(String.format("handleJsonParamsStr: %s %s", obj.getKey(), obj.getValue()));
+            String tempKey = String.valueOf(obj.getKey());
+            String tempValue = String.valueOf(obj.getValue());
+            if(isJson(tempValue)){
+                //BurpExtender.stdout.println(String.format("参数值 %s 是Json格式的,需要进一步处理", tempValue));
+                HashMap subHashMap = handleSubJsonParamsStr(tempKey,tempValue);
+                paramHashMap.putAll(subHashMap);
+            }else {
+                paramHashMap.put(tempKey, FLAG_EXIST);
             }
         }
+        return paramHashMap;
     }
 
-    public static void updateSuccessCount(){
-        synchronized(Config.FAIL_TOTAL){
-            Config.REQUEST_TOTAL++;
-            Config.SUCCESS_TOTAL++;
-            GUI.lbRequestCount.setText(String.valueOf(Config.REQUEST_TOTAL));
-            GUI.lbSuccessCount.setText(String.valueOf(Config.SUCCESS_TOTAL));
+    //递归处理Json内的子Json
+    public static HashMap handleSubJsonParamsStr(String prefix, String subParamsStr){
+        HashMap subParamHashMap = new HashMap();
+        Map<String, String> subMap = JSONObject.parseObject(subParamsStr, Map.class);
+        for(Map.Entry<String, String> subObj : subMap.entrySet()) {
+            //BurpExtender.stdout.println(String.format("SubHandleJsonParamsStr:%s %s %s", prefix, subObj.getKey(), subObj.getValue()));
+            String tempKey = String.format("%s.%s", prefix, subObj.getKey());
+            String tempValue = String.valueOf(subObj.getValue());
+            if(isJson(tempValue)){
+                HashMap subSubJsonParamsStr = handleSubJsonParamsStr(tempKey, String.valueOf(subObj.getValue()));
+                subParamHashMap.putAll(subSubJsonParamsStr);
+            }
+            else {
+                //subParamHashMap.put(tempKey, tempValue);
+                subParamHashMap.put(tempKey, FLAG_EXIST);
+            }
         }
+        return subParamHashMap;
     }
 
-    public static void updateFailCount(){
-        synchronized(Config.SUCCESS_TOTAL){
-            Config.REQUEST_TOTAL++;
-            Config.FAIL_TOTAL++;
-            GUI.lbRequestCount.setText(String.valueOf(Config.REQUEST_TOTAL));
-            GUI.lbFailCount.setText(String.valueOf(Config.FAIL_TOTAL));
+    //计算字符串内是否至少包含limit个指定字符 //只需要处理多层级别的Json就可以了,单层的用内置方法即可
+    public static boolean countStr(String longStr, String mixStr, int limit) {
+        int count = 0;
+        int index = 0;
+        while((index = longStr.indexOf(mixStr,index))!= -1){
+            index = index + mixStr.length();
+            count++;
+            if(count >= limit){
+                return true;
+            }
         }
+        return false;
     }
-
 
 }

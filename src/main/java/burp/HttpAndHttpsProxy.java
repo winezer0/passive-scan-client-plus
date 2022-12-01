@@ -27,6 +27,7 @@ public class HttpAndHttpsProxy {
         byte[] request = requestResponse.getRequest();
         String reqUrl = null;
         byte[] reqBody = null;
+        String body = null;
         List<String> reqHeaders = null;
 
         IHttpService httpService = requestResponse.getHttpService();
@@ -45,20 +46,8 @@ public class HttpAndHttpsProxy {
             }
         }
 
-        //忽略重复参数的请求
-        if(Config.REQ_SMART) {
-            String reqUrlNoParam = reqUrl.split("\\?",2)[0];
-            String reqParamsJsonStr = Utils.getReqParamsJsonStr(reqParams);
-            Boolean isUniq = Utils.isUniqReqInfo(Config.reqInfoHashMap, reqUrlNoParam, reqParamsJsonStr);
-            if(!isUniq){
-                BurpExtender.stderr.println(String.format("[-] Ignored By Param Duplication: %s %s", reqUrlNoParam, Utils.MD5(reqParamsJsonStr)));
-                return null;
-            }
-        }
-
         if(reqInfo.getMethod().equals("POST")){
             int bodyOffset = reqInfo.getBodyOffset();
-            String body;
             try {
                 body = new String(request, bodyOffset, request.length - bodyOffset, "UTF-8");
                 reqBody = body.getBytes("UTF-8");
@@ -66,6 +55,30 @@ public class HttpAndHttpsProxy {
                 e.printStackTrace();
             }
         }
+
+        //忽略重复参数的请求
+        if(Config.REQ_SMART) {
+            String reqUrlNoParam = reqUrl.split("\\?",2)[0];
+            String reqParamsJsonStr = "";
+            //处理Json格式的请求
+            if(reqInfo.getContentType()==IRequestInfo.CONTENT_TYPE_JSON
+                    && !Utils.isEmpty(body)
+                    && Utils.countStr(body,"{" ,2)
+                    && Utils.isJson(body)){
+                HashMap reqParamsMap = Utils.handleJsonParamsStr(body);
+                reqParamsJsonStr = Utils.getReqParamsMapJsonStr(reqParamsMap);
+            }else {
+                //通用的参数Json获取方案
+                reqParamsJsonStr = Utils.getReqCommonParamsJsonStr(reqParams);
+            }
+            Boolean isUniq = Utils.isUniqReqInfo(Config.reqInfoHashMap, reqUrlNoParam, reqParamsJsonStr);
+            if(!isUniq){
+                BurpExtender.stderr.println(String.format("[-] Ignored By Param Duplication: %s %s", reqUrlNoParam, reqParamsJsonStr));
+                return null;
+            }
+        }
+
+
 
         //输出url去重处理
         if(Config.REQ_UNIQ) {
