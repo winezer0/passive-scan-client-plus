@@ -49,6 +49,9 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
         Config.SELECTED_PARAM = YamlReader.getInstance(callbacks).getBoolean("DEFAULT_SELECTED_PARAM");
         Config.SELECTED_SMART = YamlReader.getInstance(callbacks).getBoolean("DEFAULT_SELECTED_SMART");
 
+        Config.HASH_MAP_LIMIT = YamlReader.getInstance(callbacks).getInteger("DEFAULT_HASH_MAP_LIMIT");
+        Config.HASH_SET_LIMIT = YamlReader.getInstance(callbacks).getInteger("DEFAULT_HASH_SET_LIMIT");
+
         this.version = Config.VERSION;
         this.extensionName= Config.EXTENSION_NAME;
         callbacks.setExtensionName(this.extensionName + " " + this.version);
@@ -72,6 +75,8 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
                 stdout.println(String.format("[*] INIT DEFAULT_SELECTED_UNIQ: %s", Config.SELECTED_UNIQ));
                 stdout.println(String.format("[*] INIT DEFAULT_SELECTED_PARAM: %s", Config.SELECTED_PARAM));
                 stdout.println(String.format("[*] INIT DEFAULT_SELECTED_SMART: %s", Config.SELECTED_SMART));
+                stdout.println(String.format("[*] INIT DEFAULT_HASH_MAP_LIMIT: %s", Config.HASH_MAP_LIMIT));
+                stdout.println(String.format("[*] INIT DEFAULT_HASH_SET_LIMIT: %s", Config.HASH_SET_LIMIT));
                 stdout.println("[*] ####################################");
             }
         });

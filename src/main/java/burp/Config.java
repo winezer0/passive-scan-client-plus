@@ -6,6 +6,8 @@ import java.util.HashSet;
 public class Config {
     public static HashMap<String, String> reqInfoHashMap = new HashMap();
     public static HashSet<String> reqInfoHashSet = new HashSet<>();
+    public static Integer HASH_MAP_LIMIT; //限制reqInfoHashMap中最大记录的请求数量,
+    public static Integer HASH_SET_LIMIT; //限制reqInfoHashSet中最大记录的请求数量
 
     public static boolean IS_RUNNING = false;
     public static boolean REQ_UNIQ = false;
@@ -27,7 +29,10 @@ public class Config {
     public static String DOMAIN_REGX; //从配置文件获取
     public static String SUFFIX_REGX; //从配置文件获取
     public static Integer INTERVAL_TIME; //从配置文件获取
-    public static Boolean SELECTED_UNIQ;
-    public static Boolean SELECTED_PARAM;
-    public static Boolean SELECTED_SMART;
+    public static Boolean SELECTED_UNIQ; //从配置文件获取
+    public static Boolean SELECTED_PARAM; //从配置文件获取
+    public static Boolean SELECTED_SMART; //从配置文件获取
+
+
+
 }

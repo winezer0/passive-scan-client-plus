@@ -76,8 +76,13 @@ public class HttpAndHttpsProxy {
                 BurpExtender.stderr.println(String.format("[-] Ignored By Param Duplication: %s %s", reqUrlNoParam, reqParamsJsonStr));
                 return null;
             }
-        }
 
+            //内存记录数量超过限制,清空 reqInfoHashMap
+            if(Config.HASH_MAP_LIMIT <= Config.reqInfoHashMap.size()){
+                BurpExtender.stdout.println(String.format("[-] Clear HashMap Content By Exceed Limit."));
+                Config.reqInfoHashMap.clear();
+            }
+        }
 
 
         //输出url去重处理
@@ -91,9 +96,16 @@ public class HttpAndHttpsProxy {
                 //BurpExtender.stdout.println(String.format("[+] Firstly REQ URL&Body(md5): %s", url_body));
                 Config.reqInfoHashSet.add(url_body);
             }
+
+            //内存记录数量超过限制,清空 reqInfoHashSet
+            if(Config.HASH_SET_LIMIT <= Config.reqInfoHashSet.size()){
+                BurpExtender.stdout.println(String.format("[-] Clear HashSet Content By Exceed Limit."));
+                Config.reqInfoHashSet.clear();
+            }
         }
 
-            Thread.sleep(Config.INTERVAL_TIME);
+        //延迟转发
+        Thread.sleep(Config.INTERVAL_TIME);
         if(httpService.getProtocol().equals("https")){
             //修改 输出url去重处理
             return HttpsProxy(reqUrl, reqHeaders, reqBody, Config.PROXY_HOST, Config.PROXY_PORT,Config.PROXY_USERNAME,Config.PROXY_PASSWORD);
