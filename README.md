@@ -21,6 +21,23 @@ jdk17启动burpsuite 2022.11.1  不可运行PSC
 问题详情：https://github.com/c0ny1/passive-scan-client/issues
 ```
 
+##### v0.4.9.2 支持去重请求数量限制
+
+```
+SMART功能通过HASHMAP去重
+UNIQ功能通过HASHSET去重
+当存在大量不同的请求时,可能会超出内存限制。
+解决方法:
+1、通过Clear按钮手动清空
+2、新增LIMIT配置,当超出指定大小时自动清空(新增功能)
+
+DEFAULT_HASH_MAP_LIMIT: 500
+DEFAULT_HASH_SET_LIMIT: 1000
+
+注意：使用自定义启动配置文件的用户需要更新(psc.config.yml)配置文件
+注意：优先从插件所在目录读取psc.config.yml文件,不存在时,从jar包内部读取psc.config.yml文件
+```
+
 ##### v0.4.9.1 优化SAMRT过滤
 
 ```
@@ -92,7 +109,7 @@ DEFAULT_SELECTED_PARAM: false //新增
 
 ```
 优先从插件所在目录读取psc.config.yml文件
-文件不存在时,从jar包内部读取psc.config.yml文件(建议使用)
+文件不存在时,从jar包内部读取psc.config.yml文件
 
 DEFAULT_EXTENSION_NAME: "Passive Scan Client" 
 DEFAULT_VERSION: "0.4.7"
