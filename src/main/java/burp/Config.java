@@ -20,19 +20,17 @@ public class Config {
 
     public static String EXTENSION_NAME; //从配置文件获取
     public static String VERSION; //从配置文件获取
-
     public static String PROXY_HOST; //从配置文件获取
     public static Integer PROXY_PORT; //从配置文件获取
     public static String PROXY_USERNAME; //从配置文件获取
     public static String PROXY_PASSWORD; //从配置文件获取
     public static Integer PROXY_TIMEOUT; //从配置文件获取
-    public static String DOMAIN_REGX; //从配置文件获取
-    public static String SUFFIX_REGX; //从配置文件获取
+    public static String TARGET_HOST_REGX; //从配置文件获取
+    public static String BLACK_SUFFIX_REGX; //从配置文件获取
+    public static String BLACK_HOST_REGX; //从配置文件获取
     public static Integer INTERVAL_TIME; //从配置文件获取
     public static Boolean SELECTED_UNIQ; //从配置文件获取
     public static Boolean SELECTED_PARAM; //从配置文件获取
     public static Boolean SELECTED_SMART; //从配置文件获取
-
-
-
+    public static Boolean SHOW_DEBUG_MSG; //从配置文件获取
 }

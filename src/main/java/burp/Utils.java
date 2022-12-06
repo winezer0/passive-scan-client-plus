@@ -69,9 +69,50 @@ public class Utils {
         }
     }
 
+    public static void showStdoutMsgDebug(String msg){
+        if(Config.SHOW_DEBUG_MSG) {
+            BurpExtender.stdout.println(msg);
+        }
+    }
+
+    public static void showStdoutMsgInfo(String msg){
+        BurpExtender.stdout.println(msg);
+    }
+
+    public static void showStderrMsgDebug(String msg){
+        if(Config.SHOW_DEBUG_MSG) {
+            BurpExtender.stderr.println(msg);
+        }
+    }
+
+    public static void showStderrMsgInfo(String msg){
+        BurpExtender.stderr.println(msg);
+    }
+
     //域名匹配
-    public static boolean isMatchDomain(String regx, String str){
-        Pattern pat = Pattern.compile("([\\w]+[\\.]|)("+regx+")",Pattern.CASE_INSENSITIVE);//正则判断
+    public static boolean isMatchTargetHost(String regx, String str, Boolean NoRegxValue){
+        //如果没有正在表达式,的情况下返回指定值 NoRegxValue
+        if (regx.trim().length() == 0){
+            return NoRegxValue;
+        }
+
+        Pattern pat = Pattern.compile("^.*("+regx+").*$",Pattern.CASE_INSENSITIVE);//正则判断
+        Matcher mc= pat.matcher(str);//条件匹配
+        if(mc.find()){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    //域名匹配
+    public static boolean isMatchBlackHost(String regx, String str, Boolean NoRegxValue){
+        //如果没有正在表达式,的情况下返回指定值 NoRegxValue
+        if (regx.trim().length() == 0){
+            return NoRegxValue;
+        }
+
+        Pattern pat = Pattern.compile("^.*("+regx+")$",Pattern.CASE_INSENSITIVE);//正则判断
         Matcher mc= pat.matcher(str);//条件匹配
         if(mc.find()){
             return true;
@@ -98,33 +139,22 @@ public class Utils {
                     int lastPartContentLength = lastPartContents.length;
                     //extension
                     extension = lastPartContents[lastPartContentLength -1];
-
-                    /*
-                    //name
-                    String name = "";
-                    for (int i = 0; i < lastPartContentLength; i++) {
-                        // BurpExtender.out.println("Last Part " + i + ": "+ lastPartContents[i]);
-                        if(i < (lastPartContents.length -1)){
-                            name += lastPartContents[i] ;
-                            if(i < (lastPartContentLength -2)){
-                                name += ".";
-                            }
-                        }
-                    }
-                    String filename = name + "." + extension;
-                    BurpExtender.out.println("Name: " + name);
-                    BurpExtender.out.println("Filename: " + filename); */
                 }
             }
         }catch (Exception exception){
-            BurpExtender.stderr.println(String.format("[*] GetPathExtension [%s] Occur Error [%s]", path, exception.getMessage()));
+            Utils.showStderrMsgInfo(String.format("[*] GetPathExtension [%s] Occur Error [%s]", path, exception.getMessage()));
         }
         //BurpExtender.out.println("Extension: " + extension);
         return extension;
     }
 
     //后缀匹配
-    public static boolean isMatchExtension(String regx, String path){
+    public static boolean isMatchBlackSuffix(String regx, String path, Boolean NoRegxValue){
+        //如果没有正在表达式,的情况下返回指定值 NoRegxValue
+        if (regx.trim().length() == 0){
+            return NoRegxValue;
+        }
+
         String ext = getPathExtension(path);
         //无后缀情况全部放行
         if("".equalsIgnoreCase(ext)){
@@ -156,7 +186,7 @@ public class Utils {
                 url_body = req_url + "&" + Utils.MD5(Arrays.toString(req_body));
             }
         }catch (Exception exception){
-            BurpExtender.stderr.println(String.format("[*] getReqInfoHash [%s] Occur Error [%s]", req_url, exception.getMessage()));
+            Utils.showStderrMsgInfo(String.format("[*] getReqInfoHash [%s] Occur Error [%s]", req_url, exception.getMessage()));
         }
         return url_body;
     }
@@ -167,7 +197,6 @@ public class Utils {
         // 组合成参数json
         JSONObject reqParamsJson = new JSONObject();
         for (IParameter param:reqParams) {
-            BurpExtender.stdout.println(param.toString());
             //param.getValue(); 当前根据是否存在值，后续可考虑改成参数是否存在列表[false,true] 参数类型列表[None,int,string,bytes等]
             reqParamsJson.put(param.getName(), true);
         }
@@ -188,7 +217,7 @@ public class Utils {
 
         if(Utils.isEmpty(oldReqParamsJsonStr)){
             reqInfoHashMap.put(reqUrl, newReqParamsJsonStr);
-            BurpExtender.stdout.println("[+] reqInfoHashMap Add By None:" + reqInfoHashMap.get(reqUrl));
+            Utils.showStdoutMsgDebug("[+] reqInfoHashMap Add By None:" + reqInfoHashMap.get(reqUrl));
             return true;
         }
 
@@ -202,7 +231,7 @@ public class Utils {
         //如果旧的json内没有数据
         if(oldReqParamsJson == null){
             reqInfoHashMap.put(reqUrl, newReqParamsJsonStr);
-            BurpExtender.stdout.println("[+] reqInfoHashMap Add By Null:" + reqInfoHashMap.get(reqUrl));
+            Utils.showStdoutMsgDebug("[+] reqInfoHashMap Add By Null:" + reqInfoHashMap.get(reqUrl));
             return true;
         }
 
@@ -226,7 +255,7 @@ public class Utils {
         if(hasNewParam){
             // 放入集合
             reqInfoHashMap.put(reqUrl, oldReqParamsJson.toJSONString());
-            BurpExtender.stdout.println("[+] reqInfoHashMap Add By New:" + reqInfoHashMap.get(reqUrl));
+            Utils.showStdoutMsgDebug("[+] reqInfoHashMap Add By New:" + reqInfoHashMap.get(reqUrl));
             return true;
         }else {
             //BurpExtender.stdout.println("No New Param:" + reqInfoHashMap.get(reqUrl));
@@ -316,5 +345,7 @@ public class Utils {
         }
         return false;
     }
+
+
 
 }

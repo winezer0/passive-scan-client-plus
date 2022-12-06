@@ -41,7 +41,7 @@ public class HttpAndHttpsProxy {
         if(Config.REQ_PARAM){
             //判断是否存在参数
             if(reqParams.size()<=0){
-                BurpExtender.stderr.println(String.format("[-] Ignored By Param Blank: %s", reqUrl));
+                Utils.showStderrMsgDebug(String.format("[-] Ignored By Param Blank: %s", reqUrl));
                 return null;
             }
         }
@@ -73,13 +73,13 @@ public class HttpAndHttpsProxy {
             }
             Boolean isUniq = Utils.isUniqReqInfo(Config.reqInfoHashMap, reqUrlNoParam, reqParamsJsonStr);
             if(!isUniq){
-                BurpExtender.stderr.println(String.format("[-] Ignored By Param Duplication: %s %s", reqUrlNoParam, reqParamsJsonStr));
+                Utils.showStderrMsgDebug(String.format("[-] Ignored By Param Duplication: %s %s", reqUrlNoParam, reqParamsJsonStr));
                 return null;
             }
 
             //内存记录数量超过限制,清空 reqInfoHashMap
             if(Config.HASH_MAP_LIMIT <= Config.reqInfoHashMap.size()){
-                BurpExtender.stdout.println(String.format("[-] Clear HashMap Content By Exceed Limit."));
+                Utils.showStdoutMsgInfo(String.format("[-] Clear HashMap Content By Exceed Limit."));
                 Config.reqInfoHashMap.clear();
             }
         }
@@ -90,16 +90,16 @@ public class HttpAndHttpsProxy {
             String url_body = Utils.getReqInfoHash(reqUrl, reqBody);
             //新增 输出url去重处理  记录请求URL和body对应hash
             if (Config.reqInfoHashSet.contains(url_body)) {
-                BurpExtender.stderr.println(String.format("[-] Ignored By URL&Body(md5): %s", url_body));
+                Utils.showStderrMsgDebug(String.format("[-] Ignored By URL&Body(md5): %s", url_body));
                 return null;
             } else {
-                //BurpExtender.stdout.println(String.format("[+] Firstly REQ URL&Body(md5): %s", url_body));
+                Utils.showStdoutMsgDebug(String.format("[+] Firstly REQ URL&Body(md5): %s", url_body));
                 Config.reqInfoHashSet.add(url_body);
             }
 
             //内存记录数量超过限制,清空 reqInfoHashSet
             if(Config.HASH_SET_LIMIT <= Config.reqInfoHashSet.size()){
-                BurpExtender.stdout.println(String.format("[-] Clear HashSet Content By Exceed Limit."));
+                Utils.showStdoutMsgInfo(String.format("[-] Clear HashSet Content By Exceed Limit."));
                 Config.reqInfoHashSet.clear();
             }
         }
@@ -142,7 +142,7 @@ public class HttpAndHttpsProxy {
                 String user_pass = String.format("%s:%s", username, password);
                 String headerKey = "Proxy-Authorization";
                 String headerValue = "Basic " + Base64.encode(user_pass.getBytes());
-                BurpExtender.stdout.println(String.format("[*] Set [%s] Proxy-Authorization Data: [%s]", user_pass, headerValue));
+                Utils.showStdoutMsgDebug(String.format("[*] Set [%s] Proxy-Authorization Data: [%s]", user_pass, headerValue));
                 httpsConn.setRequestProperty(headerKey, headerValue);
             }
 
@@ -225,7 +225,7 @@ public class HttpAndHttpsProxy {
         } catch (Exception e) {
             //e.printStackTrace();
             result = e.getMessage();
-            BurpExtender.stderr.println("[*] First Times: " + e.getMessage());
+            Utils.showStderrMsgDebug("[-] First Times: " + e.getMessage());
             Utils.updateFailCount();
         } finally {
             try {
@@ -251,13 +251,13 @@ public class HttpAndHttpsProxy {
             status = String.valueOf(httpsConn.getResponseCode());
         } catch (IOException e) {
             status = e.getMessage();
-            BurpExtender.stderr.println("[*] Second Times: " + e.getMessage());
+            Utils.showStderrMsgDebug("[-] Second Times: " + e.getMessage());
             //新增 不记录错误响应的请求
             if(Config.REQ_UNIQ) {
                 String url_body = Utils.getReqInfoHash(url, body);
                 if(Config.reqInfoHashSet.contains(url_body)){
                     Config.reqInfoHashSet.remove(url_body);//新增
-                    BurpExtender.stderr.println(String.format("[!] Remove Hashset Record: %s", url_body) );
+                    Utils.showStderrMsgInfo(String.format("[!] Remove Hashset Record: %s", url_body) );
                 }
             }
         }
@@ -294,7 +294,7 @@ public class HttpAndHttpsProxy {
                 String user_pass = String.format("%s:%s", username, password);
                 String headerKey = "Proxy-Authorization";
                 String headerValue = "Basic " + Base64.encode(user_pass.getBytes());
-                BurpExtender.stdout.println(String.format("[*] Set [%s] Proxy-Authorization Data: [%s]", user_pass, headerValue));
+                Utils.showStdoutMsgDebug(String.format("[*] Set [%s] Proxy-Authorization Data: [%s]", user_pass, headerValue));
                 httpConn.setRequestProperty(headerKey, headerValue);
             }
 
@@ -374,7 +374,7 @@ public class HttpAndHttpsProxy {
         } catch (Exception e) {
             //e.printStackTrace();
             result = e.getMessage();
-            BurpExtender.stderr.println("[*] First Times: " + e.getMessage());
+            Utils.showStderrMsgDebug("[-] First Times: " + e.getMessage());
             Utils.updateFailCount();
         } finally {
             try {
@@ -400,13 +400,13 @@ public class HttpAndHttpsProxy {
             status = String.valueOf(httpConn.getResponseCode());
         } catch (IOException e) {
             status = e.getMessage();
-            BurpExtender.stderr.println("[*] Second Times: " + e.getMessage());
+            Utils.showStderrMsgDebug("[-] Second Times: " + e.getMessage());
             //新增 不记录错误响应的请求
             if(Config.REQ_UNIQ) {
                 String url_body = Utils.getReqInfoHash(url, body);
                 if(Config.reqInfoHashSet.contains(url_body)){
                     Config.reqInfoHashSet.remove(url_body);//新增
-                    BurpExtender.stderr.println(String.format("[!] Remove Hashset Record: %s", url_body) );
+                    Utils.showStderrMsgInfo(String.format("[!] Remove Hashset Record: %s", url_body) );
                 }
             }
         }

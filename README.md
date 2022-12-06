@@ -43,6 +43,40 @@ jdk17启动burpsuite 2022.11.1  不可运行PSC
 问题详情：https://github.com/c0ny1/passive-scan-client/issues
 ```
 
+
+
+v0.4.10.0  优化域名过滤
+
+```
+1、修改Domain为TargetHost，并优化正则匹配过程
+//无正则情况全部放行
+Pattern pat = Pattern.compile("^.*("+regx+").*$",Pattern.CASE_INSENSITIVE);//正则判断
+
+2、增加BlackHost 窗口,按[后缀]过滤目标
+//无正则情况全部放行
+Pattern pat = Pattern.compile("^.*("+regx+")$",Pattern.CASE_INSENSITIVE);//正则判断
+
+3、修改ExcludeSuffix为BlackSuffix
+//无正则情况全部放行
+//无后缀情况全部放行 
+Pattern pat = Pattern.compile("^("+regx+")$",Pattern.CASE_INSENSITIVE);//正则判断
+
+4、增加SHOW_DEBUG_MSG标志，控制显示调试信息
+
+5、PSC默认配置文件已修改,外部配置文件需更新
+DEFAULT_TARGET_HOST_REGX: ""
+DEFAULT_BLACK_HOST_REGX: "bing.com|baidu.com|microsoft.com|msn.com|nelreports.net|azure.com|bdstatic.com"
+DEFAULT_BLACK_SUFFIX_REGX: "js|css|jpeg|gif|jpg|png|pdf|rar|zip|docx|doc|svg|jpeg|ico|woff|woff2|ttf|otf"
+DEFAULT_SHOW_DEBUG_MSG: false
+
+注意：
+1、右键转发到PSC功能可强制 绕过 正则匹配目标功能 扫描。
+2、匹配顺序: 白名单域名匹配>>黑名单域名匹配>>黑名单后缀匹配
+
+```
+
+
+
 ##### v0.4.9.2 支持去重请求数量限制
 
 ```

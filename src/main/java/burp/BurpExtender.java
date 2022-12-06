@@ -42,8 +42,11 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
         Config.PROXY_USERNAME = YamlReader.getInstance(callbacks).getString("DEFAULT_PROXY_USERNAME");
         Config.PROXY_PASSWORD = YamlReader.getInstance(callbacks).getString("DEFAULT_PROXY_PASSWORD");
         Config.PROXY_TIMEOUT = YamlReader.getInstance(callbacks).getInteger("DEFAULT_PROXY_TIMEOUT");
-        Config.DOMAIN_REGX = YamlReader.getInstance(callbacks).getString("DEFAULT_DOMAIN_REGX");
-        Config.SUFFIX_REGX = YamlReader.getInstance(callbacks).getString("DEFAULT_SUFFIX_REGX");
+
+        Config.TARGET_HOST_REGX = YamlReader.getInstance(callbacks).getString("DEFAULT_TARGET_HOST_REGX");
+        Config.BLACK_HOST_REGX = YamlReader.getInstance(callbacks).getString("DEFAULT_BLACK_HOST_REGX");
+        Config.BLACK_SUFFIX_REGX = YamlReader.getInstance(callbacks).getString("DEFAULT_BLACK_SUFFIX_REGX");
+
         Config.INTERVAL_TIME = YamlReader.getInstance(callbacks).getInteger("DEFAULT_INTERVAL_TIME");
         Config.SELECTED_UNIQ = YamlReader.getInstance(callbacks).getBoolean("DEFAULT_SELECTED_UNIQ");
         Config.SELECTED_PARAM = YamlReader.getInstance(callbacks).getBoolean("DEFAULT_SELECTED_PARAM");
@@ -51,6 +54,8 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
 
         Config.HASH_MAP_LIMIT = YamlReader.getInstance(callbacks).getInteger("DEFAULT_HASH_MAP_LIMIT");
         Config.HASH_SET_LIMIT = YamlReader.getInstance(callbacks).getInteger("DEFAULT_HASH_SET_LIMIT");
+
+        Config.SHOW_DEBUG_MSG = YamlReader.getInstance(callbacks).getBoolean("DEFAULT_SHOW_DEBUG_MSG");
 
         this.version = Config.VERSION;
         this.extensionName= Config.EXTENSION_NAME;
@@ -60,24 +65,25 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
             public void run() {
                 BurpExtender.this.callbacks.addSuiteTab(BurpExtender.this);
                 BurpExtender.this.callbacks.registerProxyListener(BurpExtender.this);
-                stdout.println(Utils.getBanner());
-
-                stdout.println(String.format("[*] INIT DEFAULT_EXTENSION_NAME: %s", Config.EXTENSION_NAME));
-                stdout.println(String.format("[*] INIT DEFAULT_VERSION: %s", Config.VERSION));
-                stdout.println(String.format("[*] INIT DEFAULT_PROXY_HOST: %s", Config.PROXY_HOST));
-                stdout.println(String.format("[*] INIT DEFAULT_PROXY_PORT: %s", Config.PROXY_PORT));
-                stdout.println(String.format("[*] INIT DEFAULT_PROXY_USERNAME: %s", Config.PROXY_USERNAME));
-                stdout.println(String.format("[*] INIT DEFAULT_PROXY_PASSWORD: %s", Config.PROXY_PASSWORD));
-                stdout.println(String.format("[*] INIT DEFAULT_PROXY_TIMEOUT: %s", Config.PROXY_TIMEOUT));
-                stdout.println(String.format("[*] INIT DEFAULT_DOMAIN_REGX: %s", Config.DOMAIN_REGX));
-                stdout.println(String.format("[*] INIT DEFAULT_SUFFIX_REGX: %s", Config.SUFFIX_REGX));
-                stdout.println(String.format("[*] INIT DEFAULT_INTERVAL_TIME: %s", Config.INTERVAL_TIME));
-                stdout.println(String.format("[*] INIT DEFAULT_SELECTED_UNIQ: %s", Config.SELECTED_UNIQ));
-                stdout.println(String.format("[*] INIT DEFAULT_SELECTED_PARAM: %s", Config.SELECTED_PARAM));
-                stdout.println(String.format("[*] INIT DEFAULT_SELECTED_SMART: %s", Config.SELECTED_SMART));
-                stdout.println(String.format("[*] INIT DEFAULT_HASH_MAP_LIMIT: %s", Config.HASH_MAP_LIMIT));
-                stdout.println(String.format("[*] INIT DEFAULT_HASH_SET_LIMIT: %s", Config.HASH_SET_LIMIT));
-                stdout.println("[*] ####################################");
+                Utils.showStdoutMsgInfo(Utils.getBanner());
+                Utils.showStdoutMsgInfo(String.format("[*] INIT DEFAULT_EXTENSION_NAME: %s", Config.EXTENSION_NAME));
+                Utils.showStdoutMsgInfo(String.format("[*] INIT DEFAULT_VERSION: %s", Config.VERSION));
+                Utils.showStdoutMsgInfo(String.format("[*] INIT DEFAULT_PROXY_HOST: %s", Config.PROXY_HOST));
+                Utils.showStdoutMsgInfo(String.format("[*] INIT DEFAULT_PROXY_PORT: %s", Config.PROXY_PORT));
+                Utils.showStdoutMsgInfo(String.format("[*] INIT DEFAULT_PROXY_USERNAME: %s", Config.PROXY_USERNAME));
+                Utils.showStdoutMsgInfo(String.format("[*] INIT DEFAULT_PROXY_PASSWORD: %s", Config.PROXY_PASSWORD));
+                Utils.showStdoutMsgInfo(String.format("[*] INIT DEFAULT_PROXY_TIMEOUT: %s", Config.PROXY_TIMEOUT));
+                Utils.showStdoutMsgInfo(String.format("[*] INIT DEFAULT_INTERVAL_TIME: %s", Config.INTERVAL_TIME));
+                Utils.showStdoutMsgInfo(String.format("[*] INIT DEFAULT_SELECTED_UNIQ: %s", Config.SELECTED_UNIQ));
+                Utils.showStdoutMsgInfo(String.format("[*] INIT DEFAULT_SELECTED_PARAM: %s", Config.SELECTED_PARAM));
+                Utils.showStdoutMsgInfo(String.format("[*] INIT DEFAULT_SELECTED_SMART: %s", Config.SELECTED_SMART));
+                Utils.showStdoutMsgInfo(String.format("[*] INIT DEFAULT_HASH_MAP_LIMIT: %s", Config.HASH_MAP_LIMIT));
+                Utils.showStdoutMsgInfo(String.format("[*] INIT DEFAULT_HASH_SET_LIMIT: %s", Config.HASH_SET_LIMIT));
+                Utils.showStdoutMsgInfo(String.format("[*] INIT DEFAULT_TARGET_HOST_REGX: %s", Config.TARGET_HOST_REGX));
+                Utils.showStdoutMsgInfo(String.format("[*] INIT DEFAULT_BLACK_HOST_REGX: %s", Config.BLACK_HOST_REGX));
+                Utils.showStdoutMsgInfo(String.format("[*] INIT DEFAULT_BLACK_SUFFIX_REGX: %s", Config.BLACK_SUFFIX_REGX));
+                Utils.showStdoutMsgInfo(String.format("[*] INIT DEFAULT_SHOW_DEBUG_MSG: %s", Config.SHOW_DEBUG_MSG));
+                Utils.showStdoutMsgInfo("[*] ####################################");
             }
         });
 
@@ -119,18 +125,15 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
                                 int row = log.size();
                                 String method = helpers.analyzeRequest(message).getMethod();
                                 byte[] req = message.getRequest();
-
                                 String req_str = new String(req);
                                 //向代理转发请求
                                 Map<String, String> mapResult = null;
+
                                 try {
                                     mapResult = HttpAndHttpsProxy.Proxy(message);
-                                    //mapResult = HttpAndHttpsProxy.Proxy(message , Config.reqBodyHashSet);
-
                                 } catch (InterruptedException interruptedException) {
                                     interruptedException.printStackTrace();
                                 }
-
 
                                 log.add(new LogEntry(row + 1,
                                         callbacks.saveBuffersToTempFiles(message), helpers.analyzeRequest(message).getUrl(),
@@ -149,7 +152,6 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
     }
 
 
-
     //
     // 实现ITab
     //
@@ -166,20 +168,33 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
 
     public void processProxyMessage(boolean messageIsRequest, final IInterceptedProxyMessage iInterceptedProxyMessage) {
         if (!messageIsRequest && Config.IS_RUNNING) {
-            IHttpRequestResponse reprsp = iInterceptedProxyMessage.getMessageInfo();
-            IHttpService httpService = reprsp.getHttpService();
-            String host = reprsp.getHttpService().getHost();
+            IHttpRequestResponse rep_rsp = iInterceptedProxyMessage.getMessageInfo();
+            IHttpService httpService = rep_rsp.getHttpService();
+            String host = rep_rsp.getHttpService().getHost();
 
-            //stdout.println(Config.DOMAIN_REGX);
-            if(!Utils.isMatchDomain(Config.DOMAIN_REGX,host)){
+            //白名单域名匹配
+            if(!Utils.isMatchTargetHost(Config.TARGET_HOST_REGX, host, true)){
+                Utils.showStdoutMsgDebug(String.format("[-] MatchTargetHost HOST:[%s] NOT Match Regex:[%s]", host, Config.TARGET_HOST_REGX));
                 return;
+            } else {
+                Utils.showStdoutMsgDebug(String.format("[*] MatchTargetHost HOST:[%s] Match Regex:[%s]", host, Config.TARGET_HOST_REGX));
             }
 
-            //String  url = helpers.analyzeRequest(httpService,reprsp.getRequest()).getUrl().toString();
-            //url = url.indexOf("?") > 0 ? url.substring(0, url.indexOf("?")) : url;
-            String  path = helpers.analyzeRequest(httpService,reprsp.getRequest()).getUrl().getPath();
-            if(Utils.isMatchExtension(Config.SUFFIX_REGX,path)){
+            //黑名单域名匹配
+            if(Utils.isMatchBlackHost(Config.BLACK_HOST_REGX, host, false)){
+                Utils.showStdoutMsgDebug(String.format("[-] MatchBlackHost HOST:[%s] Match Regex:[%s]", host , Config.BLACK_HOST_REGX));
                 return;
+            }else {
+                Utils.showStdoutMsgDebug(String.format("[*] MatchBlackHost HOST:[%s] NOT Match Regex:[%s]", host , Config.BLACK_HOST_REGX));
+            }
+
+            //黑名单后缀匹配
+            String path = helpers.analyzeRequest(httpService,rep_rsp.getRequest()).getUrl().getPath();
+            if(Utils.isMatchBlackSuffix(Config.BLACK_SUFFIX_REGX, path, false)){
+                Utils.showStdoutMsgDebug(String.format("[-] MatchBlackSuffix PATH:[%s] Match Regex:[%s]", path , Config.BLACK_SUFFIX_REGX));
+                return;
+            }else {
+                Utils.showStdoutMsgDebug(String.format("[*] MatchBlackSuffix PATH:[%s] NOT Match Regex:[%s]", path , Config.BLACK_SUFFIX_REGX));
             }
 
             final IHttpRequestResponse req_resp = iInterceptedProxyMessage.getMessageInfo();
@@ -195,9 +210,7 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
                         String method = helpers.analyzeRequest(req_resp).getMethod();
                         Map<String, String> mapResult = null;
                         try {
-                            mapResult = HttpAndHttpsProxy.Proxy(req_resp); //增加重复元素过滤功能
-                            //mapResult = HttpAndHttpsProxy.Proxy(req_resp , Config.reqBodyHashSet);
-
+                            mapResult = HttpAndHttpsProxy.Proxy(req_resp);
                         } catch (InterruptedException e) {
                             // TODO Auto-generated catch block
                             e.printStackTrace();

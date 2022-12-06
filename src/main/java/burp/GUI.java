@@ -21,8 +21,9 @@ public class GUI implements IMessageEditorController {
     private JTextField tfUsername;
     private JLabel lbPassword;
     private JTextField tfPassword;
-    private JTextField tfDomain;
-    private JTextField tfExcludeSuffix;
+    private JTextField tfTargetHost;
+    private JTextField tfBlackHost;
+    private JTextField tfBlackSuffix;
     private JToggleButton btnConn;
     private JToggleButton btnUniq;
     private JToggleButton btnParam;
@@ -284,8 +285,9 @@ public class GUI implements IMessageEditorController {
                     Config.PROXY_TIMEOUT = Integer.valueOf(tfTimeout.getText());
                     Config.PROXY_USERNAME = tfUsername.getText();
                     Config.PROXY_PASSWORD = tfPassword.getText();
-                    Config.DOMAIN_REGX = tfDomain.getText();
-                    Config.SUFFIX_REGX = tfExcludeSuffix.getText();
+                    Config.TARGET_HOST_REGX = tfTargetHost.getText();
+                    Config.BLACK_HOST_REGX = tfBlackHost.getText();
+                    Config.BLACK_SUFFIX_REGX = tfBlackSuffix.getText();
                     Config.INTERVAL_TIME = Integer.valueOf(tfIntervalTime.getText());
                     setAllEnabled(false);
                 }else{
@@ -344,52 +346,69 @@ public class GUI implements IMessageEditorController {
         GridBagLayout gbl_panel_1 = new GridBagLayout();
         gbl_panel_1.columnWidths = new int[] { 40, 225, 0, 0, 0 };
         gbl_panel_1.rowHeights = new int[] { 0, 0 };
-        gbl_panel_1.columnWeights = new double[] { 0.0D, 0.0D, 0.0D,0.0D,1.0D, 0.0D, 0.0D,0.0D,0.0D,0.0D,0.0D,0.0D,Double.MIN_VALUE };
+        gbl_panel_1.columnWeights = new double[] { 0.0D, 0.0D, 0.0D, 0.0D, 0.0D,0.0D,1.0D, 0.0D, 0.0D,0.0D,0.0D,0.0D,0.0D,0.0D,Double.MIN_VALUE };
         gbl_panel_1.rowWeights = new double[] { 0.0D, Double.MIN_VALUE };
         FilterPanel.setLayout(gbl_panel_1);
 
-        JLabel lbDomain = new JLabel("Domain:");
-        GridBagConstraints gbc_lblDomain = new GridBagConstraints();
-        gbc_lblDomain.insets = new Insets(0, 0, 0, 5);
-        gbc_lblDomain.anchor = 13;
-        gbc_lblDomain.gridx = 0;
-        gbc_lblDomain.gridy = 0;
-        FilterPanel.add(lbDomain, gbc_lblDomain);
+        JLabel lbTargetHost = new JLabel("TargetHost:");
+        GridBagConstraints gbc_lbTargetHost = new GridBagConstraints();
+        gbc_lbTargetHost.insets = new Insets(0, 0, 0, 5);
+        gbc_lbTargetHost.anchor = 15;
+        gbc_lbTargetHost.gridx = 0;
+        gbc_lbTargetHost.gridy = 0;
+        FilterPanel.add(lbTargetHost, gbc_lbTargetHost);
 
+        tfTargetHost = new JTextField(30);
+        tfTargetHost.setText(Config.TARGET_HOST_REGX);
+        GridBagConstraints gbc_tfTargetHost = new GridBagConstraints();
+        gbc_tfTargetHost.insets = new Insets(0, 0, 0, 5);
+        gbc_tfTargetHost.fill = 2;
+        gbc_tfTargetHost.gridx = 1;
+        gbc_tfTargetHost.gridy = 0;
+        FilterPanel.add(tfTargetHost, gbc_tfTargetHost);
 
-        tfDomain = new JTextField(20);
-        tfDomain.setText("");
-        GridBagConstraints gbc_tfDomain = new GridBagConstraints();
-        gbc_tfDomain.insets = new Insets(0, 0, 0, 5);
-        gbc_tfDomain.fill = 2;
-        gbc_tfDomain.gridx = 1;
-        gbc_tfDomain.gridy = 0;
-        FilterPanel.add(tfDomain, gbc_tfDomain);
+        //新增黑名单主机控制
+        JLabel lbBlackHost = new JLabel("BlackHost:");
+        GridBagConstraints gbc_lbBlackHost = new GridBagConstraints();
+        gbc_lbBlackHost.insets = new Insets(0, 0, 0, 5);
+        gbc_lbBlackHost.anchor = 15;
+        gbc_lbBlackHost.fill = 2;
+        gbc_lbBlackHost.gridx = 2;
+        gbc_lbBlackHost.gridy = 0;
+        FilterPanel.add(lbBlackHost, gbc_lbBlackHost);
 
+        tfBlackHost = new JTextField(30);
+        tfBlackHost.setText(Config.BLACK_HOST_REGX);
+        GridBagConstraints gbc_tfBlackHost = new GridBagConstraints();
+        gbc_tfBlackHost.insets = new Insets(0, 0, 0, 5);
+        gbc_tfBlackHost.fill = 2;
+        gbc_tfBlackHost.gridx = 3;
+        gbc_tfBlackHost.gridy = 0;
+        FilterPanel.add(tfBlackHost, gbc_tfBlackHost);
+        //新增黑名单主机控制
 
-        JLabel lbExcludeSuffix = new JLabel("Exclude suffix:");
-        GridBagConstraints gbc_lbExcludeSuffix = new GridBagConstraints();
-        gbc_lbExcludeSuffix.insets = new Insets(0, 0, 0, 5);
-        gbc_lbExcludeSuffix.anchor = 13;
-        gbc_lbExcludeSuffix.fill = 2;
-        gbc_lbExcludeSuffix.gridx = 2;
-        gbc_lbExcludeSuffix.gridy = 0;
-        FilterPanel.add(lbExcludeSuffix, gbc_lbExcludeSuffix);
+        JLabel lbBlackSuffix = new JLabel("BlackSuffix:");
+        GridBagConstraints gbc_lbBlackSuffix = new GridBagConstraints();
+        gbc_lbBlackSuffix.insets = new Insets(0, 0, 0, 5);
+        gbc_lbBlackSuffix.anchor = 15;
+        gbc_lbBlackSuffix.fill = 2;
+        gbc_lbBlackSuffix.gridx = 4;
+        gbc_lbBlackSuffix.gridy = 0;
+        FilterPanel.add(lbBlackSuffix, gbc_lbBlackSuffix);
 
-        tfExcludeSuffix = new JTextField(35);
-        tfExcludeSuffix.setText(Config.SUFFIX_REGX);
-        GridBagConstraints gbc_tfExcludeSuffix = new GridBagConstraints();
-        gbc_tfExcludeSuffix.insets = new Insets(0, 0, 0, 5);
-        gbc_tfExcludeSuffix.fill = 2;
-        gbc_tfExcludeSuffix.gridx = 3;
-        gbc_tfExcludeSuffix.gridy = 0;
-        FilterPanel.add(tfExcludeSuffix, gbc_tfExcludeSuffix);
-
+        tfBlackSuffix = new JTextField(30);
+        tfBlackSuffix.setText(Config.BLACK_SUFFIX_REGX);
+        GridBagConstraints gbc_tfBlackSuffix = new GridBagConstraints();
+        gbc_tfBlackSuffix.insets = new Insets(0, 0, 0, 5);
+        gbc_tfBlackSuffix.fill = 2;
+        gbc_tfBlackSuffix.gridx = 5;
+        gbc_tfBlackSuffix.gridy = 0;
+        FilterPanel.add(tfBlackSuffix, gbc_tfBlackSuffix);
 
         GridBagConstraints gbc_vb = new GridBagConstraints();
         gbc_vb.insets = new Insets(0, 0, 0, 5);
         gbc_vb.fill = 2;
-        gbc_vb.gridx = 4;
+        gbc_vb.gridx = 6;
         gbc_vb.gridy = 0;
         FilterPanel.add(Box.createVerticalBox(), gbc_vb);
 
@@ -397,7 +416,7 @@ public class GUI implements IMessageEditorController {
         GridBagConstraints gbc_lbRequest = new GridBagConstraints();
         gbc_lbRequest.insets = new Insets(0, 0, 0, 5);
         gbc_lbRequest.fill = 2;
-        gbc_lbRequest.gridx = 5;
+        gbc_lbRequest.gridx = 7;
         gbc_lbRequest.gridy = 0;
         FilterPanel.add(lbRequest, gbc_lbRequest);
 
@@ -407,14 +426,14 @@ public class GUI implements IMessageEditorController {
         GridBagConstraints gbc_lbRequestCount = new GridBagConstraints();
         gbc_lbRequestCount.insets = new Insets(0, 0, 0, 5);
         gbc_lbRequestCount.fill = 2;
-        gbc_lbRequestCount.gridx = 6;
+        gbc_lbRequestCount.gridx = 8;
         gbc_lbRequestCount.gridy = 0;
         FilterPanel.add(lbRequestCount, gbc_lbRequestCount);
 
         GridBagConstraints gbc_vb2 = new GridBagConstraints();
         gbc_vb2.insets = new Insets(0, 0, 0, 5);
         gbc_vb2.fill = 2;
-        gbc_vb2.gridx = 7;
+        gbc_vb2.gridx = 9;
         gbc_vb2.gridy = 0;
         FilterPanel.add(Box.createVerticalBox(), gbc_vb);
 
@@ -422,7 +441,7 @@ public class GUI implements IMessageEditorController {
         GridBagConstraints gbc_lbSuccess = new GridBagConstraints();
         gbc_lbSuccess.insets = new Insets(0, 0, 0, 5);
         gbc_lbSuccess.fill = 2;
-        gbc_lbSuccess.gridx = 8;
+        gbc_lbSuccess.gridx = 10;
         gbc_lbSuccess.gridy = 0;
         FilterPanel.add(lbSuccess, gbc_lbSuccess);
 
@@ -431,14 +450,14 @@ public class GUI implements IMessageEditorController {
         GridBagConstraints gbc_lbSuccessCount = new GridBagConstraints();
         gbc_lbSuccessCount.insets = new Insets(0, 0, 0, 5);
         gbc_lbSuccessCount.fill = 2;
-        gbc_lbSuccessCount.gridx = 9;
+        gbc_lbSuccessCount.gridx = 11;
         gbc_lbSuccessCount.gridy = 0;
         FilterPanel.add(lbSuccessCount, gbc_lbSuccessCount);
 
         GridBagConstraints gbc_vb3 = new GridBagConstraints();
         gbc_vb3.insets = new Insets(0, 0, 0, 5);
         gbc_vb3.fill = 2;
-        gbc_vb3.gridx = 10;
+        gbc_vb3.gridx = 12;
         gbc_vb3.gridy = 0;
         FilterPanel.add(Box.createVerticalBox(), gbc_vb3);
 
@@ -446,7 +465,7 @@ public class GUI implements IMessageEditorController {
         GridBagConstraints gbc_lbFail = new GridBagConstraints();
         gbc_lbFail.insets = new Insets(0, 0, 0, 5);
         gbc_lbFail.fill = 2;
-        gbc_lbFail.gridx = 11;
+        gbc_lbFail.gridx = 13;
         gbc_lbFail.gridy = 0;
         FilterPanel.add(lbFail, gbc_lbFail);
 
@@ -455,7 +474,7 @@ public class GUI implements IMessageEditorController {
         GridBagConstraints gbc_lbFailCount = new GridBagConstraints();
         gbc_lbFailCount.insets = new Insets(0, 0, 0, 5);
         gbc_lbFailCount.fill = 2;
-        gbc_lbFailCount.gridx = 12;
+        gbc_lbFailCount.gridx = 14;
         gbc_lbFailCount.gridy = 0;
         FilterPanel.add(lbFailCount, gbc_lbFailCount);
 
@@ -519,8 +538,9 @@ public class GUI implements IMessageEditorController {
         tfUsername.setEnabled(is);
         tfPassword.setEnabled(is);
         tfTimeout.setEnabled(is);
-        tfDomain.setEnabled(is);
-        tfExcludeSuffix.setEnabled(is);
+        tfTargetHost.setEnabled(is);
+        tfBlackHost.setEnabled(is);
+        tfBlackSuffix.setEnabled(is);
         tfIntervalTime.setEnabled(is);
     }
 
@@ -529,7 +549,7 @@ public class GUI implements IMessageEditorController {
         if(bool){
             Config.reqInfoHashSet.clear();
             Config.reqInfoHashMap.clear();
-            BurpExtender.stdout.println("[*] Clear req Info HashSet And HashMap By Button");
+            Utils.showStdoutMsgInfo("[*] Clear req Info HashSet And HashMap By Button");
         }
     }
 }
