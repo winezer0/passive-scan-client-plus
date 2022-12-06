@@ -45,7 +45,7 @@ jdk17启动burpsuite 2022.11.1  不可运行PSC
 
 
 
-v0.4.10.0  优化域名过滤
+##### v0.4.10.0  优化域名过滤
 
 ```
 1、修改Domain为TargetHost，并优化正则匹配过程
@@ -77,7 +77,7 @@ DEFAULT_SHOW_DEBUG_MSG: false
 
 
 
-##### v0.4.9.2 支持去重请求数量限制
+##### v0.4.9.2 支持去+重请求数量限制
 
 ```
 SMART功能通过HASHMAP去重
