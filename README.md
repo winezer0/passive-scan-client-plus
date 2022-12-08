@@ -278,3 +278,4 @@ v0.3 增加请求转发间隔时间
 2、ISSUE或NOVASEC提更新需求.
 ```
 
+![NOVASEC](doc/NOVASEC.jpg)
