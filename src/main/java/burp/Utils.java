@@ -383,7 +383,7 @@ public class Utils {
     //获取参数列表里面的认证信息字符串
     public static HashMap ExtractIParamsAuthParam(List<IParameter> parameters,List<String> headers, Boolean addHeaderAuth) {
         HashMap authParamsHashMap = new HashMap<>();
-        List<String> AuthStringList = Arrays.asList(Config.AUTH_INFO_STR.split("\\|"));
+        List<String> AuthStringList = Arrays.asList(Config.AUTH_INFO_REGX.split("\\|"));
         //showStdoutMsgDebug(String.format("[*] Auth String: %s ",AuthStringList));
         //常见的情况2,Cookie中的SESSION ID|JSEESION|PHPSSIONID| |user.id=
         //当前输入的是参数列表

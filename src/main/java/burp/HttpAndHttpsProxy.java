@@ -21,12 +21,10 @@ import static burp.Utils.ExtractIParamsAuthParam;
 import static burp.Utils.ParamsHashMapAddIParams;
 
 
-//https://blog.csdn.net/sbc1232123321/article/details/79334130
+//JAVA设置代理的两种方式（HTTP和HTTPS） https://blog.csdn.net/sbc1232123321/article/details/79334130
 public class HttpAndHttpsProxy {
 
-    //修改 输出url去重处理
     public static Map<String,String> Proxy(IHttpRequestResponse requestResponse) throws InterruptedException{
-        //public static Map<String,String> Proxy(IHttpRequestResponse requestResponse, Set reqBodyHashSet) throws InterruptedException{
         byte[] request = requestResponse.getRequest();
         IHttpService httpService = requestResponse.getHttpService();
         IRequestInfo reqInfo = BurpExtender.helpers.analyzeRequest(httpService,request);
@@ -73,14 +71,13 @@ public class HttpAndHttpsProxy {
             byte contentType = reqInfo.getContentType();
 
             //确定HASHMAP请求的key
-            String reqUrlWithType;
+            String reqUrlKey;
             if(Config.REQ_AUTH){
                 //添加auth头相关的信息
-                reqUrlWithType = String.format("%s[type:%s][auth:%s]", reqUrlNoParam, contentType, authParamsJsonStr);
+                reqUrlKey = String.format("%s[type:%s][auth:%s]", reqUrlNoParam, contentType, authParamsJsonStr);
             }else {
-                reqUrlWithType = String.format("%s[type:%s]", reqUrlNoParam, contentType);
+                reqUrlKey = String.format("%s[type:%s]", reqUrlNoParam, contentType);
             }
-            Utils.showStdoutMsgDebug(String.format("[*] Current reqUrlWithType : %s", reqUrlWithType));
 
             //格式化处理每个请求的参数, Burp默认处理的参数对包含Cookie值
             String reqParamsJsonStr = "";
@@ -96,15 +93,14 @@ public class HttpAndHttpsProxy {
                 //通用的参数Json获取方案
                 reqParamsJsonStr = Utils.IParametersToJsonStr(reqParams, false);
             }
-            Boolean isUniq = Utils.isUniqReqInfo(Config.reqInfoHashMap, reqUrlWithType, reqParamsJsonStr, false);
+            Boolean isUniq = Utils.isUniqReqInfo(Config.reqInfoHashMap, reqUrlKey, reqParamsJsonStr, false);
             if(!isUniq){
-                Utils.showStderrMsgDebug(String.format("[-] Ignored By Param Duplication: %s %s", reqUrlWithType, reqParamsJsonStr));
+                Utils.showStderrMsgDebug(String.format("[-] Ignored By Param Duplication: %s %s", reqUrlKey, reqParamsJsonStr));
                 return null;
             }
 
             //记录请求的URL 到 reqKeyHASHMAP
-            String module = "REQ_SMART";
-            ReqKeyHashMap.put(module, reqUrlWithType);
+            ReqKeyHashMap.put(Config.REQ_SMART_STR, reqUrlKey);
 
             //内存记录数量超过限制,清空 reqInfoHashMap
             if(Config.HASH_MAP_LIMIT <= Config.reqInfoHashMap.size()){
@@ -116,25 +112,26 @@ public class HttpAndHttpsProxy {
 
         //忽略完全重复的请求信息
         if(Config.REQ_UNIQ) {
-            String url_body;
+            String reqUrlKey;
             if(Config.REQ_AUTH){
                 //添加auth头相关的信息
-                url_body = String.format("%s[auth:%s]", reqUrl, authParamsJsonStr);
+                reqUrlKey = String.format("%s[auth:%s]", reqUrl, authParamsJsonStr);
             }else {
-                url_body = Utils.calcReqInfoHash(reqUrl, reqBody);
+                reqUrlKey = String.format("%s", reqUrl);
             }
+            //计算请求信息Hash
+            String reqInfoHash = Utils.calcReqInfoHash(reqUrlKey, reqBody);
             //新增 输出url去重处理  记录请求URL和body对应hash
-            if (Config.reqInfoHashSet.contains(url_body)) {
-                Utils.showStderrMsgDebug(String.format("[-] Ignored By URL&Body(md5): %s", url_body));
+            if (Config.reqInfoHashSet.contains(reqInfoHash)) {
+                Utils.showStderrMsgDebug(String.format("[-] Ignored By URL&Body(md5): %s", reqInfoHash));
                 return null;
             } else {
-                Utils.showStdoutMsgDebug(String.format("[+] Firstly REQ URL&Body(md5): %s", url_body));
-                Config.reqInfoHashSet.add(url_body);
+                Utils.showStdoutMsgDebug(String.format("[+] Firstly REQ URL&Body(md5): %s", reqInfoHash));
+                Config.reqInfoHashSet.add(reqInfoHash);
             }
 
             //记录请求的URL 到 reqKeyHASHMAP
-            String module = "REQ_UNIQ";
-            ReqKeyHashMap.put(module, url_body);
+            ReqKeyHashMap.put(Config.REQ_UNIQ_STR, reqInfoHash);
 
             //内存记录数量超过限制,清空 reqInfoHashSet
             if(Config.HASH_SET_LIMIT <= Config.reqInfoHashSet.size()){
@@ -264,7 +261,7 @@ public class HttpAndHttpsProxy {
         } catch (Exception e) {
             //e.printStackTrace();
             result = e.getMessage();
-            Utils.showStderrMsgDebug("[-] First Times: " + e.getMessage());
+            Utils.showStderrMsgDebug("[!] First Times: " + e.getMessage());
             Utils.updateFailCount();
         } finally {
             try {
@@ -290,24 +287,22 @@ public class HttpAndHttpsProxy {
             status = String.valueOf(httpsConn.getResponseCode());
         } catch (IOException e) {
             status = e.getMessage();
-            Utils.showStderrMsgDebug("[-] Second Times: " + e.getMessage());
+            Utils.showStderrMsgDebug("[!] Second Times: " + e.getMessage());
 
             //新增 不记录错误响应的请求
             if(Config.DEL_ERROR_KEY){
                 if(Config.REQ_UNIQ){
-                    String module = "REQ_UNIQ";
-                    String reqKey = ReqKeyHashMap.get(module);
+                    String reqKey = ReqKeyHashMap.get(Config.REQ_UNIQ_STR);
                     if(Config.reqInfoHashSet.contains(reqKey)){
                         Config.reqInfoHashSet.remove(reqKey);
-                        Utils.showStderrMsgInfo(String.format("[!] Remove Hashset Record: %s", reqKey) );
+                        Utils.showStderrMsgInfo(String.format("[-] Remove Hashset Record: %s", reqKey) );
                     }
                 }
                 if(Config.REQ_SMART){
-                    String module = "REQ_SMART";
-                    String reqKey = ReqKeyHashMap.get(module);
+                    String reqKey = ReqKeyHashMap.get(Config.REQ_SMART_STR);
                     if(Config.reqInfoHashMap.containsKey(reqKey)){
                         Config.reqInfoHashMap.remove(reqKey);
-                        Utils.showStderrMsgInfo(String.format("[!] Remove Hashmap Record: %s", reqKey) );
+                        Utils.showStderrMsgInfo(String.format("[-] Remove Hashmap Record: %s", reqKey) );
                     }
                 }
             }
@@ -425,7 +420,7 @@ public class HttpAndHttpsProxy {
         } catch (Exception e) {
             //e.printStackTrace();
             result = e.getMessage();
-            Utils.showStderrMsgDebug("[-] First Times: " + e.getMessage());
+            Utils.showStderrMsgDebug("[!] First Times: " + e.getMessage());
             Utils.updateFailCount();
         } finally {
             try {
@@ -451,24 +446,22 @@ public class HttpAndHttpsProxy {
             status = String.valueOf(httpConn.getResponseCode());
         } catch (IOException e) {
             status = e.getMessage();
-            Utils.showStderrMsgDebug("[-] Second Times: " + e.getMessage());
+            Utils.showStderrMsgDebug("[!] Second Times: " + e.getMessage());
 
             //新增 不记录错误响应的请求
             if(Config.DEL_ERROR_KEY){
                 if(Config.REQ_UNIQ){
-                    String module = "REQ_UNIQ";
-                    String reqKey = ReqKeyHashMap.get(module);
+                    String reqKey = ReqKeyHashMap.get(Config.REQ_UNIQ_STR);
                     if(Config.reqInfoHashSet.contains(reqKey)){
                         Config.reqInfoHashSet.remove(reqKey);
-                        Utils.showStderrMsgInfo(String.format("[!] Remove Hashset Record: %s", reqKey) );
+                        Utils.showStderrMsgInfo(String.format("[-] Remove Hashset Record: %s", reqKey) );
                     }
                 }
                 if(Config.REQ_SMART){
-                    String module = "REQ_SMART";
-                    String reqKey = ReqKeyHashMap.get(module);
+                    String reqKey = ReqKeyHashMap.get(Config.REQ_SMART_STR);
                     if(Config.reqInfoHashMap.containsKey(reqKey)){
                         Config.reqInfoHashMap.remove(reqKey);
-                        Utils.showStderrMsgInfo(String.format("[!] Remove Hashmap Record: %s", reqKey) );
+                        Utils.showStderrMsgInfo(String.format("[-] Remove Hashmap Record: %s", reqKey) );
                     }
                 }
             }

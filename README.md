@@ -55,6 +55,13 @@ jdk17启动burpsuite 2022.11.1  不可运行PSC
 
 
 
+##### v0.4.11.1  优化参数名称 非必要更新
+
+```
+1、修改配置文件中的所有键 需要修改配置文件
+2、将所有常用字符串修改为常量
+```
+
 ##### v0.4.11.0  增加AUTH功能按钮
 
 ```
@@ -73,8 +80,6 @@ DEFAULT_DEL_ERROR_KEY: false
 5、统一SMART功能 Json参数存在记录值
 {"PHPSESSID":"YES","category.id":"YES","category.name":"YES","id":"YES","name":"YES","photoUrls":"YES","security":"YES","status":"YES","tags":"YES"}
 ```
-
-
 
 ##### v0.4.10.1  优化SMART功能 请求类型过滤
 
