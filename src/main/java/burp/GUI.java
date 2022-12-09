@@ -28,6 +28,7 @@ public class GUI implements IMessageEditorController {
     private JToggleButton btnUniq;
     private JToggleButton btnParam;
     private JToggleButton btnSmart;
+    private JToggleButton btnAuth;
     private JButton btnClear;
     private JSplitPane splitPane;
     public static HttpLogTable logTable;
@@ -47,7 +48,7 @@ public class GUI implements IMessageEditorController {
         contentPane.setLayout(new BorderLayout(0, 0));
 
         ////////////////////////////////////////////////////////////////////
-        // topPanel start
+        //topPanel start
         ////////////////////////////////////////////////////////////////////
         JPanel topPanel = new JPanel();
         GridBagLayout gridBagLayout = new GridBagLayout();
@@ -68,7 +69,7 @@ public class GUI implements IMessageEditorController {
         GridBagLayout gbl_panel = new GridBagLayout();
         gbl_panel.columnWidths = new int[] { 40, 100, 0, 39, 33, 25, 0, 0, 0 };
         gbl_panel.rowHeights = new int[] { 0, 0 };
-        gbl_panel.columnWeights = new double[] { 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D,0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 1.0D, 0.0D,0.0D, Double.MIN_VALUE };
+        gbl_panel.columnWeights = new double[] { 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D,0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 1.0D, 0.0D,0.0D, Double.MIN_VALUE };
         gbl_panel.rowWeights = new double[] { 0.0D, Double.MIN_VALUE };
         ConfigPanel.setLayout(gbl_panel);
 
@@ -161,7 +162,7 @@ public class GUI implements IMessageEditorController {
         gbc_tfTimeout.gridy = 0;
         ConfigPanel.add(tfTimeout, gbc_tfTimeout);
 
-        // 增加间隔时间
+        //增加间隔时间
         lbIntervalTime = new JLabel("Interval lTime:");
         GridBagConstraints gbc_lbIntervalTime = new GridBagConstraints();
         gbc_lbIntervalTime.fill = 2;
@@ -179,7 +180,7 @@ public class GUI implements IMessageEditorController {
         gbc_tfIntervalTime.gridy = 0;
         ConfigPanel.add(tfIntervalTime, gbc_tfIntervalTime);
 
-        // 增加URL去重开关
+        //增加URL去重开关
         btnUniq = new JToggleButton("UNIQ");
         btnUniq.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent arg0) {
@@ -208,7 +209,7 @@ public class GUI implements IMessageEditorController {
         ConfigPanel.add(btnUniq, gbc_btnUniq);
 
 
-        // 增加无参数URL去除开关
+        //增加无参数URL去除开关
         btnParam = new JToggleButton("PARAM");
         btnParam.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent arg0) {
@@ -236,7 +237,7 @@ public class GUI implements IMessageEditorController {
         gbc_btnParam.gridy = 0;
         ConfigPanel.add(btnParam, gbc_btnParam);
 
-        // 增加重复参数URL去除开关
+        //增加重复参数URL去除开关
         btnSmart = new JToggleButton("SMART");
         btnSmart.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent arg0) {
@@ -264,11 +265,38 @@ public class GUI implements IMessageEditorController {
         gbc_btnSmart.gridy = 0;
         ConfigPanel.add(btnSmart, gbc_btnSmart);
 
+        //增加去重时关注认证信息的开关
+        btnAuth = new JToggleButton("AUTH");
+        btnAuth.addChangeListener(new ChangeListener() {
+            public void stateChanged(ChangeEvent arg0) {
+                boolean isSelected = btnAuth.isSelected();
+                if(isSelected){
+                    Config.REQ_AUTH = true;
+                    btnAuth.setText("AUTH");
+                }else{
+                    Config.REQ_AUTH = false;
+                    btnAuth.setText("AUTH");
+                }
+                btnAuth.setSelected(isSelected);
+            }
+        });
+
+        //根据配置文件设置AUTH按钮的默认选择行为
+        if(Config.SELECTED_AUTH){
+            btnAuth.setSelected(true);
+        }
+
+        GridBagConstraints gbc_btnAuth = new GridBagConstraints();
+        gbc_btnAuth.fill = 2;
+        gbc_btnAuth.insets = new Insets(0, 0, 0, 5);
+        gbc_btnAuth.gridx = 15;
+        gbc_btnAuth.gridy = 0;
+        ConfigPanel.add(btnAuth, gbc_btnAuth);
         ///////////////////////////////
         GridBagConstraints gbc_lb1 = new GridBagConstraints();
         gbc_lb1.anchor = 15;
         gbc_lb1.insets = new Insets(0, 0, 0, 5);
-        gbc_lb1.gridx = 15;
+        gbc_lb1.gridx = 16;
         gbc_lb1.gridy = 0;
         ConfigPanel.add(new JLabel(""), gbc_lb1);
         ///////////////////////////////
@@ -302,7 +330,7 @@ public class GUI implements IMessageEditorController {
         GridBagConstraints gbc_btnConn = new GridBagConstraints();
         gbc_btnConn.fill = 2;
         gbc_btnConn.insets = new Insets(0, 0, 0, 5);
-        gbc_btnConn.gridx = 16;
+        gbc_btnConn.gridx = 17;
         gbc_btnConn.gridy = 0;
         ConfigPanel.add(btnConn, gbc_btnConn);
 
@@ -331,7 +359,7 @@ public class GUI implements IMessageEditorController {
         GridBagConstraints gbc_btnClear = new GridBagConstraints();
         gbc_btnClear.fill = 2;
         gbc_btnClear.insets = new Insets(0, 0, 0, 5);
-        gbc_btnClear.gridx = 17;
+        gbc_btnClear.gridx = 19;
         gbc_btnClear.gridy = 0;
         ConfigPanel.add(btnClear, gbc_btnClear);
         ////////////////////////////////////////////////////////////////////
@@ -480,7 +508,7 @@ public class GUI implements IMessageEditorController {
 
         contentPane.add(topPanel,BorderLayout.NORTH);
         ////////////////////////////////////////////////////////////////////
-        // topPanel end
+        //topPanel end
         ////////////////////////////////////////////////////////////////////
 
         splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);

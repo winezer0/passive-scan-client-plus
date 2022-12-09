@@ -54,6 +54,34 @@ jdk17启动burpsuite 2022.11.1  不可运行PSC
 问题详情：https://github.com/c0ny1/passive-scan-client/issues
 ```
 
+
+
+v0.4.11.0  增加AUTH功能按钮
+
+```
+1、增加AUTH功能按钮,如果开启该功能，会将URL+auth信息作为hashset和hashmap的键。 
+DEFAULT_SELECTED_AUTH: false
+
+2、 auth从Cookie内、参数内、请求头内获取，如sessionid、token头，参考
+DEFAULT_AUTH_INFO_STR: "token|auth|sessid|session"
+注：使用String.lowercase().indexof()匹配
+
+3、支持配置转发失败后是否删除hashset和hashmap内的记录。
+DEFAULT_DEL_ERROR_KEY: false
+```
+
+
+
+v0.4.10.1  优化SMART功能 Json参数记录
+
+```
+1、优化嵌套Json格式下的Cookie参数记录.
+2、统一SMART功能 Json参数记录值同意为YES
+{"PHPSESSID":"YES","category.id":"YES","category.name":"YES","id":"YES","name":"YES","photoUrls":"YES","security":"YES","status":"YES","tags":"YES"}
+```
+
+
+
 ##### v0.4.10.1  优化SMART功能 请求类型过滤
 
 ```

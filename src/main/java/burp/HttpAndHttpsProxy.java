@@ -17,6 +17,9 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import static burp.Utils.ExtractIParamsAuthParam;
+import static burp.Utils.ParamsHashMapAddIParams;
+
 
 //https://blog.csdn.net/sbc1232123321/article/details/79334130
 public class HttpAndHttpsProxy {
@@ -25,17 +28,16 @@ public class HttpAndHttpsProxy {
     public static Map<String,String> Proxy(IHttpRequestResponse requestResponse) throws InterruptedException{
         //public static Map<String,String> Proxy(IHttpRequestResponse requestResponse, Set reqBodyHashSet) throws InterruptedException{
         byte[] request = requestResponse.getRequest();
-        String reqUrl = null;
-        byte[] reqBody = null;
-        String body = null;
-        List<String> reqHeaders = null;
-
         IHttpService httpService = requestResponse.getHttpService();
         IRequestInfo reqInfo = BurpExtender.helpers.analyzeRequest(httpService,request);
 
-        reqUrl = reqInfo.getUrl().toString();
-        reqHeaders = reqInfo.getHeaders();
+        String reqUrl = reqInfo.getUrl().toString();
+        List<String> reqHeaders = reqInfo.getHeaders();
         List<IParameter> reqParams = reqInfo.getParameters();
+        byte[] reqBody = null;
+        String body = null;
+        //HASHMAP 记录当前请求的Key,传递给下一个函数支持错误删除
+        HashMap<String, String> ReqKeyHashMap = new HashMap<>();
 
         //忽略无参数目标
         if(Config.REQ_PARAM){
@@ -56,31 +58,53 @@ public class HttpAndHttpsProxy {
             }
         }
 
+        //计算认证相关的头信息
+        String authParamsJsonStr = "";
+
+        if(Config.REQ_AUTH) {
+            //考虑添加auth头相关的信息
+            HashMap authParamsHashMap = ExtractIParamsAuthParam(reqParams, reqHeaders, true);
+            authParamsJsonStr = Utils.paramsHashMapToJsonStr(authParamsHashMap, true);
+        }
+
         //忽略重复参数的请求
         if(Config.REQ_SMART) {
             String reqUrlNoParam = reqUrl.split("\\?",2)[0];
             byte contentType = reqInfo.getContentType();
-            String reqUrlWithType = String.format("%s[type:%s]", reqUrlNoParam,contentType);
+
+            //确定HASHMAP请求的key
+            String reqUrlWithType;
+            if(Config.REQ_AUTH){
+                //添加auth头相关的信息
+                reqUrlWithType = String.format("%s[type:%s][auth:%s]", reqUrlNoParam, contentType, authParamsJsonStr);
+            }else {
+                reqUrlWithType = String.format("%s[type:%s]", reqUrlNoParam, contentType);
+            }
             Utils.showStdoutMsgDebug(String.format("[*] Current reqUrlWithType : %s", reqUrlWithType));
 
-            //格式化处理每个请求的参数
+            //格式化处理每个请求的参数, Burp默认处理的参数对包含Cookie值
             String reqParamsJsonStr = "";
-            //处理Json格式的请求
+            //额外处理 多层 Json格式的请求
             if(contentType == IRequestInfo.CONTENT_TYPE_JSON
                     && !Utils.isEmpty(body)
                     && Utils.countStr(body,"{" ,2)
                     && Utils.isJson(body)){
-                HashMap reqParamsMap = Utils.handleJsonParamsStr(body);
-                reqParamsJsonStr = Utils.getReqParamsMapJsonStr(reqParamsMap);
+                HashMap reqParamsMap = Utils.JsonParamsToHashMap(body, false);
+                reqParamsMap = ParamsHashMapAddIParams(reqParamsMap, reqParams);
+                reqParamsJsonStr = Utils.paramsHashMapToJsonStr(reqParamsMap, false);
             }else {
                 //通用的参数Json获取方案
-                reqParamsJsonStr = Utils.getReqCommonParamsJsonStr(reqParams);
+                reqParamsJsonStr = Utils.IParametersToJsonStr(reqParams, false);
             }
-            Boolean isUniq = Utils.isUniqReqInfo(Config.reqInfoHashMap, reqUrlWithType, reqParamsJsonStr);
+            Boolean isUniq = Utils.isUniqReqInfo(Config.reqInfoHashMap, reqUrlWithType, reqParamsJsonStr, false);
             if(!isUniq){
                 Utils.showStderrMsgDebug(String.format("[-] Ignored By Param Duplication: %s %s", reqUrlWithType, reqParamsJsonStr));
                 return null;
             }
+
+            //记录请求的URL 到 reqKeyHASHMAP
+            String module = "REQ_SMART";
+            ReqKeyHashMap.put(module, reqUrlWithType);
 
             //内存记录数量超过限制,清空 reqInfoHashMap
             if(Config.HASH_MAP_LIMIT <= Config.reqInfoHashMap.size()){
@@ -90,9 +114,15 @@ public class HttpAndHttpsProxy {
         }
 
 
-        //输出url去重处理
+        //忽略完全重复的请求信息
         if(Config.REQ_UNIQ) {
-            String url_body = Utils.getReqInfoHash(reqUrl, reqBody);
+            String url_body;
+            if(Config.REQ_AUTH){
+                //添加auth头相关的信息
+                url_body = String.format("%s[auth:%s]", reqUrl, authParamsJsonStr);
+            }else {
+                url_body = Utils.calcReqInfoHash(reqUrl, reqBody);
+            }
             //新增 输出url去重处理  记录请求URL和body对应hash
             if (Config.reqInfoHashSet.contains(url_body)) {
                 Utils.showStderrMsgDebug(String.format("[-] Ignored By URL&Body(md5): %s", url_body));
@@ -101,6 +131,10 @@ public class HttpAndHttpsProxy {
                 Utils.showStdoutMsgDebug(String.format("[+] Firstly REQ URL&Body(md5): %s", url_body));
                 Config.reqInfoHashSet.add(url_body);
             }
+
+            //记录请求的URL 到 reqKeyHASHMAP
+            String module = "REQ_UNIQ";
+            ReqKeyHashMap.put(module, url_body);
 
             //内存记录数量超过限制,清空 reqInfoHashSet
             if(Config.HASH_SET_LIMIT <= Config.reqInfoHashSet.size()){
@@ -113,15 +147,15 @@ public class HttpAndHttpsProxy {
         Thread.sleep(Config.INTERVAL_TIME);
         if(httpService.getProtocol().equals("https")){
             //修改 输出url去重处理
-            return HttpsProxy(reqUrl, reqHeaders, reqBody, Config.PROXY_HOST, Config.PROXY_PORT,Config.PROXY_USERNAME,Config.PROXY_PASSWORD);
+            return HttpsProxy(ReqKeyHashMap, reqUrl, reqHeaders, reqBody, Config.PROXY_HOST, Config.PROXY_PORT,Config.PROXY_USERNAME,Config.PROXY_PASSWORD);
         }else {
             //修改 输出url去重处理
-            return HttpProxy(reqUrl, reqHeaders, reqBody, Config.PROXY_HOST, Config.PROXY_PORT,Config.PROXY_USERNAME,Config.PROXY_PASSWORD);
+            return HttpProxy(ReqKeyHashMap, reqUrl, reqHeaders, reqBody, Config.PROXY_HOST, Config.PROXY_PORT,Config.PROXY_USERNAME,Config.PROXY_PASSWORD);
         }
     }
 
     //感谢chen1sheng的pr，已经修改了我漏修复的https转发bug，并解决了header截断的bug。
-    public static Map<String,String> HttpsProxy(String url, List<String> headers,byte[] body, String proxy, int port,String username,String password){
+    public static Map<String,String> HttpsProxy(HashMap<String,String> ReqKeyHashMap, String url, List<String> headers,byte[] body, String proxy, int port,String username,String password){
     //public static Map<String,String> HttpsProxy(Set reqBodyHashSet, String url_body, String url, List<String> headers,byte[] body, String proxy, int port,String username,String password){
         Map<String,String> mapResult = new HashMap<String,String>();
         String status = "";
@@ -135,7 +169,7 @@ public class HttpAndHttpsProxy {
         try {
             URL urlClient = new URL(url);
             SSLContext sc = SSLContext.getInstance("SSL");
-            // 指定信任https
+            //指定信任https
             sc.init(null, new TrustManager[] { new TrustAnyTrustManager() }, new java.security.SecureRandom());
             //创建代理虽然是https也是Type.HTTP
             Proxy proxy1=new Proxy(Type.HTTP, new InetSocketAddress(proxy, port));
@@ -156,7 +190,7 @@ public class HttpAndHttpsProxy {
 
             //设置控制请求方法的Flag
             String methodFlag = "";
-            // 设置通用的请求属性
+            //设置通用的请求属性
             for(String header:headers){
                 if(header.startsWith("GET") || header.startsWith("POST") || header.startsWith("PUT")){
                     if(header.startsWith("GET")){
@@ -175,37 +209,37 @@ public class HttpAndHttpsProxy {
             }
 
             if (methodFlag.equals("GET")){
-                // 发送GET请求必须设置如下两行
+                //发送GET请求必须设置如下两行
                 httpsConn.setDoOutput(false);
                 httpsConn.setDoInput(true);
 
-                // 获取URLConnection对象的连接
+                //获取URLConnection对象的连接
                 httpsConn.connect();
             }
             else if(methodFlag.equals("POST")){
-                // 发送POST请求必须设置如下两行
+                //发送POST请求必须设置如下两行
                 httpsConn.setDoOutput(true);
                 httpsConn.setDoInput(true);
 
-                // 获取URLConnection对象对应的输出流
+                //获取URLConnection对象对应的输出流
                 out = new PrintWriter(httpsConn.getOutputStream());
                 if(body != null) {
-                    // 发送请求参数
+                    //发送请求参数
                     out.print(new String(body));
                 }
-                // flush输出流的缓冲
+                //flush输出流的缓冲
                 out.flush();
             }
-            // 定义BufferedReader输入流来读取URL的响应
+            //定义BufferedReader输入流来读取URL的响应
             in = new BufferedReader(new InputStreamReader(httpsConn.getInputStream()));
             String line;
             while ((line = in.readLine()) != null) {
                 result += line;
                 result += "\r\n";
             }
-            // 断开连接
+            //断开连接
             httpsConn.disconnect();
-            // 获取响应头
+            //获取响应头
             Map<String, List<String>> mapHeaders = httpsConn.getHeaderFields();
             for (Map.Entry<String, List<String>> entry : mapHeaders.entrySet()) {
                 String key = entry.getKey();
@@ -257,12 +291,24 @@ public class HttpAndHttpsProxy {
         } catch (IOException e) {
             status = e.getMessage();
             Utils.showStderrMsgDebug("[-] Second Times: " + e.getMessage());
+
             //新增 不记录错误响应的请求
-            if(Config.REQ_UNIQ) {
-                String url_body = Utils.getReqInfoHash(url, body);
-                if(Config.reqInfoHashSet.contains(url_body)){
-                    Config.reqInfoHashSet.remove(url_body);//新增
-                    Utils.showStderrMsgInfo(String.format("[!] Remove Hashset Record: %s", url_body) );
+            if(Config.DEL_ERROR_KEY){
+                if(Config.REQ_UNIQ){
+                    String module = "REQ_UNIQ";
+                    String reqKey = ReqKeyHashMap.get(module);
+                    if(Config.reqInfoHashSet.contains(reqKey)){
+                        Config.reqInfoHashSet.remove(reqKey);
+                        Utils.showStderrMsgInfo(String.format("[!] Remove Hashset Record: %s", reqKey) );
+                    }
+                }
+                if(Config.REQ_SMART){
+                    String module = "REQ_SMART";
+                    String reqKey = ReqKeyHashMap.get(module);
+                    if(Config.reqInfoHashMap.containsKey(reqKey)){
+                        Config.reqInfoHashMap.remove(reqKey);
+                        Utils.showStderrMsgInfo(String.format("[!] Remove Hashmap Record: %s", reqKey) );
+                    }
                 }
             }
         }
@@ -273,7 +319,7 @@ public class HttpAndHttpsProxy {
         return mapResult;
     }
 
-    public static Map<String,String> HttpProxy(String url,List<String> headers,byte[] body, String proxy, int port,String username,String password) {
+    public static Map<String,String> HttpProxy(HashMap<String,String> ReqKeyHashMap, String url,List<String> headers,byte[] body, String proxy, int port,String username,String password) {
         //public static Map<String,String> HttpProxy(Set reqBodyHashSet, String url_body,String url,List<String> headers,byte[] body, String proxy, int port,String username,String password) {
         Map<String,String> mapResult = new HashMap<String,String>();
         String status = "";
@@ -287,7 +333,7 @@ public class HttpAndHttpsProxy {
         try {
             URL urlClient = new URL(url);
             SSLContext sc = SSLContext.getInstance("SSL");
-            // 指定信任https
+            //指定信任https
             sc.init(null, new TrustManager[] { new TrustAnyTrustManager() }, new java.security.SecureRandom());
             //创建代理
             Proxy proxy1=new Proxy(Type.HTTP, new InetSocketAddress(proxy, port));
@@ -305,7 +351,7 @@ public class HttpAndHttpsProxy {
 
             //设置控制请求方法的Flag
             String methodFlag = "";
-            // 设置通用的请求属性
+            //设置通用的请求属性
             for(String header:headers){
                 if(header.startsWith("GET") || header.startsWith("POST") || header.startsWith("PUT")){
                     if(header.startsWith("GET")){
@@ -324,37 +370,37 @@ public class HttpAndHttpsProxy {
             }
 
             if (methodFlag.equals("GET")){
-                // 发送GET请求必须设置如下两行
+                //发送GET请求必须设置如下两行
                 httpConn.setDoOutput(false);
                 httpConn.setDoInput(true);
 
-                // 获取URLConnection对象的连接
+                //获取URLConnection对象的连接
                 httpConn.connect();
             }
             else if(methodFlag.equals("POST")){
-                // 发送POST请求必须设置如下两行
+                //发送POST请求必须设置如下两行
                 httpConn.setDoOutput(true);
                 httpConn.setDoInput(true);
 
-                // 获取URLConnection对象对应的输出流
+                //获取URLConnection对象对应的输出流
                 out = new PrintWriter(httpConn.getOutputStream());
                 if(body != null) {
-                    // 发送请求参数
+                    //发送请求参数
                     out.print(new String(body));
                 }
-                // flush输出流的缓冲
+                //flush输出流的缓冲
                 out.flush();
             }
-            // 定义BufferedReader输入流来读取URL的响应
+            //定义BufferedReader输入流来读取URL的响应
             in = new BufferedReader(new InputStreamReader(httpConn.getInputStream()));
             String line;
             while ((line = in.readLine()) != null) {
                 result += line;
                 result += "\r\n";
             }
-            // 断开连接
+            //断开连接
             httpConn.disconnect();
-            // 获取响应头
+            //获取响应头
             Map<String, List<String>> mapHeaders = httpConn.getHeaderFields();
             for (Map.Entry<String, List<String>> entry : mapHeaders.entrySet()) {
                 String key = entry.getKey();
@@ -406,12 +452,24 @@ public class HttpAndHttpsProxy {
         } catch (IOException e) {
             status = e.getMessage();
             Utils.showStderrMsgDebug("[-] Second Times: " + e.getMessage());
+
             //新增 不记录错误响应的请求
-            if(Config.REQ_UNIQ) {
-                String url_body = Utils.getReqInfoHash(url, body);
-                if(Config.reqInfoHashSet.contains(url_body)){
-                    Config.reqInfoHashSet.remove(url_body);//新增
-                    Utils.showStderrMsgInfo(String.format("[!] Remove Hashset Record: %s", url_body) );
+            if(Config.DEL_ERROR_KEY){
+                if(Config.REQ_UNIQ){
+                    String module = "REQ_UNIQ";
+                    String reqKey = ReqKeyHashMap.get(module);
+                    if(Config.reqInfoHashSet.contains(reqKey)){
+                        Config.reqInfoHashSet.remove(reqKey);
+                        Utils.showStderrMsgInfo(String.format("[!] Remove Hashset Record: %s", reqKey) );
+                    }
+                }
+                if(Config.REQ_SMART){
+                    String module = "REQ_SMART";
+                    String reqKey = ReqKeyHashMap.get(module);
+                    if(Config.reqInfoHashMap.containsKey(reqKey)){
+                        Config.reqInfoHashMap.remove(reqKey);
+                        Utils.showStderrMsgInfo(String.format("[!] Remove Hashmap Record: %s", reqKey) );
+                    }
                 }
             }
         }

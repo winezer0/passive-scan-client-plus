@@ -56,6 +56,10 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
         Config.HASH_SET_LIMIT = YamlReader.getInstance(callbacks).getInteger("DEFAULT_HASH_SET_LIMIT");
 
         Config.SHOW_DEBUG_MSG = YamlReader.getInstance(callbacks).getBoolean("DEFAULT_SHOW_DEBUG_MSG");
+        Config.DEL_ERROR_KEY = YamlReader.getInstance(callbacks).getBoolean("DEFAULT_DEL_ERROR_KEY");
+
+        Config.SELECTED_AUTH = YamlReader.getInstance(callbacks).getBoolean("DEFAULT_SELECTED_AUTH");
+        Config.AUTH_INFO_STR = YamlReader.getInstance(callbacks).getString("DEFAULT_AUTH_INFO_STR");
 
         this.version = Config.VERSION;
         this.extensionName= Config.EXTENSION_NAME;
@@ -66,23 +70,26 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
                 BurpExtender.this.callbacks.addSuiteTab(BurpExtender.this);
                 BurpExtender.this.callbacks.registerProxyListener(BurpExtender.this);
                 Utils.showStdoutMsgInfo(Utils.getBanner());
-                Utils.showStdoutMsgInfo(String.format("[*] INIT DEFAULT_EXTENSION_NAME: %s", Config.EXTENSION_NAME));
-                Utils.showStdoutMsgInfo(String.format("[*] INIT DEFAULT_VERSION: %s", Config.VERSION));
-                Utils.showStdoutMsgInfo(String.format("[*] INIT DEFAULT_PROXY_HOST: %s", Config.PROXY_HOST));
-                Utils.showStdoutMsgInfo(String.format("[*] INIT DEFAULT_PROXY_PORT: %s", Config.PROXY_PORT));
-                Utils.showStdoutMsgInfo(String.format("[*] INIT DEFAULT_PROXY_USERNAME: %s", Config.PROXY_USERNAME));
-                Utils.showStdoutMsgInfo(String.format("[*] INIT DEFAULT_PROXY_PASSWORD: %s", Config.PROXY_PASSWORD));
-                Utils.showStdoutMsgInfo(String.format("[*] INIT DEFAULT_PROXY_TIMEOUT: %s", Config.PROXY_TIMEOUT));
-                Utils.showStdoutMsgInfo(String.format("[*] INIT DEFAULT_INTERVAL_TIME: %s", Config.INTERVAL_TIME));
-                Utils.showStdoutMsgInfo(String.format("[*] INIT DEFAULT_SELECTED_UNIQ: %s", Config.SELECTED_UNIQ));
-                Utils.showStdoutMsgInfo(String.format("[*] INIT DEFAULT_SELECTED_PARAM: %s", Config.SELECTED_PARAM));
-                Utils.showStdoutMsgInfo(String.format("[*] INIT DEFAULT_SELECTED_SMART: %s", Config.SELECTED_SMART));
-                Utils.showStdoutMsgInfo(String.format("[*] INIT DEFAULT_HASH_MAP_LIMIT: %s", Config.HASH_MAP_LIMIT));
-                Utils.showStdoutMsgInfo(String.format("[*] INIT DEFAULT_HASH_SET_LIMIT: %s", Config.HASH_SET_LIMIT));
-                Utils.showStdoutMsgInfo(String.format("[*] INIT DEFAULT_TARGET_HOST_REGX: %s", Config.TARGET_HOST_REGX));
-                Utils.showStdoutMsgInfo(String.format("[*] INIT DEFAULT_BLACK_HOST_REGX: %s", Config.BLACK_HOST_REGX));
-                Utils.showStdoutMsgInfo(String.format("[*] INIT DEFAULT_BLACK_SUFFIX_REGX: %s", Config.BLACK_SUFFIX_REGX));
-                Utils.showStdoutMsgInfo(String.format("[*] INIT DEFAULT_SHOW_DEBUG_MSG: %s", Config.SHOW_DEBUG_MSG));
+                Utils.showStdoutMsgInfo(String.format("[*] INIT EXTENSION_NAME: %s", Config.EXTENSION_NAME));
+                Utils.showStdoutMsgInfo(String.format("[*] INIT VERSION: %s", Config.VERSION));
+                Utils.showStdoutMsgInfo(String.format("[*] INIT PROXY_HOST: %s", Config.PROXY_HOST));
+                Utils.showStdoutMsgInfo(String.format("[*] INIT PROXY_PORT: %s", Config.PROXY_PORT));
+                Utils.showStdoutMsgInfo(String.format("[*] INIT PROXY_USERNAME: %s", Config.PROXY_USERNAME));
+                Utils.showStdoutMsgInfo(String.format("[*] INIT PROXY_PASSWORD: %s", Config.PROXY_PASSWORD));
+                Utils.showStdoutMsgInfo(String.format("[*] INIT PROXY_TIMEOUT: %s", Config.PROXY_TIMEOUT));
+                Utils.showStdoutMsgInfo(String.format("[*] INIT INTERVAL_TIME: %s", Config.INTERVAL_TIME));
+                Utils.showStdoutMsgInfo(String.format("[*] INIT SELECTED_UNIQ: %s", Config.SELECTED_UNIQ));
+                Utils.showStdoutMsgInfo(String.format("[*] INIT SELECTED_PARAM: %s", Config.SELECTED_PARAM));
+                Utils.showStdoutMsgInfo(String.format("[*] INIT SELECTED_SMART: %s", Config.SELECTED_SMART));
+                Utils.showStdoutMsgInfo(String.format("[*] INIT HASH_MAP_LIMIT: %s", Config.HASH_MAP_LIMIT));
+                Utils.showStdoutMsgInfo(String.format("[*] INIT HASH_SET_LIMIT: %s", Config.HASH_SET_LIMIT));
+                Utils.showStdoutMsgInfo(String.format("[*] INIT TARGET_HOST_REGX: %s", Config.TARGET_HOST_REGX));
+                Utils.showStdoutMsgInfo(String.format("[*] INIT BLACK_HOST_REGX: %s", Config.BLACK_HOST_REGX));
+                Utils.showStdoutMsgInfo(String.format("[*] INIT BLACK_SUFFIX_REGX: %s", Config.BLACK_SUFFIX_REGX));
+                Utils.showStdoutMsgInfo(String.format("[*] INIT SELECTED_AUTH: %s", Config.SELECTED_AUTH));
+                Utils.showStdoutMsgInfo(String.format("[*] INIT AUTH_INFO_STR: %s", Config.AUTH_INFO_STR));
+                Utils.showStdoutMsgInfo(String.format("[*] INIT DEL_ERROR_KEY: %s", Config.DEL_ERROR_KEY));
+                Utils.showStdoutMsgInfo(String.format("[*] INIT SHOW_DEBUG_MSG: %s", Config.SHOW_DEBUG_MSG));
                 Utils.showStdoutMsgInfo("[*] ####################################");
             }
         });
@@ -109,7 +116,7 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
     }
 
     //callbacks.registerContextMenuFactory(this);//必须注册右键菜单Factory
-    // 实现右键 感谢原作者Conanjun
+    //实现右键 感谢原作者Conanjun
     @Override
     public List<JMenuItem> createMenuItems(IContextMenuInvocation invocation) {
         final IHttpRequestResponse[] messages = invocation.getSelectedMessages();
@@ -153,7 +160,7 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
 
 
     //
-    // 实现ITab
+    //实现ITab
     //
 
     @Override
@@ -201,7 +208,7 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
 
             //final LogEntry logEntry = new LogEntry(1,callbacks.saveBuffersToTempFiles(iInterceptedProxyMessage.getMessageInfo()),helpers.analyzeRequest(resrsp).getUrl());
 
-            // create a new log entry with the message details
+            //create a new log entry with the message details
             executorService.submit(new Runnable() {
                 @Override
                 public void run() {
@@ -212,7 +219,7 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
                         try {
                             mapResult = HttpAndHttpsProxy.Proxy(req_resp);
                         } catch (InterruptedException e) {
-                            // TODO Auto-generated catch block
+                            //TODO Auto-generated catch block
                             e.printStackTrace();
                         }
 
