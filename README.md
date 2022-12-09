@@ -61,7 +61,7 @@ jdk17启动burpsuite 2022.11.1  不可运行PSC
 1、增加AUTH功能按钮,如果开启该功能，会将URL+auth信息作为hashset和hashmap的键。 
 DEFAULT_SELECTED_AUTH: false
 
-2、 auth从Cookie内、参数内、请求头内获取，如sessionid、token头，参考
+2、 Auth信息从Cookie内、参数内、请求头内获取，如sessionid、token头，参考
 DEFAULT_AUTH_INFO_STR: "token|auth|sessid|session"
 注：使用String.lowercase().indexof()匹配
 
@@ -70,7 +70,7 @@ DEFAULT_DEL_ERROR_KEY: false
 
 4、优化嵌套Json格式下的Cookie参数记录.
 
-5、统一SMART功能 Json参数记录值同意为YES
+5、统一SMART功能 Json参数存在记录值
 {"PHPSESSID":"YES","category.id":"YES","category.name":"YES","id":"YES","name":"YES","photoUrls":"YES","security":"YES","status":"YES","tags":"YES"}
 ```
 
