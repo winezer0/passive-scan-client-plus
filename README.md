@@ -60,6 +60,14 @@ jdk17启动burpsuite 2022.11.1  不可运行PSC
 1、修复SMART模式下，不同请求格式下可能造成的发包遗漏
 
 例如：xml格式下存在漏洞、json格式下不存在漏洞。但旧版本会只按照参数值记录，导致同样参数的请求只会发送一次。新版本以URL+请求体类型作为hashmap的键，同样的URL、同样的请求体类型才会作为相同的请求处理。
+
+byte CONTENT_TYPE_NONE = 0;
+byte CONTENT_TYPE_URL_ENCODED = 1;
+byte CONTENT_TYPE_MULTIPART = 2;
+byte CONTENT_TYPE_XML = 3;
+byte CONTENT_TYPE_JSON = 4;
+byte CONTENT_TYPE_AMF = 5;
+byte CONTENT_TYPE_UNKNOWN = -1;
 ```
 
 ##### v0.4.10.0  优化域名过滤
