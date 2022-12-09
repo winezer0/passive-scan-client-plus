@@ -207,58 +207,56 @@ public class Utils {
         return reqParamsJsonStr;
     }
 
-    //判断Json是否已经在HashMap中,是返回false，不是返回true
+    //判断Json是否是不重复的(不存在与HashMap中),独特返回true,重复返回false
     public static Boolean isUniqReqInfo(HashMap<String,String> reqInfoHashMap, String reqUrl, String newReqParamsJsonStr) {
-        // 判断全局HashMap里面有没有，有就重新放入
-        //考虑不使用 StrUtil
+        // 判断全局HashMap里面是否已经存在URL对应的参数字符串，有就合并新旧参数字符串，没有就直接存入
         String oldReqParamsJsonStr = reqInfoHashMap.get(reqUrl);
-        //BurpExtender.stdout.println("oldReqParamsJsonStr:" + oldReqParamsJsonStr);
-        //BurpExtender.stdout.println("newReqParamsJsonStr:" + newReqParamsJsonStr);
+        showStderrMsgDebug("[*] Old ReqParamsJsonStr:" + oldReqParamsJsonStr);
+        showStderrMsgDebug("[*] New ReqParamsJsonStr:" + newReqParamsJsonStr);
 
+        // 不存在历史参数列表，直接存入,返回false
         if(Utils.isEmpty(oldReqParamsJsonStr)){
             reqInfoHashMap.put(reqUrl, newReqParamsJsonStr);
             Utils.showStdoutMsgDebug("[+] reqInfoHashMap Add By None:" + reqInfoHashMap.get(reqUrl));
             return true;
         }
 
-        //如果新旧的JsonStr相同,直接忽略
+        // 如果新旧的参数JsonStr相同,直接忽略,返回false
         if(newReqParamsJsonStr.equals(oldReqParamsJsonStr)){
             return false;
         }
 
-        //如果已经存在参数Json,需要解开Json进行对比
-        JSONObject oldReqParamsJson = JSONObject.parseObject(oldReqParamsJsonStr);
-        //如果旧的json内没有数据
-        if(oldReqParamsJson == null){
+        // 如果对应请求目标已经存在参数Json,且不完全相同,需要解开参数JsonStr进行对比
+        JSONObject oldReqParamsJsonObj = JSONObject.parseObject(oldReqParamsJsonStr);
+
+        // 如果旧的JsonStr内没有数据,就直接存入新的参数JsonStr
+        if(oldReqParamsJsonObj == null){
             reqInfoHashMap.put(reqUrl, newReqParamsJsonStr);
             Utils.showStdoutMsgDebug("[+] reqInfoHashMap Add By Null:" + reqInfoHashMap.get(reqUrl));
             return true;
         }
 
-        // 是否存在新的参数
+        // hasNewParam 记录是否存在新的参数
         Boolean hasNewParam = false;
         // 如果旧的json内有 旧的参数， {"aaa":"1", "bbb","2"}
-        Map<String, String> map = JSONObject.parseObject(newReqParamsJsonStr, Map.class);
-        for(Map.Entry<String, String> obj : map.entrySet()){
+        Map<String, String> newReqParamsJsonMap = JSONObject.parseObject(newReqParamsJsonStr, Map.class);
+        for(Map.Entry<String, String> newReqParamEntry : newReqParamsJsonMap.entrySet()){
             // 旧的参数包含新的参数key，则跳过
-            boolean containsKey = oldReqParamsJson.containsKey(obj.getKey());
-            if(containsKey){
+            if(oldReqParamsJsonObj.containsKey(newReqParamEntry.getKey())){
                 continue;
             }
-            // 否则放入json 放入新的参数
+            // 往旧的Json参数对象 存入 新的参数
+            oldReqParamsJsonObj.put(newReqParamEntry.getKey(), true);
             hasNewParam = true;
-            //oldReqParamsJson.put(obj.getKey(), obj.getValue());
-            oldReqParamsJson.put(obj.getKey(), true);
         }
 
-        //如果有新参数就重新整理HashMap
+        //如果有新参数加入就重新整理HashMap
         if(hasNewParam){
             // 放入集合
-            reqInfoHashMap.put(reqUrl, oldReqParamsJson.toJSONString());
+            reqInfoHashMap.put(reqUrl, oldReqParamsJsonObj.toJSONString());
             Utils.showStdoutMsgDebug("[+] reqInfoHashMap Add By New:" + reqInfoHashMap.get(reqUrl));
             return true;
         }else {
-            //BurpExtender.stdout.println("No New Param:" + reqInfoHashMap.get(reqUrl));
             return false;
         }
     }

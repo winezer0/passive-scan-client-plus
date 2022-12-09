@@ -59,9 +59,14 @@ public class HttpAndHttpsProxy {
         //忽略重复参数的请求
         if(Config.REQ_SMART) {
             String reqUrlNoParam = reqUrl.split("\\?",2)[0];
+            byte contentType = reqInfo.getContentType();
+            String reqUrlWithType = String.format("%s[type:%s]", reqUrlNoParam,contentType);
+            Utils.showStdoutMsgDebug(String.format("[*] Current reqUrlWithType : %s", reqUrlWithType));
+
+            //格式化处理每个请求的参数
             String reqParamsJsonStr = "";
             //处理Json格式的请求
-            if(reqInfo.getContentType()==IRequestInfo.CONTENT_TYPE_JSON
+            if(contentType == IRequestInfo.CONTENT_TYPE_JSON
                     && !Utils.isEmpty(body)
                     && Utils.countStr(body,"{" ,2)
                     && Utils.isJson(body)){
@@ -71,9 +76,9 @@ public class HttpAndHttpsProxy {
                 //通用的参数Json获取方案
                 reqParamsJsonStr = Utils.getReqCommonParamsJsonStr(reqParams);
             }
-            Boolean isUniq = Utils.isUniqReqInfo(Config.reqInfoHashMap, reqUrlNoParam, reqParamsJsonStr);
+            Boolean isUniq = Utils.isUniqReqInfo(Config.reqInfoHashMap, reqUrlWithType, reqParamsJsonStr);
             if(!isUniq){
-                Utils.showStderrMsgDebug(String.format("[-] Ignored By Param Duplication: %s %s", reqUrlNoParam, reqParamsJsonStr));
+                Utils.showStderrMsgDebug(String.format("[-] Ignored By Param Duplication: %s %s", reqUrlWithType, reqParamsJsonStr));
                 return null;
             }
 
