@@ -71,6 +71,6 @@ public class Config {
     public static String SHOW_MSG_LEVEL_STR = "SHOW_MSG_LEVEL";
 
     public static Integer DECODE_MAX_TIMES; //从配置文件获取,
-    public static String DECODE_MAX_TIMES_STR = "DECODE_MAX_TMIES"; //从配置文件获取,显示输出信息的级别
+    public static String DECODE_MAX_TIMES_STR = "DECODE_MAX_TIMES"; //从配置文件获取
 
 }

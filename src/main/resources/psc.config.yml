@@ -17,5 +17,5 @@ BLACK_HOST_REGX: "bing.com|baidu.com|microsoft.com|msn.com|nelreports.net|azure.
 BLACK_SUFFIX_REGX: "js|css|jpeg|gif|jpg|png|pdf|rar|zip|docx|doc|svg|jpeg|ico|woff|woff2|ttf|otf"
 AUTH_INFO_REGX: "token|auth|sessid|session"
 DEL_STATUS_REGX: "502|504"
-DECODE_MAX_TMIES: 3
+DECODE_MAX_TIMES: 3
 SHOW_MSG_LEVEL: 1
