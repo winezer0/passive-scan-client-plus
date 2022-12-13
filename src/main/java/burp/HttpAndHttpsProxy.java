@@ -107,7 +107,7 @@ public class HttpAndHttpsProxy {
 
             //内存记录数量超过限制,清空 reqInfoHashMap
             if(Config.HASH_MAP_LIMIT <= Config.reqInfoHashMap.size()){
-                Utils.showStdoutMsg(1, String.format("[-] Clear HashMap Content By Exceed Limit."));
+                Utils.showStdoutMsg(1, String.format("[-] Clear HashMap Content By Exceed Limit %s.", Config.HASH_MAP_LIMIT));
                 Config.reqInfoHashMap.clear();
             }
         }
@@ -138,7 +138,7 @@ public class HttpAndHttpsProxy {
 
             //内存记录数量超过限制,清空 reqInfoHashSet
             if(Config.HASH_SET_LIMIT <= Config.reqInfoHashSet.size()){
-                Utils.showStdoutMsg(1, String.format("[-] Clear HashSet Content By Exceed Limit."));
+                Utils.showStdoutMsg(1, String.format("[-] Clear HashSet Content By Exceed Limit %s.", Config.HASH_SET_LIMIT));
                 Config.reqInfoHashSet.clear();
             }
         }

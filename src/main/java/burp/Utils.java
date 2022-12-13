@@ -268,7 +268,7 @@ public class Utils {
         //不存在历史参数列表，直接存入,返回false
         if(Utils.isEmpty(oldReqParamsJsonStr)){
             reqInfoHashMap.put(reqUrl, newReqParamsJsonStr);
-            Utils.showStdoutMsg(1, String.format("[+] reqInfoHashMap Add By None:", reqInfoHashMap.get(reqUrl)));
+            Utils.showStdoutMsg(1, String.format("[+] reqInfoHashMap Add By None:%s", reqInfoHashMap.get(reqUrl)));
             return true;
         }
 
@@ -283,7 +283,7 @@ public class Utils {
         //如果旧的JsonStr内没有数据,就直接存入新的参数JsonStr //大概是不会到达这个情况
         if(oldReqParamsJsonObj == null){
             reqInfoHashMap.put(reqUrl, newReqParamsJsonStr);
-            Utils.showStdoutMsg(1, String.format("[+] reqInfoHashMap Add By Null:",reqInfoHashMap.get(reqUrl) ));
+            Utils.showStdoutMsg(1, String.format("[+] reqInfoHashMap Add By Null:%s",reqInfoHashMap.get(reqUrl) ));
             return true;
         }
 
