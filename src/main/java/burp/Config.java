@@ -64,10 +64,13 @@ public class Config {
     public static Boolean SELECTED_AUTH; //从配置文件获取,去重是否关注认证头信息 按钮的默认设置 注：按钮变量可合并到参数
     public static String SELECTED_AUTH_STR = "SELECTED_AUTH";
 
-    public static Boolean DEL_ERROR_KEY; //从配置文件获取,请求失败是否删除记录
-    public static String DEL_ERROR_KEY_STR = "DEL_ERROR_KEY";
+    public static Boolean DEL_ERROR_KEY = true;
+    //public static String DEL_ERROR_KEY_STR = "DEL_ERROR_KEY";
 
     public static Integer SHOW_MSG_LEVEL; //从配置文件获取,显示输出信息的级别
     public static String SHOW_MSG_LEVEL_STR = "SHOW_MSG_LEVEL";
+
+    public static Integer DECODE_MAX_TIMES; //从配置文件获取,
+    public static String DECODE_MAX_TIMES_STR = "DECODE_MAX_TMIES"; //从配置文件获取,显示输出信息的级别
 
 }

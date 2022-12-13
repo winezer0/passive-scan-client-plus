@@ -11,11 +11,11 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 
 public class Utils {
 
-    private static final Object FLAG_EXIST = "Y";
+    private static final Object FLAG_EXIST = "y";
 
     public static String MD5(String key) {
         //import java.security.MessageDigest;
-        char hexDigits[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+        char[] hexDigits = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
         try {
             byte[] btInput = key.getBytes();
             //获得MD5摘要算法的 MessageDigest 对象
@@ -26,7 +26,7 @@ public class Utils {
             byte[] md = mdInst.digest();
             //把密文转换成十六进制的字符串形式
             int j = md.length;
-            char str[] = new char[j * 2];
+            char[] str = new char[j * 2];
             int k = 0;
             for (int i = 0; i < j; i++) {
                 byte byte0 = md[i];
@@ -45,7 +45,7 @@ public class Utils {
                         + "[+] #####################################\n"
                         + "[+]    " + BurpExtender.extensionName + " v" + BurpExtender.version +"\n"
                         + "[+]    anthor: c0ny1\n"
-                        + "[+]    github: http://github.com/c0ny1/passive-scan-client\n"
+                        + "[+]    github: https://github.com/c0ny1/passive-scan-client\n"
                         + "[+]    update: https://github.com/winezer0/passive-scan-client-plus\n"
                         + "[+] ####################################";
         return bannerInfo;
@@ -69,27 +69,6 @@ public class Utils {
         }
     }
 
-    //public static void showStdoutMsgDebug(String msg){
-    //    if(Config.SHOW_DEBUG_MSG) {
-    //        BurpExtender.stdout.println(msg);
-    //    }
-    //}
-    //
-    //public static void showStdoutMsgInfo(String msg){
-    //    BurpExtender.stdout.println(msg);
-    //}
-    //
-    //public static void showStderrMsgDebug(String msg){
-    //    if(Config.SHOW_DEBUG_MSG) {
-    //        BurpExtender.stderr.println(msg);
-    //    }
-    //}
-    //
-    //public static void showStderrMsgInfo(String msg){
-    //    BurpExtender.stderr.println(msg);
-    //}
-
-
     public static void showStderrMsg(Integer msgLevel,String msg){
         if(msgLevel <=  Config.SHOW_MSG_LEVEL){
             BurpExtender.stderr.println(msg);
@@ -111,11 +90,7 @@ public class Utils {
 
         Pattern pat = Pattern.compile("^("+regx+")$",Pattern.CASE_INSENSITIVE);//正则判断
         Matcher mc= pat.matcher(str);//条件匹配
-        if(mc.find()){
-            return true;
-        }else{
-            return false;
-        }
+        return mc.find();
     }
 
     //包含关键字匹配正则
@@ -127,11 +102,7 @@ public class Utils {
 
         Pattern pat = Pattern.compile("^.*("+regx+").*$",Pattern.CASE_INSENSITIVE);//正则判断
         Matcher mc= pat.matcher(str);//条件匹配
-        if(mc.find()){
-            return true;
-        }else{
-            return false;
-        }
+        return mc.find();
     }
 
     //域名匹配
@@ -148,11 +119,7 @@ public class Utils {
 
         Pattern pat = Pattern.compile("^.*("+regx+")$",Pattern.CASE_INSENSITIVE);//正则判断
         Matcher mc= pat.matcher(str);//条件匹配
-        if(mc.find()){
-            return true;
-        }else{
-            return false;
-        }
+        return mc.find();
     }
 
     //获取请求路径的扩展名
@@ -165,15 +132,13 @@ public class Utils {
 
         try {
             String[] pathContents = path.split("[\\\\/]");
-            if(pathContents != null){
-                int pathContentsLength = pathContents.length;
-                String lastPart = pathContents[pathContentsLength-1];
-                String[] lastPartContents = lastPart.split("\\.");
-                if(lastPartContents != null && lastPartContents.length > 1){
-                    int lastPartContentLength = lastPartContents.length;
-                    //extension
-                    extension = lastPartContents[lastPartContentLength -1];
-                }
+            int pathContentsLength = pathContents.length;
+            String lastPart = pathContents[pathContentsLength-1];
+            String[] lastPartContents = lastPart.split("\\.");
+            if(lastPartContents.length > 1){
+                int lastPartContentLength = lastPartContents.length;
+                //extension
+                extension = lastPartContents[lastPartContentLength -1];
             }
         }catch (Exception exception){
             Utils.showStderrMsg(2, String.format("[*] GetPathExtension [%s] Occur Error [%s]", path, exception.getMessage()));
@@ -197,11 +162,7 @@ public class Utils {
             //Pattern pat = Pattern.compile("([\\w]+[\\.]|)("+regx+")",Pattern.CASE_INSENSITIVE);//正则判断
             Pattern pat = Pattern.compile("^("+regx+")$",Pattern.CASE_INSENSITIVE);//正则判断
             Matcher mc= pat.matcher(ext);//条件匹配
-            if(mc.find()){
-                return true;
-            }else{
-                return false;
-            }
+            return mc.find();
         }
     }
 
@@ -288,7 +249,7 @@ public class Utils {
         }
 
         //hasNewParam 记录是否存在新的参数
-        Boolean hasNewParam = false;
+        boolean hasNewParam = false;
         //解析新的json参数对象,并进行便利
         Map<String, String> newReqParamsJsonMap = JSONObject.parseObject(newReqParamsJsonStr, Map.class);
         for(Map.Entry<String, String> newReqParamEntry : newReqParamsJsonMap.entrySet()){
@@ -397,25 +358,6 @@ public class Utils {
         return false;
     }
 
-    /*
-    判断字符串是否包含列表里面的元素
-    public static Boolean StringContainList(String string, List<String> keyList, Boolean BlankValue) {
-        //列表为空时返回默认值
-        if (keyList.isEmpty() || keyList.size() <= 0){
-            return BlankValue;
-        }
-        //如果字符串内包含列表内的任意一个元素,返回True
-        for (String key : keyList) {
-            if (string.toLowerCase().indexOf(key.toLowerCase()) != -1){
-                //showStdoutMsgDebug(String.format("[+] String:%s Contain Key: %s", string,keyList));
-                return true;
-            }
-        }
-        //循环完毕后没有发现,返回false
-        return false;
-    }
-    */
-
     //获取参数列表里面的认证信息字符串
     public static HashMap ExtractIParamsAuthParam(List<IParameter> parameters,List<String> headers, Boolean addHeaderAuth) {
         HashMap authParamsHashMap = new HashMap<>();
@@ -432,10 +374,10 @@ public class Utils {
         //常见的情况1,AUTH头、Token头、
         if(addHeaderAuth){
             for (String header : headers) {
-                List headerInfo = Arrays.asList(header.split(": ", 2));
+                List<String> headerInfo = Arrays.asList(header.split(": ", 2));
                 if (headerInfo.size() == 2){
-                    String headerName = (String) headerInfo.get(0);
-                    String headerValue =(String) headerInfo.get(1);
+                    String headerName = headerInfo.get(0);
+                    String headerValue = headerInfo.get(1);
                     if(isMatchKeywords(Config.AUTH_INFO_REGX, headerName, false)){ //关键字正则匹配
                         authParamsHashMap.put(headerName, headerValue);
                         //showStdoutMsgDebug(String.format("[*] Auth Header: %s --- %s",headerName, headerValue));
@@ -460,10 +402,13 @@ public class Utils {
 
     //进行URL解码
     public static String decodeUrl(String str) {
-        if (!isEmpty(str) && str.indexOf("%") != -1) {
-            str = BurpExtender.helpers.urlDecode(str);
-            if (str.indexOf("%") != -1) {
-                str = BurpExtender.helpers.urlDecode(str);
+        if (!isEmpty(str)) {
+            for (int i = 0; i < Config.DECODE_MAX_TIMES; i++) {
+                if (str.contains("%")) {
+                    str = BurpExtender.helpers.urlDecode(str);
+                }else {
+                    break;
+                }
             }
         }
         return str;

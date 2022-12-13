@@ -27,11 +27,11 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
 
     @Override
     public void registerExtenderCallbacks(IBurpExtenderCallbacks callbacks) {
-        this.burpExtender = this;
-        this.callbacks = callbacks;
-        this.helpers = callbacks.getHelpers();
-        this.stdout = new PrintWriter(callbacks.getStdout(),true);
-        this.stderr = new PrintWriter(callbacks.getStderr(),true);
+        burpExtender = this;
+        BurpExtender.callbacks = callbacks;
+        helpers = callbacks.getHelpers();
+        stdout = new PrintWriter(callbacks.getStdout(),true);
+        stderr = new PrintWriter(callbacks.getStderr(),true);
         callbacks.registerContextMenuFactory(this);//必须注册右键菜单Factory
 
 
@@ -54,24 +54,25 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
         Config.HASH_MAP_LIMIT = YamlReader.getInstance(callbacks).getInteger(Config.HASH_MAP_LIMIT_STR);
         Config.HASH_SET_LIMIT = YamlReader.getInstance(callbacks).getInteger(Config.HASH_SET_LIMIT_STR);
         Config.INTERVAL_TIME = YamlReader.getInstance(callbacks).getInteger(Config.INTERVAL_TIME_STR);
+        Config.DECODE_MAX_TIMES = YamlReader.getInstance(callbacks).getInteger(Config.DECODE_MAX_TIMES_STR);
 
         Config.SELECTED_HASH = YamlReader.getInstance(callbacks).getBoolean(Config.SELECTED_HASH_STR);
         Config.SELECTED_PARAM = YamlReader.getInstance(callbacks).getBoolean(Config.SELECTED_PARAM_STR);
         Config.SELECTED_SMART = YamlReader.getInstance(callbacks).getBoolean(Config.SELECTED_SMART_STR);
         Config.SELECTED_AUTH = YamlReader.getInstance(callbacks).getBoolean(Config.SELECTED_AUTH_STR);
 
+        //Config.DEL_ERROR_KEY = YamlReader.getInstance(callbacks).getBoolean(Config.DEL_ERROR_KEY_STR);
         Config.SHOW_MSG_LEVEL = YamlReader.getInstance(callbacks).getInteger(Config.SHOW_MSG_LEVEL_STR);
-        Config.DEL_ERROR_KEY = YamlReader.getInstance(callbacks).getBoolean(Config.DEL_ERROR_KEY_STR);
 
 
-        this.version = Config.VERSION;
-        this.extensionName= Config.EXTENSION_NAME;
-        callbacks.setExtensionName(this.extensionName + " " + this.version);
-        BurpExtender.this.gui = new GUI();
+        version = Config.VERSION;
+        extensionName= Config.EXTENSION_NAME;
+        callbacks.setExtensionName(extensionName + " " + version);
+        gui = new GUI();
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                BurpExtender.this.callbacks.addSuiteTab(BurpExtender.this);
-                BurpExtender.this.callbacks.registerProxyListener(BurpExtender.this);
+                BurpExtender.callbacks.addSuiteTab(BurpExtender.this);
+                BurpExtender.callbacks.registerProxyListener(BurpExtender.this);
                 Utils.showStdoutMsg(0, Utils.getBanner());
                 Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.EXTENSION_NAME_STR, Config.EXTENSION_NAME));
                 Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.VERSION_STR, Config.VERSION));
@@ -86,6 +87,7 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
                 Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.INTERVAL_TIME_STR, Config.INTERVAL_TIME));
                 Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.HASH_MAP_LIMIT_STR, Config.HASH_MAP_LIMIT));
                 Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.HASH_SET_LIMIT_STR, Config.HASH_SET_LIMIT));
+                Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.DECODE_MAX_TIMES_STR, Config.DECODE_MAX_TIMES));
 
                 Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.SELECTED_HASH_STR, Config.SELECTED_HASH));
                 Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.SELECTED_PARAM_STR, Config.SELECTED_PARAM));
@@ -98,7 +100,7 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
                 Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.AUTH_INFO_REGX_STR, Config.AUTH_INFO_REGX));
                 Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.DEL_STATUS_REGX_STR, Config.DEL_STATUS_REGX));
 
-                Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.DEL_ERROR_KEY_STR, Config.DEL_ERROR_KEY));
+                //Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.DEL_ERROR_KEY_STR, Config.DEL_ERROR_KEY));
                 Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.SHOW_MSG_LEVEL_STR, Config.SHOW_MSG_LEVEL));
                 Utils.showStdoutMsg(1, "[*] ####################################");
             }
@@ -141,8 +143,8 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
                             synchronized (log) {
                                 int row = log.size();
                                 String method = helpers.analyzeRequest(message).getMethod();
-                                byte[] req = message.getRequest();
-                                String req_str = new String(req);
+                                //byte[] req = message.getRequest();
+                                //String req_str = new String(req);
                                 //向代理转发请求
                                 Map<String, String> mapResult = null;
 
@@ -178,7 +180,7 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
 
     @Override
     public String getTabCaption() {
-        return this.extensionName;
+        return extensionName;
     }
 
     @Override
@@ -196,16 +198,12 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
             if(!Utils.isMatchTargetHost(Config.TARGET_HOST_REGX, host, true)){
                 //Utils.showStdoutMsgDebug(String.format("[-] MatchTargetHost HOST:[%s] NOT Match Regex:[%s]", host, Config.TARGET_HOST_REGX));
                 return;
-            } else {
-                //Utils.showStdoutMsgDebug(String.format("[*] MatchTargetHost HOST:[%s] Match Regex:[%s]", host, Config.TARGET_HOST_REGX));
             }
 
             //黑名单域名匹配
             if(Utils.isMatchBlackHost(Config.BLACK_HOST_REGX, host, false)){
                 //Utils.showStdoutMsgDebug(String.format("[-] MatchBlackHost HOST:[%s] Match Regex:[%s]", host , Config.BLACK_HOST_REGX));
                 return;
-            }else {
-                //Utils.showStdoutMsgDebug(String.format("[*] MatchBlackHost HOST:[%s] NOT Match Regex:[%s]", host , Config.BLACK_HOST_REGX));
             }
 
             //黑名单后缀匹配
@@ -213,8 +211,6 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
             if(Utils.isMatchBlackSuffix(Config.BLACK_SUFFIX_REGX, path, false)){
                 //Utils.showStdoutMsgDebug(String.format("[-] MatchBlackSuffix PATH:[%s] Match Regex:[%s]", path , Config.BLACK_SUFFIX_REGX));
                 return;
-            }else {
-                //Utils.showStdoutMsgDebug(String.format("[*] MatchBlackSuffix PATH:[%s] NOT Match Regex:[%s]", path , Config.BLACK_SUFFIX_REGX));
             }
 
             String url = helpers.analyzeRequest(httpService,rep_rsp.getRequest()).getUrl().toString();
