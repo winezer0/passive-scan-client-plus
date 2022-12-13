@@ -16,10 +16,10 @@ public class Config {
     public static boolean REQ_PARAM = false; //无参过滤模式
     public static boolean REQ_AUTH = false; //关注认证信息
 
-    public static boolean REQ_UNIQ = false; //HASH去重模式
-    public static String REQ_UNIQ_STR = "REQ_UNIQ";
+    public static boolean REQ_HASH = false; //HASH去重模式
+    public static String REQ_HASH_STR = "REQ_HASH"; //给内部代码使用的字符串
     public static boolean REQ_SMART = false; //参数去重模式
-    public static String REQ_SMART_STR = "REQ_SMART";
+    public static String REQ_SMART_STR = "REQ_SMART"; //给内部代码使用的字符串
 
     public static String EXTENSION_NAME; //从配置文件获取
     public static String EXTENSION_NAME_STR = "EXTENSION_NAME";
@@ -52,9 +52,11 @@ public class Config {
     public static String BLACK_SUFFIX_REGX_STR = "BLACK_SUFFIX_REGX";
     public static String AUTH_INFO_REGX; //从配置文件获取,去重时应该关注认证头信息字符串
     public static String AUTH_INFO_REGX_STR = "AUTH_INFO_REGX";
+    public static String DEL_STATUS_REGX; //记录需要删除记录的的响应码
+    public static String DEL_STATUS_REGX_STR = "DEL_STATUS_REGX";
 
-    public static Boolean SELECTED_UNIQ; //从配置文件获取,HASH去重模式 按钮的默认设置 注：按钮变量可合并到参数
-    public static String SELECTED_UNIQ_STR = "SELECTED_UNIQ";
+    public static Boolean SELECTED_HASH; //从配置文件获取,HASH去重模式 按钮的默认设置 注：按钮变量可合并到参数
+    public static String SELECTED_HASH_STR = "SELECTED_HASH";
     public static Boolean SELECTED_PARAM; //从配置文件获取,过滤无参数 按钮的默认设置 注：按钮变量可合并到参数
     public static String SELECTED_PARAM_STR = "SELECTED_PARAM";
     public static Boolean SELECTED_SMART; //从配置文件获取,参数去重模式 按钮的默认设置 注：按钮变量可合并到参数
@@ -62,11 +64,10 @@ public class Config {
     public static Boolean SELECTED_AUTH; //从配置文件获取,去重是否关注认证头信息 按钮的默认设置 注：按钮变量可合并到参数
     public static String SELECTED_AUTH_STR = "SELECTED_AUTH";
 
-    public static Boolean SHOW_DEBUG_MSG; //从配置文件获取,显示调试信息 //考虑将其增加按钮,但是很有可能发生异步输出错误.
-    public static String SHOW_DEBUG_MSG_STR = "SHOW_DEBUG_MSG";
-
     public static Boolean DEL_ERROR_KEY; //从配置文件获取,请求失败是否删除记录
     public static String DEL_ERROR_KEY_STR = "DEL_ERROR_KEY";
 
+    public static Integer SHOW_MSG_LEVEL; //从配置文件获取,显示输出信息的级别
+    public static String SHOW_MSG_LEVEL_STR = "SHOW_MSG_LEVEL";
 
 }

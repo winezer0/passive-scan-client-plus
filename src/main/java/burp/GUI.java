@@ -25,7 +25,7 @@ public class GUI implements IMessageEditorController {
     private JTextField tfBlackHost;
     private JTextField tfBlackSuffix;
     private JToggleButton btnConn;
-    private JToggleButton btnUniq;
+    private JToggleButton btnHash;
     private JToggleButton btnParam;
     private JToggleButton btnSmart;
     private JToggleButton btnAuth;
@@ -181,32 +181,40 @@ public class GUI implements IMessageEditorController {
         ConfigPanel.add(tfIntervalTime, gbc_tfIntervalTime);
 
         //增加URL去重开关
-        btnUniq = new JToggleButton("UNIQ");
-        btnUniq.addChangeListener(new ChangeListener() {
+        btnHash = new JToggleButton("HASH");
+        btnHash.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent arg0) {
-                boolean isSelected = btnUniq.isSelected();
+                boolean isSelected = btnHash.isSelected();
+                boolean oldStatus = Config.REQ_HASH;
+
                 if(isSelected){
-                    Config.REQ_UNIQ = true;
-                    btnUniq.setText("UNIQ");
+                    Config.REQ_HASH = true;
+                    btnHash.setText("HASH");
                 }else{
-                    Config.REQ_UNIQ = false;
-                    btnUniq.setText("UNIQ");
+                    Config.REQ_HASH = false;
+                    btnHash.setText("HASH");
                 }
-                btnUniq.setSelected(isSelected);
+                btnHash.setSelected(isSelected);
+
+                boolean newStatus = Config.REQ_HASH;
+                //判断状态是否改变,改变了就输出
+                if(oldStatus != newStatus){
+                    Utils.showStdoutMsg(1, String.format("[*] Click Button [%s]: %s --> %s", "HASH", oldStatus, newStatus));
+                }
             }
         });
 
-        //根据配置文件设置UNIQ按钮的默认选择行为
-        if(Config.SELECTED_UNIQ){
-            btnUniq.setSelected(true);
+        //根据配置文件设置HASH按钮的默认选择行为
+        if(Config.SELECTED_HASH){
+            btnHash.setSelected(true);
         }
 
-        GridBagConstraints gbc_btnUniq = new GridBagConstraints();
-        gbc_btnUniq.fill = 2;
-        gbc_btnUniq.insets = new Insets(0, 0, 0, 5);
-        gbc_btnUniq.gridx = 12;
-        gbc_btnUniq.gridy = 0;
-        ConfigPanel.add(btnUniq, gbc_btnUniq);
+        GridBagConstraints gbc_btnHash = new GridBagConstraints();
+        gbc_btnHash.fill = 2;
+        gbc_btnHash.insets = new Insets(0, 0, 0, 5);
+        gbc_btnHash.gridx = 12;
+        gbc_btnHash.gridy = 0;
+        ConfigPanel.add(btnHash, gbc_btnHash);
 
 
         //增加无参数URL去除开关
@@ -214,6 +222,7 @@ public class GUI implements IMessageEditorController {
         btnParam.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent arg0) {
                 boolean isSelected = btnParam.isSelected();
+                boolean oldStatus = Config.REQ_PARAM;
                 if(isSelected){
                     Config.REQ_PARAM = true;
                     btnParam.setText("PARAM");
@@ -222,6 +231,11 @@ public class GUI implements IMessageEditorController {
                     btnParam.setText("PARAM");
                 }
                 btnParam.setSelected(isSelected);
+                //判断状态是否改变,改变了就输出
+                boolean newStatus = Config.REQ_PARAM;
+                if(oldStatus != newStatus) {
+                    Utils.showStdoutMsg(1, String.format("[*] Click Button [%s]: %s --> %s", "PARAM", oldStatus, newStatus));
+                }
             }
         });
 
@@ -242,6 +256,7 @@ public class GUI implements IMessageEditorController {
         btnSmart.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent arg0) {
                 boolean isSelected = btnSmart.isSelected();
+                boolean oldStatus = Config.REQ_SMART;
                 if(isSelected){
                     Config.REQ_SMART = true;
                     btnSmart.setText("SMART");
@@ -250,6 +265,11 @@ public class GUI implements IMessageEditorController {
                     btnSmart.setText("SMART");
                 }
                 btnSmart.setSelected(isSelected);
+                boolean newStatus = Config.REQ_SMART;
+                //判断状态是否改变,改变了就输出
+                if(oldStatus != newStatus){
+                    Utils.showStdoutMsg(1, String.format("[*] Click Button [%s]: %s --> %s", "SMART", oldStatus, newStatus));
+                }
             }
         });
 
@@ -270,6 +290,7 @@ public class GUI implements IMessageEditorController {
         btnAuth.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent arg0) {
                 boolean isSelected = btnAuth.isSelected();
+                boolean oldStatus = Config.REQ_AUTH;
                 if(isSelected){
                     Config.REQ_AUTH = true;
                     btnAuth.setText("AUTH");
@@ -278,6 +299,11 @@ public class GUI implements IMessageEditorController {
                     btnAuth.setText("AUTH");
                 }
                 btnAuth.setSelected(isSelected);
+                boolean newStatus = Config.REQ_AUTH;
+                //判断状态是否改变,改变了就输出
+                if(oldStatus != newStatus){
+                    Utils.showStdoutMsg(1, String.format("[*] Click Button [%s]: %s --> %s", "AUTH", oldStatus, newStatus));
+                }
             }
         });
 
@@ -575,9 +601,15 @@ public class GUI implements IMessageEditorController {
     //新增URL去重
     public void clearHashSet(boolean bool){
         if(bool){
+            int HashSetSizeBefore = Config.reqInfoHashSet.size();
             Config.reqInfoHashSet.clear();
+            int HashSetSizeAfter = Config.reqInfoHashSet.size();
+            Utils.showStdoutMsg(0, String.format("[*] Clear HashSet By Button, HashSet Size %s --> %s.",HashSetSizeBefore, HashSetSizeAfter));
+
+            int HashMapSizeBefore = Config.reqInfoHashMap.size();
             Config.reqInfoHashMap.clear();
-            Utils.showStdoutMsgInfo("[*] Clear req Info HashSet And HashMap By Button");
+            int HashMapSizeAfter = Config.reqInfoHashMap.size();
+            Utils.showStdoutMsg(0, String.format("[*] Clear HashSet By Button, HashMap Size %s --> %s.",HashMapSizeBefore, HashMapSizeAfter));
         }
     }
 }

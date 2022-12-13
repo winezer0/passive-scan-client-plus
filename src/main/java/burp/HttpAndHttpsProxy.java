@@ -17,8 +17,7 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import static burp.Utils.ExtractIParamsAuthParam;
-import static burp.Utils.ParamsHashMapAddIParams;
+import static burp.Utils.*;
 
 
 //JAVA设置代理的两种方式（HTTP和HTTPS） https://blog.csdn.net/sbc1232123321/article/details/79334130
@@ -41,7 +40,7 @@ public class HttpAndHttpsProxy {
         if(Config.REQ_PARAM){
             //判断是否存在参数
             if(reqParams.size()<=0){
-                Utils.showStderrMsgDebug(String.format("[-] Ignored By Param Blank: %s", reqUrl));
+                Utils.showStderrMsg(1, String.format("[-] Ignored By Param Blank: %s", reqUrl));
                 return null;
             }
         }
@@ -60,7 +59,7 @@ public class HttpAndHttpsProxy {
         String authParamsJsonStr = "";
 
         if(Config.REQ_AUTH) {
-            //考虑添加auth头相关的信息
+            //考虑添加auth头相关的信息 //将所有认证头信息组成一个Json字符串追加到URL后面
             HashMap authParamsHashMap = ExtractIParamsAuthParam(reqParams, reqHeaders, true);
             authParamsJsonStr = Utils.paramsHashMapToJsonStr(authParamsHashMap, true);
         }
@@ -84,18 +83,22 @@ public class HttpAndHttpsProxy {
             //额外处理 多层 Json格式的请求
             if(contentType == IRequestInfo.CONTENT_TYPE_JSON
                     && !Utils.isEmpty(body)
-                    && Utils.countStr(body,"{" ,2)
-                    && Utils.isJson(body)){
+                    && Utils.countStr(Utils.decodeUrl(body),"{" ,2, true)
+                    && Utils.isJson(Utils.decodeUrl(body))){
                 HashMap reqParamsMap = Utils.JsonParamsToHashMap(body, false);
                 reqParamsMap = ParamsHashMapAddIParams(reqParamsMap, reqParams);
                 reqParamsJsonStr = Utils.paramsHashMapToJsonStr(reqParamsMap, false);
+            }else if(Utils.paramValueHasJson(reqParams)){
+                //如果有参数的值有Json格式,需要进一步进行处理
+                Utils.showStdoutMsg(2, "[!] Parameter Value Has Json format, Need Depth Processing ...");
+                reqParamsJsonStr = Utils.IParametersToJsonStrPlus(reqParams, false);
             }else {
                 //通用的参数Json获取方案
                 reqParamsJsonStr = Utils.IParametersToJsonStr(reqParams, false);
             }
             Boolean isUniq = Utils.isUniqReqInfo(Config.reqInfoHashMap, reqUrlKey, reqParamsJsonStr, false);
             if(!isUniq){
-                Utils.showStderrMsgDebug(String.format("[-] Ignored By Param Duplication: %s %s", reqUrlKey, reqParamsJsonStr));
+                Utils.showStderrMsg(1, String.format("[-] Ignored By Param Duplication: %s %s", reqUrlKey, reqParamsJsonStr));
                 return null;
             }
 
@@ -104,14 +107,14 @@ public class HttpAndHttpsProxy {
 
             //内存记录数量超过限制,清空 reqInfoHashMap
             if(Config.HASH_MAP_LIMIT <= Config.reqInfoHashMap.size()){
-                Utils.showStdoutMsgInfo(String.format("[-] Clear HashMap Content By Exceed Limit."));
+                Utils.showStdoutMsg(1, String.format("[-] Clear HashMap Content By Exceed Limit."));
                 Config.reqInfoHashMap.clear();
             }
         }
 
 
         //忽略完全重复的请求信息
-        if(Config.REQ_UNIQ) {
+        if(Config.REQ_HASH) {
             String reqUrlKey;
             if(Config.REQ_AUTH){
                 //添加auth头相关的信息
@@ -123,19 +126,19 @@ public class HttpAndHttpsProxy {
             String reqInfoHash = Utils.calcReqInfoHash(reqUrlKey, reqBody);
             //新增 输出url去重处理  记录请求URL和body对应hash
             if (Config.reqInfoHashSet.contains(reqInfoHash)) {
-                Utils.showStderrMsgDebug(String.format("[-] Ignored By URL&Body(md5): %s", reqInfoHash));
+                Utils.showStderrMsg(1, String.format("[-] Ignored By URL&Body(md5): %s", reqInfoHash));
                 return null;
             } else {
-                Utils.showStdoutMsgDebug(String.format("[+] Firstly REQ URL&Body(md5): %s", reqInfoHash));
+                Utils.showStdoutMsg(1, String.format("[+] Firstly REQ URL&Body(md5): %s", reqInfoHash));
                 Config.reqInfoHashSet.add(reqInfoHash);
             }
 
             //记录请求的URL 到 reqKeyHASHMAP
-            ReqKeyHashMap.put(Config.REQ_UNIQ_STR, reqInfoHash);
+            ReqKeyHashMap.put(Config.REQ_HASH_STR, reqInfoHash);
 
             //内存记录数量超过限制,清空 reqInfoHashSet
             if(Config.HASH_SET_LIMIT <= Config.reqInfoHashSet.size()){
-                Utils.showStdoutMsgInfo(String.format("[-] Clear HashSet Content By Exceed Limit."));
+                Utils.showStdoutMsg(1, String.format("[-] Clear HashSet Content By Exceed Limit."));
                 Config.reqInfoHashSet.clear();
             }
         }
@@ -178,7 +181,7 @@ public class HttpAndHttpsProxy {
                 String user_pass = String.format("%s:%s", username, password);
                 String headerKey = "Proxy-Authorization";
                 String headerValue = "Basic " + Base64.encode(user_pass.getBytes());
-                Utils.showStdoutMsgDebug(String.format("[*] Set [%s] Proxy-Authorization Data: [%s]", user_pass, headerValue));
+                Utils.showStdoutMsg(1, String.format("[*] Set [%s] Proxy-Authorization Data: [%s]", user_pass, headerValue));
                 httpsConn.setRequestProperty(headerKey, headerValue);
             }
 
@@ -261,8 +264,12 @@ public class HttpAndHttpsProxy {
         } catch (Exception e) {
             //e.printStackTrace();
             result = e.getMessage();
-            Utils.showStderrMsgDebug("[!] First Times: " + e.getMessage());
+            Utils.showStderrMsg(1, "[!] First Times: " + e.getMessage());
             Utils.updateFailCount();
+
+            //不记录错误响应的请求
+            String cause = "Response Error";
+            DeleteErrorKey(ReqKeyHashMap, cause);
         } finally {
             try {
                 if (reader != null) {
@@ -282,30 +289,23 @@ public class HttpAndHttpsProxy {
             }
         }
 
-        //再次获取状态码
+        //再次获取状态码 // 影响服务器状态码的获取
         try {
             status = String.valueOf(httpsConn.getResponseCode());
         } catch (IOException e) {
             status = e.getMessage();
-            Utils.showStderrMsgDebug("[!] Second Times: " + e.getMessage());
+            Utils.showStderrMsg(1, "[!] Second Times: " + e.getMessage());
+        }
 
-            //新增 不记录错误响应的请求
-            if(Config.DEL_ERROR_KEY){
-                if(Config.REQ_UNIQ){
-                    String reqKey = ReqKeyHashMap.get(Config.REQ_UNIQ_STR);
-                    if(Config.reqInfoHashSet.contains(reqKey)){
-                        Config.reqInfoHashSet.remove(reqKey);
-                        Utils.showStderrMsgInfo(String.format("[-] Remove Hashset Record: %s", reqKey) );
-                    }
-                }
-                if(Config.REQ_SMART){
-                    String reqKey = ReqKeyHashMap.get(Config.REQ_SMART_STR);
-                    if(Config.reqInfoHashMap.containsKey(reqKey)){
-                        Config.reqInfoHashMap.remove(reqKey);
-                        Utils.showStderrMsgInfo(String.format("[-] Remove Hashmap Record: %s", reqKey) );
-                    }
-                }
-            }
+        //修复rspHeader为空导致的空行
+        if("".equals(rspHeader.trim())){
+            rspHeader = "Failed to obtain the response header";
+        }
+
+        //不记录指定响应状态码的请求
+        if(Utils.isEqualKeywords(Config.DEL_STATUS_REGX,status,false)){
+            String cause = String.format("Status %s In %s", status, Config.DEL_STATUS_REGX);
+            DeleteErrorKey(ReqKeyHashMap, cause);
         }
 
         mapResult.put("status",status);
@@ -340,7 +340,7 @@ public class HttpAndHttpsProxy {
                 String user_pass = String.format("%s:%s", username, password);
                 String headerKey = "Proxy-Authorization";
                 String headerValue = "Basic " + Base64.encode(user_pass.getBytes());
-                Utils.showStdoutMsgDebug(String.format("[*] Set [%s] Proxy-Authorization Data: [%s]", user_pass, headerValue));
+                Utils.showStdoutMsg(1, String.format("[*] Set [%s] Proxy-Authorization Data: [%s]", user_pass, headerValue));
                 httpConn.setRequestProperty(headerKey, headerValue);
             }
 
@@ -420,8 +420,12 @@ public class HttpAndHttpsProxy {
         } catch (Exception e) {
             //e.printStackTrace();
             result = e.getMessage();
-            Utils.showStderrMsgDebug("[!] First Times: " + e.getMessage());
+            Utils.showStderrMsg(1, "[!] First Times: " + e.getMessage());
             Utils.updateFailCount();
+
+            //不记录错误响应的请求
+            String cause = "Response Error";
+            DeleteErrorKey(ReqKeyHashMap, cause);
         } finally {
             try {
                 if (reader != null) {
@@ -441,30 +445,23 @@ public class HttpAndHttpsProxy {
             }
         }
 
-        //再次获取状态码
+        //再次获取状态码 // 影响服务器状态码的获取
         try {
             status = String.valueOf(httpConn.getResponseCode());
         } catch (IOException e) {
             status = e.getMessage();
-            Utils.showStderrMsgDebug("[!] Second Times: " + e.getMessage());
+            Utils.showStderrMsg(1, "[!] Second Times: " + e.getMessage());
+        }
 
-            //新增 不记录错误响应的请求
-            if(Config.DEL_ERROR_KEY){
-                if(Config.REQ_UNIQ){
-                    String reqKey = ReqKeyHashMap.get(Config.REQ_UNIQ_STR);
-                    if(Config.reqInfoHashSet.contains(reqKey)){
-                        Config.reqInfoHashSet.remove(reqKey);
-                        Utils.showStderrMsgInfo(String.format("[-] Remove Hashset Record: %s", reqKey) );
-                    }
-                }
-                if(Config.REQ_SMART){
-                    String reqKey = ReqKeyHashMap.get(Config.REQ_SMART_STR);
-                    if(Config.reqInfoHashMap.containsKey(reqKey)){
-                        Config.reqInfoHashMap.remove(reqKey);
-                        Utils.showStderrMsgInfo(String.format("[-] Remove Hashmap Record: %s", reqKey) );
-                    }
-                }
-            }
+        //修复rspHeader为空导致的空行
+        if("".equals(rspHeader.trim())){
+            rspHeader = "Failed to obtain the response header";
+        }
+
+        //不记录指定响应状态码的请求
+        if(Utils.isEqualKeywords(Config.DEL_STATUS_REGX,status,false)){
+            String cause = String.format("Status %s In %s", status, Config.DEL_STATUS_REGX);
+            DeleteErrorKey(ReqKeyHashMap, cause);
         }
 
         mapResult.put("status",status);
@@ -489,6 +486,26 @@ public class HttpAndHttpsProxy {
     private static class TrustAnyHostnameVerifier implements HostnameVerifier {
         public boolean verify(String hostname, SSLSession session) {
             return true;
+        }
+    }
+
+    //不记录错误响应的请求
+    private static void DeleteErrorKey(HashMap<String,String> reqKeyHashMap, String cause){
+        if(Config.DEL_ERROR_KEY){
+            if(Config.REQ_HASH){
+                String reqKey = reqKeyHashMap.get(Config.REQ_HASH_STR);
+                if(Config.reqInfoHashSet.contains(reqKey)){
+                    Config.reqInfoHashSet.remove(reqKey);
+                    Utils.showStderrMsg(1, String.format("[-] Cause [%s] So Remove Hashset Record: %s", cause, reqKey) );
+                }
+            }
+            if(Config.REQ_SMART){
+                String reqKey = reqKeyHashMap.get(Config.REQ_SMART_STR);
+                if(Config.reqInfoHashMap.containsKey(reqKey)){
+                    Config.reqInfoHashMap.remove(reqKey);
+                    Utils.showStderrMsg(1, String.format("[-] Cause [%s] So Remove Hashmap Record: %s", cause, reqKey) );
+                }
+            }
         }
     }
 }

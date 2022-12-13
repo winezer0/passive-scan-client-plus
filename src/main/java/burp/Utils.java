@@ -11,7 +11,7 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 
 public class Utils {
 
-    private static final Object FLAG_EXIST = "YES";
+    private static final Object FLAG_EXIST = "Y";
 
     public static String MD5(String key) {
         //import java.security.MessageDigest;
@@ -69,28 +69,57 @@ public class Utils {
         }
     }
 
-    public static void showStdoutMsgDebug(String msg){
-        if(Config.SHOW_DEBUG_MSG) {
-            BurpExtender.stdout.println(msg);
-        }
-    }
+    //public static void showStdoutMsgDebug(String msg){
+    //    if(Config.SHOW_DEBUG_MSG) {
+    //        BurpExtender.stdout.println(msg);
+    //    }
+    //}
+    //
+    //public static void showStdoutMsgInfo(String msg){
+    //    BurpExtender.stdout.println(msg);
+    //}
+    //
+    //public static void showStderrMsgDebug(String msg){
+    //    if(Config.SHOW_DEBUG_MSG) {
+    //        BurpExtender.stderr.println(msg);
+    //    }
+    //}
+    //
+    //public static void showStderrMsgInfo(String msg){
+    //    BurpExtender.stderr.println(msg);
+    //}
 
-    public static void showStdoutMsgInfo(String msg){
-        BurpExtender.stdout.println(msg);
-    }
 
-    public static void showStderrMsgDebug(String msg){
-        if(Config.SHOW_DEBUG_MSG) {
+    public static void showStderrMsg(Integer msgLevel,String msg){
+        if(msgLevel <=  Config.SHOW_MSG_LEVEL){
             BurpExtender.stderr.println(msg);
         }
     }
 
-    public static void showStderrMsgInfo(String msg){
-        BurpExtender.stderr.println(msg);
+    public static void showStdoutMsg(Integer msgLevel, String msg){
+        if(msgLevel <=  Config.SHOW_MSG_LEVEL){
+            BurpExtender.stdout.println(msg);
+        }
     }
 
-    //域名匹配
-    public static boolean isMatchTargetHost(String regx, String str, Boolean NoRegxValue){
+    //完全关键字匹配正则
+    public static boolean isEqualKeywords(String regx, String str, Boolean NoRegxValue){
+        //如果没有正在表达式,的情况下返回指定值 NoRegxValue
+        if (regx.trim().length() == 0){
+            return NoRegxValue;
+        }
+
+        Pattern pat = Pattern.compile("^("+regx+")$",Pattern.CASE_INSENSITIVE);//正则判断
+        Matcher mc= pat.matcher(str);//条件匹配
+        if(mc.find()){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    //包含关键字匹配正则
+    public static boolean isMatchKeywords(String regx, String str, Boolean NoRegxValue){
         //如果没有正在表达式,的情况下返回指定值 NoRegxValue
         if (regx.trim().length() == 0){
             return NoRegxValue;
@@ -103,6 +132,11 @@ public class Utils {
         }else{
             return false;
         }
+    }
+
+    //域名匹配
+    public static boolean isMatchTargetHost(String regx, String str, Boolean NoRegxValue){
+        return isMatchKeywords(regx, str, NoRegxValue);
     }
 
     //域名匹配
@@ -142,7 +176,7 @@ public class Utils {
                 }
             }
         }catch (Exception exception){
-            Utils.showStderrMsgInfo(String.format("[*] GetPathExtension [%s] Occur Error [%s]", path, exception.getMessage()));
+            Utils.showStderrMsg(2, String.format("[*] GetPathExtension [%s] Occur Error [%s]", path, exception.getMessage()));
         }
         //BurpExtender.out.println("Extension: " + extension);
         return extension;
@@ -180,6 +214,7 @@ public class Utils {
     public static boolean isJson(Object obj) {
         try{
             String str = obj.toString().trim();
+
             if (str.charAt(0) == '{' && str.charAt(str.length() - 1) == '}') {
                 JSONObject.parseObject(str);
                 return true;
@@ -200,7 +235,7 @@ public class Utils {
                 reqInfoHash = reqUrl + "&" + Utils.MD5(Arrays.toString(reqBody));
             }
         }catch (Exception exception){
-            Utils.showStderrMsgInfo(String.format("[*] getReqInfoHash [%s] Occur Error [%s]", reqUrl, exception.getMessage()));
+            Utils.showStderrMsg(2, String.format("[*] getReqInfoHash [%s] Occur Error [%s]", reqUrl, exception.getMessage()));
         }
         return reqInfoHash;
     }
@@ -227,13 +262,13 @@ public class Utils {
     public static Boolean isUniqReqInfo(HashMap<String,String> reqInfoHashMap, String reqUrl, String newReqParamsJsonStr, Boolean useValue) {
         //判断全局HashMap里面是否已经存在URL对应的参数字符串，有就合并新旧参数字符串，没有就直接存入
         String oldReqParamsJsonStr = reqInfoHashMap.get(reqUrl);
-        showStderrMsgDebug("[*] Old ReqParamsJsonStr:" + oldReqParamsJsonStr);
-        showStderrMsgDebug("[*] New ReqParamsJsonStr:" + newReqParamsJsonStr);
+        showStderrMsg(2, String.format("[*] Old ReqParamsJsonStr:%s", oldReqParamsJsonStr));
+        showStderrMsg(2, String.format("[*] New ReqParamsJsonStr:%s", newReqParamsJsonStr));
 
         //不存在历史参数列表，直接存入,返回false
         if(Utils.isEmpty(oldReqParamsJsonStr)){
             reqInfoHashMap.put(reqUrl, newReqParamsJsonStr);
-            Utils.showStdoutMsgDebug("[+] reqInfoHashMap Add By None:" + reqInfoHashMap.get(reqUrl));
+            Utils.showStdoutMsg(1, String.format("[+] reqInfoHashMap Add By None:", reqInfoHashMap.get(reqUrl)));
             return true;
         }
 
@@ -248,7 +283,7 @@ public class Utils {
         //如果旧的JsonStr内没有数据,就直接存入新的参数JsonStr //大概是不会到达这个情况
         if(oldReqParamsJsonObj == null){
             reqInfoHashMap.put(reqUrl, newReqParamsJsonStr);
-            Utils.showStdoutMsgDebug("[+] reqInfoHashMap Add By Null:" + reqInfoHashMap.get(reqUrl));
+            Utils.showStdoutMsg(1, String.format("[+] reqInfoHashMap Add By Null:",reqInfoHashMap.get(reqUrl) ));
             return true;
         }
 
@@ -274,7 +309,7 @@ public class Utils {
         if(hasNewParam){
             //将新的参数Json对象转换后放入HASHMAP集合
             reqInfoHashMap.put(reqUrl, oldReqParamsJsonObj.toJSONString());
-            Utils.showStdoutMsgDebug("[+] reqInfoHashMap Add By New:" + reqInfoHashMap.get(reqUrl));
+            Utils.showStdoutMsg(1, String.format("[+] reqInfoHashMap Add By New:%s", reqInfoHashMap.get(reqUrl)));
             return true;
         }else {
             return false;
@@ -303,19 +338,8 @@ public class Utils {
         HashMap paramHashMap = new HashMap<>();
         Map<String, String> map = JSONObject.parseObject(ParamsStr, Map.class);
         for(Map.Entry<String, String> obj : map.entrySet()){
-            String tempKey = String.valueOf(obj.getKey());
-            String tempValue = String.valueOf(obj.getValue());
-            if(isJson(tempValue)){
-                //参数值是Json格式的, 需要进一步处理
-                HashMap subHashMap = subJsonStrToHashMap(tempKey, tempValue, useValue);
-                paramHashMap.putAll(subHashMap);
-            }else {
-                if(useValue){
-                    paramHashMap.put(tempKey, tempValue);
-                }else {
-                    paramHashMap.put(tempKey, FLAG_EXIST);
-                }
-            }
+            String tempKey = obj.getKey();
+            ParamValueHandle(useValue, paramHashMap, obj, tempKey);
         }
         return paramHashMap;
     }
@@ -326,19 +350,24 @@ public class Utils {
         Map<String, String> subMap = JSONObject.parseObject(subParamsStr, Map.class);
         for(Map.Entry<String, String> subObj : subMap.entrySet()) {
             String tempKey = String.format("%s.%s", prefix, subObj.getKey());
-            String tempValue = String.valueOf(subObj.getValue());
-            if(isJson(tempValue)){
-                HashMap subSubParamsHashMap = subJsonStrToHashMap(tempKey, String.valueOf(subObj.getValue()), useValue);
-                subParamHashMap.putAll(subSubParamsHashMap);
-            }else {
-                if(useValue){
-                    subParamHashMap.put(tempKey, tempValue);
-                }else {
-                    subParamHashMap.put(tempKey, FLAG_EXIST);
-                }
-            }
+            ParamValueHandle(useValue, subParamHashMap, subObj, tempKey);
         }
         return subParamHashMap;
+    }
+
+    public static void ParamValueHandle(Boolean useValue, HashMap subParamHashMap, Map.Entry<String, String> subObj, String tempKey) {
+        String tempValue = subObj.getValue();
+        String tempValueUrlDecode = decodeUrl(tempValue);
+        if(isJson(tempValueUrlDecode)){
+            HashMap subSubParamsHashMap = subJsonStrToHashMap(tempKey, tempValueUrlDecode, useValue);
+            subParamHashMap.putAll(subSubParamsHashMap);
+        }else {
+            if(useValue){
+                subParamHashMap.put(tempKey, tempValue);
+            }else {
+                subParamHashMap.put(tempKey, FLAG_EXIST);
+            }
+        }
     }
 
     //往人工解析json请求体得到的hashmap内添加 burp 自动解析出来的 参数:值对
@@ -350,7 +379,12 @@ public class Utils {
     }
 
     //计算字符串内是否至少包含limit个指定字符 //只需要处理多层级别的Json就可以了,单层的用内置方法即可
-    public static boolean countStr(String longStr, String mixStr, int limit) {
+    public static boolean countStr(String longStr, String mixStr, int limit, boolean decode) {
+        //进行URL解码
+        if (decode) {
+            longStr = decodeUrl(longStr);
+        }
+
         int count = 0;
         int index = 0;
         while((index = longStr.indexOf(mixStr,index))!= -1){
@@ -363,7 +397,8 @@ public class Utils {
         return false;
     }
 
-    //判断字符串是否包含列表里面的元素
+    /*
+    判断字符串是否包含列表里面的元素
     public static Boolean StringContainList(String string, List<String> keyList, Boolean BlankValue) {
         //列表为空时返回默认值
         if (keyList.isEmpty() || keyList.size() <= 0){
@@ -379,16 +414,16 @@ public class Utils {
         //循环完毕后没有发现,返回false
         return false;
     }
+    */
 
     //获取参数列表里面的认证信息字符串
     public static HashMap ExtractIParamsAuthParam(List<IParameter> parameters,List<String> headers, Boolean addHeaderAuth) {
         HashMap authParamsHashMap = new HashMap<>();
-        List<String> AuthStringList = Arrays.asList(Config.AUTH_INFO_REGX.split("\\|"));
-        //showStdoutMsgDebug(String.format("[*] Auth String: %s ",AuthStringList));
+
         //常见的情况2,Cookie中的SESSION ID|JSEESION|PHPSSIONID| |user.id=
         //当前输入的是参数列表
         for (IParameter param:parameters) {
-            if(StringContainList(param.getName(), AuthStringList, false)){
+            if(isMatchKeywords(Config.AUTH_INFO_REGX, param.getName(), false)){ //关键字正则匹配
                 authParamsHashMap.put(param.getName(), param.getValue());
                 //showStdoutMsgDebug(String.format("[*] Auth Param: %s --- %s",param.getName(), param.getValue() ));
             }
@@ -401,7 +436,7 @@ public class Utils {
                 if (headerInfo.size() == 2){
                     String headerName = (String) headerInfo.get(0);
                     String headerValue =(String) headerInfo.get(1);
-                    if(StringContainList(headerName, AuthStringList, false)){
+                    if(isMatchKeywords(Config.AUTH_INFO_REGX, headerName, false)){ //关键字正则匹配
                         authParamsHashMap.put(headerName, headerValue);
                         //showStdoutMsgDebug(String.format("[*] Auth Header: %s --- %s",headerName, headerValue));
                     }
@@ -409,5 +444,54 @@ public class Utils {
             }
         }
         return authParamsHashMap;
+    }
+
+    //判断参数值是否含有Json //需要URL解码
+    public static Boolean paramValueHasJson(List<IParameter> parameters){
+        for (IParameter param:parameters) {
+            String tempValue = param.getValue();
+            String tempValueUrlDecode = decodeUrl(tempValue);
+            if(isJson(tempValueUrlDecode)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    //进行URL解码
+    public static String decodeUrl(String str) {
+        if (!isEmpty(str) && str.indexOf("%") != -1) {
+            str = BurpExtender.helpers.urlDecode(str);
+            if (str.indexOf("%") != -1) {
+                str = BurpExtender.helpers.urlDecode(str);
+            }
+        }
+        return str;
+    }
+
+    //获取所有请求参数的JSON格式字符串//支持处理参数值为Json的格式
+    public static String IParametersToJsonStrPlus(List<IParameter> reqParams, Boolean useValue) {
+        JSONObject reqParamsJson = new JSONObject();
+        for (IParameter param:reqParams) {
+            String tempKey = param.getName();
+            String tempValue = param.getValue();
+            String tempValueUrlDecode = decodeUrl(tempValue);
+
+            if(isJson(tempValueUrlDecode)){
+                HashMap subParamsHashMap = subJsonStrToHashMap(tempKey, tempValueUrlDecode, useValue);
+                reqParamsJson.putAll(subParamsHashMap);
+            }else{
+                if(useValue){
+                    //默认按照值内容组成参数键值对,该方式比较字符串会更耗时
+                    reqParamsJson.put(tempKey, param.getValue());
+                }else {
+                    //当前根据是否存在值,该方式比较字符串会省一点时间
+                    reqParamsJson.put(tempKey, FLAG_EXIST);
+                }
+            }
+        }
+        //排序输出URL JSON
+        String reqParamsJsonStr = JSON.toJSONString(reqParamsJson, SerializerFeature.MapSortField);
+        return reqParamsJsonStr;
     }
 }

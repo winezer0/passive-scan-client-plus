@@ -17,10 +17,10 @@ public class YamlReader {
         String config = getExtensionFilePath(callbacks) + "psc.config.yml";
         File file = new File(config);
         if(file.exists()){
-            Utils.showStdoutMsgInfo(String.format("[+] Custom Config File Path: %s", file.getPath()));
+            BurpExtender.stdout.println(String.format("[+] Custom Config File Path: %s", file.getPath()));
             properties = new Yaml().load(new FileInputStream(file));
         } else {
-            Utils.showStdoutMsgInfo(String.format("[+] User Inner Config File Path: %s", file.getPath()));
+            BurpExtender.stdout.println(String.format("[+] User Inner Config File Path: %s", file.getPath()));
             InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("psc.config.yml");
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream, "GBK");
             properties = new Yaml().load(inputStreamReader);
