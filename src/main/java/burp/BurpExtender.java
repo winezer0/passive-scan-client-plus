@@ -45,7 +45,7 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
         Config.PROXY_PASSWORD = YamlReader.getInstance(callbacks).getString(Config.PROXY_PASSWORD_STR);
 
         Config.TARGET_HOST_REGX = YamlReader.getInstance(callbacks).getString(Config.TARGET_HOST_REGX_STR);
-        Config.BLACK_HOST_REGX = YamlReader.getInstance(callbacks).getString(Config.BLACK_HOST_REGX_STR);
+        Config.BLACK_URL_REGX = YamlReader.getInstance(callbacks).getString(Config.BLACK_URL_REGX_STR);
         Config.BLACK_SUFFIX_REGX = YamlReader.getInstance(callbacks).getString(Config.BLACK_SUFFIX_REGX_STR);
         Config.AUTH_INFO_REGX = YamlReader.getInstance(callbacks).getString(Config.AUTH_INFO_REGX_STR);
         Config.DEL_STATUS_REGX = YamlReader.getInstance(callbacks).getString(Config.DEL_STATUS_REGX_STR);
@@ -95,7 +95,7 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
                 Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.SELECTED_AUTH_STR, Config.SELECTED_AUTH));
 
                 Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.TARGET_HOST_REGX_STR, Config.TARGET_HOST_REGX));
-                Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.BLACK_HOST_REGX_STR, Config.BLACK_HOST_REGX));
+                Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.BLACK_URL_REGX_STR, Config.BLACK_URL_REGX));
                 Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.BLACK_SUFFIX_REGX_STR, Config.BLACK_SUFFIX_REGX));
                 Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.AUTH_INFO_REGX_STR, Config.AUTH_INFO_REGX));
                 Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.DEL_STATUS_REGX_STR, Config.DEL_STATUS_REGX));
@@ -193,27 +193,24 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
             IHttpRequestResponse rep_rsp = iInterceptedProxyMessage.getMessageInfo();
             IHttpService httpService = rep_rsp.getHttpService();
             String host = rep_rsp.getHttpService().getHost();
+            String path = helpers.analyzeRequest(httpService,rep_rsp.getRequest()).getUrl().getPath();
+            String url = helpers.analyzeRequest(httpService,rep_rsp.getRequest()).getUrl().toString();
 
             //白名单域名匹配
             if(!Utils.isMatchTargetHost(Config.TARGET_HOST_REGX, host, true)){
-                //Utils.showStdoutMsgDebug(String.format("[-] MatchTargetHost HOST:[%s] NOT Match Regex:[%s]", host, Config.TARGET_HOST_REGX));
                 return;
             }
 
-            //黑名单域名匹配
-            if(Utils.isMatchBlackHost(Config.BLACK_HOST_REGX, host, false)){
-                //Utils.showStdoutMsgDebug(String.format("[-] MatchBlackHost HOST:[%s] Match Regex:[%s]", host , Config.BLACK_HOST_REGX));
+            //黑名单URL单词匹配
+            if(Utils.isMatchKeywords(Config.BLACK_URL_REGX, url, false)){
                 return;
             }
 
             //黑名单后缀匹配
-            String path = helpers.analyzeRequest(httpService,rep_rsp.getRequest()).getUrl().getPath();
             if(Utils.isMatchBlackSuffix(Config.BLACK_SUFFIX_REGX, path, false)){
-                //Utils.showStdoutMsgDebug(String.format("[-] MatchBlackSuffix PATH:[%s] Match Regex:[%s]", path , Config.BLACK_SUFFIX_REGX));
                 return;
             }
 
-            String url = helpers.analyzeRequest(httpService,rep_rsp.getRequest()).getUrl().toString();
             Utils.showStdoutMsg(0, String.format("[+] Passive Scanning Url [%s]", url));
 
             final IHttpRequestResponse req_resp = iInterceptedProxyMessage.getMessageInfo();

@@ -46,8 +46,8 @@ public class Config {
 
     public static String TARGET_HOST_REGX; //从配置文件获取
     public static String TARGET_HOST_REGX_STR = "TARGET_HOST_REGX";
-    public static String BLACK_HOST_REGX; //从配置文件获取
-    public static String BLACK_HOST_REGX_STR = "BLACK_HOST_REGX";
+    public static String BLACK_URL_REGX; //从配置文件获取
+    public static String BLACK_URL_REGX_STR = "BLACK_URL_REGX";
     public static String BLACK_SUFFIX_REGX; //从配置文件获取
     public static String BLACK_SUFFIX_REGX_STR = "BLACK_SUFFIX_REGX";
     public static String AUTH_INFO_REGX; //从配置文件获取,去重时应该关注认证头信息字符串

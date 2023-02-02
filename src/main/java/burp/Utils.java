@@ -112,7 +112,7 @@ public class Utils {
 
     //域名匹配
     public static boolean isMatchBlackHost(String regx, String str, Boolean NoRegxValue){
-        //如果没有正在表达式,的情况下返回指定值 NoRegxValue
+        //如果没有正则表达式,的情况下返回指定值 NoRegxValue
         if (regx.trim().length() == 0){
             return NoRegxValue;
         }

@@ -22,7 +22,7 @@ public class GUI implements IMessageEditorController {
     private JLabel lbPassword;
     private JTextField tfPassword;
     private JTextField tfTargetHost;
-    private JTextField tfBlackHost;
+    private JTextField tfBlackUrl;
     private JTextField tfBlackSuffix;
     private JToggleButton btnConn;
     private JToggleButton btnHash;
@@ -340,7 +340,7 @@ public class GUI implements IMessageEditorController {
                     Config.PROXY_USERNAME = tfUsername.getText();
                     Config.PROXY_PASSWORD = tfPassword.getText();
                     Config.TARGET_HOST_REGX = tfTargetHost.getText();
-                    Config.BLACK_HOST_REGX = tfBlackHost.getText();
+                    Config.BLACK_URL_REGX = tfBlackUrl.getText();
                     Config.BLACK_SUFFIX_REGX = tfBlackSuffix.getText();
                     Config.INTERVAL_TIME = Integer.valueOf(tfIntervalTime.getText());
                     setAllEnabled(false);
@@ -422,23 +422,23 @@ public class GUI implements IMessageEditorController {
         FilterPanel.add(tfTargetHost, gbc_tfTargetHost);
 
         //新增黑名单主机控制
-        JLabel lbBlackHost = new JLabel("BlackHost:");
-        GridBagConstraints gbc_lbBlackHost = new GridBagConstraints();
-        gbc_lbBlackHost.insets = new Insets(0, 0, 0, 5);
-        gbc_lbBlackHost.anchor = 15;
-        gbc_lbBlackHost.fill = 2;
-        gbc_lbBlackHost.gridx = 2;
-        gbc_lbBlackHost.gridy = 0;
-        FilterPanel.add(lbBlackHost, gbc_lbBlackHost);
+        JLabel lbBlackUrl = new JLabel("BlackUrl:");
+        GridBagConstraints gbc_lbBlackUrl = new GridBagConstraints();
+        gbc_lbBlackUrl.insets = new Insets(0, 0, 0, 5);
+        gbc_lbBlackUrl.anchor = 15;
+        gbc_lbBlackUrl.fill = 2;
+        gbc_lbBlackUrl.gridx = 2;
+        gbc_lbBlackUrl.gridy = 0;
+        FilterPanel.add(lbBlackUrl, gbc_lbBlackUrl);
 
-        tfBlackHost = new JTextField(30);
-        tfBlackHost.setText(Config.BLACK_HOST_REGX);
-        GridBagConstraints gbc_tfBlackHost = new GridBagConstraints();
-        gbc_tfBlackHost.insets = new Insets(0, 0, 0, 5);
-        gbc_tfBlackHost.fill = 2;
-        gbc_tfBlackHost.gridx = 3;
-        gbc_tfBlackHost.gridy = 0;
-        FilterPanel.add(tfBlackHost, gbc_tfBlackHost);
+        tfBlackUrl = new JTextField(30);
+        tfBlackUrl.setText(Config.BLACK_URL_REGX);
+        GridBagConstraints gbc_tfBlackUrl = new GridBagConstraints();
+        gbc_tfBlackUrl.insets = new Insets(0, 0, 0, 5);
+        gbc_tfBlackUrl.fill = 2;
+        gbc_tfBlackUrl.gridx = 3;
+        gbc_tfBlackUrl.gridy = 0;
+        FilterPanel.add(tfBlackUrl, gbc_tfBlackUrl);
         //新增黑名单主机控制
 
         JLabel lbBlackSuffix = new JLabel("BlackSuffix:");
@@ -593,7 +593,7 @@ public class GUI implements IMessageEditorController {
         tfPassword.setEnabled(is);
         tfTimeout.setEnabled(is);
         tfTargetHost.setEnabled(is);
-        tfBlackHost.setEnabled(is);
+        tfBlackUrl.setEnabled(is);
         tfBlackSuffix.setEnabled(is);
         tfIntervalTime.setEnabled(is);
     }
