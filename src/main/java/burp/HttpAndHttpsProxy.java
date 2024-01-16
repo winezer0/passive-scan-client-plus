@@ -1,6 +1,5 @@
 package burp;
 
-import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
