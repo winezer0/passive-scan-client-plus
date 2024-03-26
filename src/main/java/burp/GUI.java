@@ -8,18 +8,12 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 public class GUI implements IMessageEditorController {
-    private JPanel contentPane;
-    private JLabel lbHost;
+    private JPanel contentPanel;
     private JTextField tfHost;
-    private JLabel lbPort;
     private JTextField tfPort;
-    private JLabel lbTimeout;
     private JTextField tfTimeout;
-    private JLabel lbIntervalTime;
     private JTextField tfIntervalTime;
-    private JLabel lbUsername;
     private JTextField tfUsername;
-    private JLabel lbPassword;
     private JTextField tfPassword;
     private JTextField tfTargetHost;
     private JTextField tfBlackUrl;
@@ -30,6 +24,7 @@ public class GUI implements IMessageEditorController {
     private JToggleButton btnSmart;
     private JToggleButton btnAuth;
     private JButton btnClear;
+
     private JSplitPane splitPane;
     public static HttpLogTable logTable;
     public static IHttpRequestResponse currentlyDisplayedItem;
@@ -43,510 +38,463 @@ public class GUI implements IMessageEditorController {
 
 
     public GUI() {
-        contentPane = new JPanel();
-        contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-        contentPane.setLayout(new BorderLayout(0, 0));
+        contentPanel = new JPanel();
+        //外边框设置
+        contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+        //添加一个四边各为5像素宽的空白边框。这通常用于增加组件与其相邻组件之间的间距，或者在组件边缘周围添加一些额外的空间。
+        //内边距设置
+        contentPanel.setLayout(new BorderLayout(0, 0));
+        //设置没有额外间隙的 BorderLayout 布局管理器。 添加组件时，组件会紧密地排列在一起
 
         ////////////////////////////////////////////////////////////////////
-        //topPanel start
+        //topPanel start 开始设置配置文件部分面板
         ////////////////////////////////////////////////////////////////////
         JPanel topPanel = new JPanel();
-        GridBagLayout gridBagLayout = new GridBagLayout();
-//        列数，行数
-        gridBagLayout.columnWidths = new int[] { 0, 0 };
-        gridBagLayout.rowHeights = new int[] { 40, 32, 0, 0 };
-//        各列占宽度比，各行占高度比
-        gridBagLayout.columnWeights = new double[] { 1.0D, Double.MIN_VALUE };
-        gridBagLayout.rowWeights = new double[] { 0.0D, 0.0D, 1.0D, Double.MIN_VALUE };
-        topPanel.setLayout(gridBagLayout);
+        //把配置面板添加到主面板中
+        contentPanel.add(topPanel,BorderLayout.NORTH);
+        //自增配置面板内的行号
+        int topPanelY = 0;
 
-        JPanel ConfigPanel = new JPanel();
-        GridBagConstraints gbc_panel = new GridBagConstraints();
-        gbc_panel.insets = new Insets(5, 5, 5, 5);
-        gbc_panel.fill = 2;
-        gbc_panel.gridx = 0;
-        gbc_panel.gridy = 0;
-        topPanel.add(ConfigPanel, gbc_panel);
+        //统一设置行高变量
+        int LineHeight = 25;
+        //统一设置行内的元素的填充方式
+        int LineFill = GridBagConstraints.NONE;
+        //统一设置行内的元素的对齐方式
+        int LineAnchor = GridBagConstraints.WEST;
 
-        GridBagLayout gbl_panel = new GridBagLayout();
-        gbl_panel.columnWidths = new int[] { 40, 100, 0, 39, 33, 25, 0, 0, 0 };
-        gbl_panel.rowHeights = new int[] { 0, 0 };
-        gbl_panel.columnWeights = new double[] { 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D,0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 1.0D, 0.0D,0.0D, Double.MIN_VALUE };
-        gbl_panel.rowWeights = new double[] { 0.0D, Double.MIN_VALUE };
-        ConfigPanel.setLayout(gbl_panel);
+        //设置 配置面板的 基本布局配置
+        if(true){
+            //GridBagLayout是一个灵活的布局管理器，它允许你创建复杂的网格布局，其中组件可以跨越多行或多列，并且可以有不同的尺寸和填充方式。
+            GridBagLayout gridBagLayout = new GridBagLayout();
+            //列数 columnWidths 设置GridBagLayout的列宽度。数组中的每个元素代表一个列的宽度。
+            gridBagLayout.columnWidths = new int[] {0};
+            //行数 rowHeights 设置 GridBagLayout的行高。
+            gridBagLayout.rowHeights = new int[] {LineHeight, LineHeight, LineHeight, LineHeight};
+            //各列占宽度比 | 设置列的权重
+            gridBagLayout.columnWeights = new double[] {1.0D};
+            //设置行的权重 | 各行占高度比
+            gridBagLayout.rowWeights = new double[] {1.0D, 1.0D, 1.0D, 1.0D };
 
-        lbHost = new JLabel("Host:");
-        GridBagConstraints gbc_lbHost = new GridBagConstraints();
-        gbc_lbHost.fill = 2;
-//        insets  内边距
-        gbc_lbHost.insets = new Insets(0, 0, 0, 5);
-//        坐标位置，从左上角开始布局
-        gbc_lbHost.gridx = 0;
-        gbc_lbHost.gridy = 0;
-        ConfigPanel.add(lbHost, gbc_lbHost);
+            //0.0D： 权重是0，不会接收任何额外的垂直空间。即使容器有额外的空间，这些空间也不会被分配
+            //1.0D： 接收所有可用的额外空间。 如果有任何额外的垂直空间，它将被分配给第三行。
+            //Double.MIN_VALUE：设置这样的权重基本上意味着不会接收任何额外的空间。
 
-        tfHost = new JTextField();
-        tfHost.setColumns(10);
-        tfHost.setText(Config.PROXY_HOST);
-        GridBagConstraints gbc_tfHost = new GridBagConstraints();
-        gbc_tfHost.fill = 2;
-        gbc_tfHost.insets = new Insets(0, 0, 0, 5);
-        gbc_tfHost.gridx = 1;
-        gbc_tfHost.gridy = 0;
-        ConfigPanel.add(tfHost, gbc_tfHost);
-
-        lbPort = new JLabel("Port:");
-        GridBagConstraints gbc_lbPort = new GridBagConstraints();
-        gbc_lbPort.fill = 2;
-        gbc_lbPort.insets = new Insets(0, 0, 0, 5);
-        gbc_lbPort.gridx = 2;
-        gbc_lbPort.gridy = 0;
-        ConfigPanel.add(lbPort, gbc_lbPort);
-
-        tfPort = new JTextField();
-        tfPort.setText(String.valueOf(Config.PROXY_PORT));
-        tfPort.setColumns(10);
-        GridBagConstraints gbc_tfPort = new GridBagConstraints();
-        gbc_tfPort.fill = 2;
-        gbc_tfPort.insets = new Insets(0, 0, 0, 5);
-        gbc_tfPort.gridx = 3;
-        gbc_tfPort.gridy = 0;
-        ConfigPanel.add(tfPort, gbc_tfPort);
-
-        lbUsername = new JLabel("Username:");
-        GridBagConstraints gbc_lbUsername = new GridBagConstraints();
-        gbc_lbUsername.fill = 2;
-        gbc_lbUsername.insets = new Insets(0, 0, 0, 5);
-        gbc_lbUsername.gridx = 4;
-        gbc_lbUsername.gridy = 0;
-        ConfigPanel.add(lbUsername, gbc_lbUsername);
-
-        tfUsername = new JTextField();
-        tfUsername.setText(Config.PROXY_USERNAME);
-        tfUsername.setColumns(10);
-        GridBagConstraints gbc_tfUsername = new GridBagConstraints();
-        gbc_tfUsername.fill = 2;
-        gbc_tfUsername.insets = new Insets(0, 0, 0, 5);
-        gbc_tfUsername.gridx = 5;
-        gbc_tfUsername.gridy = 0;
-        ConfigPanel.add(tfUsername, gbc_tfUsername);
-
-        lbPassword = new JLabel("Password:");
-        GridBagConstraints gbc_lbPassword = new GridBagConstraints();
-        gbc_lbPassword.fill = 2;
-        gbc_lbPassword.insets = new Insets(0, 0, 0, 5);
-        gbc_lbPassword.gridx = 6;
-        gbc_lbPassword.gridy = 0;
-        ConfigPanel.add(lbPassword, gbc_lbPassword);
-
-        tfPassword = new JTextField();
-        tfPassword.setText(Config.PROXY_PASSWORD);
-        tfPassword.setColumns(10);
-        GridBagConstraints gbc_tfPassword = new GridBagConstraints();
-        gbc_tfPassword.fill = 2;
-        gbc_tfPassword.insets = new Insets(0, 0, 0, 5);
-        gbc_tfPassword.gridx = 7;
-        gbc_tfPassword.gridy = 0;
-        ConfigPanel.add(tfPassword, gbc_tfPassword);
-
-        lbTimeout = new JLabel("Timeout:");
-        GridBagConstraints gbc_lbTimeout = new GridBagConstraints();
-        gbc_lbTimeout.fill = 2;
-        gbc_lbTimeout.gridx = 8;
-        gbc_lbTimeout.gridy = 0;
-        ConfigPanel.add(lbTimeout, gbc_lbTimeout);
-
-        tfTimeout = new JTextField();
-        tfTimeout.setText(String.valueOf(Config.PROXY_TIMEOUT));
-        tfTimeout.setColumns(5);
-        GridBagConstraints gbc_tfTimeout = new GridBagConstraints();
-        gbc_tfTimeout.fill = 2;
-        gbc_tfTimeout.insets = new Insets(0, 0, 0, 5);
-        gbc_tfTimeout.gridx = 9;
-        gbc_tfTimeout.gridy = 0;
-        ConfigPanel.add(tfTimeout, gbc_tfTimeout);
-
-        // 增加间隔时间
-        lbIntervalTime = new JLabel("Interval Time:");
-        GridBagConstraints gbc_lbIntervalTime = new GridBagConstraints();
-        gbc_lbIntervalTime.fill = 2;
-        gbc_lbIntervalTime.gridx = 10;
-        gbc_lbIntervalTime.gridy = 0;
-        ConfigPanel.add(lbIntervalTime, gbc_lbIntervalTime);
-
-        tfIntervalTime = new JTextField();
-        tfIntervalTime.setText(String.valueOf(Config.INTERVAL_TIME));
-        tfIntervalTime.setColumns(5);
-        GridBagConstraints gbc_tfIntervalTime = new GridBagConstraints();
-//        fill属性用来处理GridBagLayout网格布局时子节点渲染的占位大小，2为撑满父组件
-        gbc_tfIntervalTime.fill = 2;
-        gbc_tfIntervalTime.insets = new Insets(0, 0, 0, 5);
-        gbc_tfIntervalTime.gridx = 11;
-        gbc_tfIntervalTime.gridy = 0;
-        ConfigPanel.add(tfIntervalTime, gbc_tfIntervalTime);
-
-        //增加URL去重开关
-        btnHash = new JToggleButton("HASH");
-        btnHash.addChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent arg0) {
-                boolean isSelected = btnHash.isSelected();
-                boolean oldStatus = Config.REQ_HASH;
-
-                if(isSelected){
-                    Config.REQ_HASH = true;
-                    btnHash.setText("HASH");
-                }else{
-                    Config.REQ_HASH = false;
-                    btnHash.setText("HASH");
-                }
-                btnHash.setSelected(isSelected);
-
-                boolean newStatus = Config.REQ_HASH;
-                //判断状态是否改变,改变了就输出
-                if(oldStatus != newStatus){
-                    Utils.showStdoutMsg(1, String.format("[*] Click Button [%s]: %s --> %s", "HASH", oldStatus, newStatus));
-                }
-            }
-        });
-
-        //根据配置文件设置HASH按钮的默认选择行为
-        if(Config.SELECTED_HASH){
-            btnHash.setSelected(true);
+            topPanel.setLayout(gridBagLayout);
         }
 
-        GridBagConstraints gbc_btnHash = new GridBagConstraints();
-        gbc_btnHash.fill = 2;
-        gbc_btnHash.insets = new Insets(0, 0, 0, 5);
-        gbc_btnHash.gridx = 12;
-        gbc_btnHash.gridy = 0;
-        ConfigPanel.add(btnHash, gbc_btnHash);
+        //设置 代理 面板
+        if(true){
+            //按钮面板
+            JPanel proxyPanel = new JPanel();
 
+            //把按钮面板添加到配置面板中
+            topPanel.add(proxyPanel,getGridBagConstraints(LineFill, GridBagConstraints.WEST,5, 0, topPanelY));
+            topPanelY += 1;
 
-        //增加无参数URL去除开关
-        btnParam = new JToggleButton("PARAM");
-        btnParam.addChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent arg0) {
-                boolean isSelected = btnParam.isSelected();
-                boolean oldStatus = Config.REQ_PARAM;
-                if(isSelected){
-                    Config.REQ_PARAM = true;
-                    btnParam.setText("PARAM");
-                }else{
-                    Config.REQ_PARAM = false;
-                    btnParam.setText("PARAM");
-                }
-                btnParam.setSelected(isSelected);
-                //判断状态是否改变,改变了就输出
-                boolean newStatus = Config.REQ_PARAM;
-                if(oldStatus != newStatus) {
-                    Utils.showStdoutMsg(1, String.format("[*] Click Button [%s]: %s --> %s", "PARAM", oldStatus, newStatus));
-                }
+            //设置按钮面板的格式
+            GridBagLayout gbl_panel = new GridBagLayout();
+            //列数量和列宽| 列数和 innerX的最终值是一样的  列数不完善,暂时忽略
+            //gbl_panel.columnWidths = new int[] { 40, 100, 0, 40, 30, 25, 0, 0, 0};
+            //行数量和行高 | 因为在一行,所以应该固定是0
+            gbl_panel.rowHeights = new int[] {LineHeight};
+            //列权重 | 列数不完善,暂时忽略
+            // gbl_panel.columnWeights = new double[] {0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D};
+            //行权重
+            gbl_panel.rowWeights = new double[] {1.0D};
+            proxyPanel.setLayout(gbl_panel);
+
+            //设置 按钮 行的内容
+            if(true){
+                int innerX = 0; //内部列号 起始
+
+                //HOST输入框
+                JLabel lbHost = new JLabel("Host:");
+                proxyPanel.add(lbHost, getGridBagConstraints(GridBagConstraints.HORIZONTAL,GridBagConstraints.WEST,5,innerX,0));
+                innerX += 1;
+
+                // HOST输入框
+                tfHost = new JTextField();
+                tfHost.setColumns(10);
+                tfHost.setText(Config.PROXY_HOST);
+                proxyPanel.add(tfHost, getGridBagConstraints(GridBagConstraints.HORIZONTAL,GridBagConstraints.WEST,5,innerX,0));
+                innerX += 1;
+
+                //Port输入框
+                JLabel lbPort = new JLabel("Port:");
+                proxyPanel.add(lbPort, getGridBagConstraints(GridBagConstraints.HORIZONTAL,GridBagConstraints.WEST,5,innerX,0));
+                innerX += 1;
+
+                //Port输入框
+                tfPort = new JTextField();
+                tfPort.setText(String.valueOf(Config.PROXY_PORT));
+                tfPort.setColumns(10);
+                proxyPanel.add(tfPort, getGridBagConstraints(GridBagConstraints.HORIZONTAL,GridBagConstraints.WEST,5,innerX,0));
+                innerX += 1;
+
+                //用户名输入框
+                JLabel lbUsername = new JLabel("Username:");
+                proxyPanel.add(lbUsername, getGridBagConstraints(GridBagConstraints.HORIZONTAL,GridBagConstraints.WEST,5,innerX,0));
+                innerX += 1;
+
+                //用户名输入框
+                tfUsername = new JTextField();
+                tfUsername.setText(Config.PROXY_USERNAME);
+                tfUsername.setColumns(10);
+                proxyPanel.add(tfUsername, getGridBagConstraints(GridBagConstraints.HORIZONTAL,GridBagConstraints.WEST,5,innerX,0));
+                innerX += 1;
+
+                //密码输入框
+                JLabel lbPassword = new JLabel("Password:");
+                proxyPanel.add(lbPassword, getGridBagConstraints(GridBagConstraints.HORIZONTAL,GridBagConstraints.WEST,5,innerX,0));
+                innerX += 1;
+
+                //密码输入框
+                tfPassword = new JTextField();
+                tfPassword.setText(Config.PROXY_PASSWORD);
+                tfPassword.setColumns(10);
+                proxyPanel.add(tfPassword, getGridBagConstraints(GridBagConstraints.HORIZONTAL,GridBagConstraints.WEST,5,innerX,0));
+                innerX += 1;
+
+                //超时输入框
+                JLabel lbTimeout = new JLabel("Timeout:");
+                proxyPanel.add(lbTimeout, getGridBagConstraints(GridBagConstraints.HORIZONTAL,GridBagConstraints.WEST,5,innerX,0));
+                innerX += 1;
+
+                //超时输入框
+                tfTimeout = new JTextField();
+                tfTimeout.setText(String.valueOf(Config.PROXY_TIMEOUT));
+                tfTimeout.setColumns(5);
+                proxyPanel.add(tfTimeout, getGridBagConstraints(GridBagConstraints.HORIZONTAL,GridBagConstraints.WEST,5,innerX,0));
+                innerX += 1;
+
+                //增加间隔时间
+                JLabel lbIntervalTime = new JLabel("Interval Time:");
+                proxyPanel.add(lbIntervalTime, getGridBagConstraints(GridBagConstraints.HORIZONTAL,GridBagConstraints.WEST,5,innerX,0));
+                innerX += 1;
+
+                //增加间隔时间
+                tfIntervalTime = new JTextField();
+                tfIntervalTime.setText(String.valueOf(Config.INTERVAL_TIME));
+                tfIntervalTime.setColumns(5);
+                proxyPanel.add(tfIntervalTime, getGridBagConstraints(GridBagConstraints.HORIZONTAL,GridBagConstraints.WEST,5,innerX,0));
+                innerX += 1;
             }
-        });
-
-        //根据配置文件设置PARAM按钮的默认选择行为
-        if(Config.SELECTED_PARAM){
-            btnParam.setSelected(true);
         }
 
-        GridBagConstraints gbc_btnParam = new GridBagConstraints();
-        gbc_btnParam.fill = 2;
-        gbc_btnParam.insets = new Insets(0, 0, 0, 5);
-        gbc_btnParam.gridx = 13;
-        gbc_btnParam.gridy = 0;
-        ConfigPanel.add(btnParam, gbc_btnParam);
+        //设置 过滤 面板
+        if(true){
+            JPanel filterPanel = new JPanel();
+            topPanel.add(filterPanel, getGridBagConstraints(LineFill,GridBagConstraints.WEST, 0, 0, topPanelY));  //把过滤host面板添加到配置面板中
+            topPanelY += 1;
 
-        //增加重复参数URL去除开关
-        btnSmart = new JToggleButton("SMART");
-        btnSmart.addChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent arg0) {
-                boolean isSelected = btnSmart.isSelected();
-                boolean oldStatus = Config.REQ_SMART;
-                if(isSelected){
-                    Config.REQ_SMART = true;
-                    btnSmart.setText("SMART");
-                }else{
-                    Config.REQ_SMART = false;
-                    btnSmart.setText("SMART");
-                }
-                btnSmart.setSelected(isSelected);
-                boolean newStatus = Config.REQ_SMART;
-                //判断状态是否改变,改变了就输出
-                if(oldStatus != newStatus){
-                    Utils.showStdoutMsg(1, String.format("[*] Click Button [%s]: %s --> %s", "SMART", oldStatus, newStatus));
-                }
+            //设置股过滤面板的格式
+            GridBagLayout gbl_panel = new GridBagLayout();
+            //gbl_panel.columnWidths = new int[] {40, 500};
+            gbl_panel.rowHeights = new int[] {LineHeight};
+            gbl_panel.columnWeights = new double[] {1.0D, 1.0D};
+            gbl_panel.rowWeights = new double[] {1.0D};
+            filterPanel.setLayout(gbl_panel);
+
+            //设置过滤行的内容
+            if(true){
+                int innerX = 0;
+                //新增黑名单主机控制
+                JLabel lbBlackUrl = new JLabel("BlackUrl:");
+                filterPanel.add(lbBlackUrl, getGridBagConstraints(GridBagConstraints.HORIZONTAL,GridBagConstraints.WEST,5,innerX,0));
+                innerX += 1;
+
+                tfBlackUrl = new JTextField(30);
+                tfBlackUrl.setText(Config.BLACK_URL_REGX);
+                filterPanel.add(tfBlackUrl, getGridBagConstraints(GridBagConstraints.HORIZONTAL,GridBagConstraints.WEST,5,innerX,0));
+                innerX += 1;
+
+                //黑名单后缀处理
+                JLabel lbBlackSuffix = new JLabel("BlackSuffix:");
+                filterPanel.add(lbBlackSuffix, getGridBagConstraints(GridBagConstraints.HORIZONTAL,GridBagConstraints.WEST,5,innerX,0));
+                innerX += 1;
+
+                tfBlackSuffix = new JTextField(30);
+                tfBlackSuffix.setText(Config.BLACK_SUFFIX_REGX);
+                filterPanel.add(tfBlackSuffix, getGridBagConstraints(GridBagConstraints.HORIZONTAL,GridBagConstraints.WEST,5,innerX,0));
+                innerX += 1;
             }
-        });
-
-        //根据配置文件设置SMART按钮的默认选择行为
-        if(Config.SELECTED_SMART){
-            btnSmart.setSelected(true);
         }
 
-        GridBagConstraints gbc_btnSmart = new GridBagConstraints();
-        gbc_btnSmart.fill = 2;
-        gbc_btnSmart.insets = new Insets(0, 0, 0, 5);
-        gbc_btnSmart.gridx = 14;
-        gbc_btnSmart.gridy = 0;
-        ConfigPanel.add(btnSmart, gbc_btnSmart);
+        //设置 目标 面板
+        if(true){
+            //HOST面板和后缀面板
+            JPanel targetPanel = new JPanel();
+            topPanel.add(targetPanel, getGridBagConstraints(LineFill,GridBagConstraints.WEST, 0, 0, topPanelY));
+            topPanelY += 1;
 
-        //增加去重时关注认证信息的开关
-        btnAuth = new JToggleButton("AUTH");
-        btnAuth.addChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent arg0) {
-                boolean isSelected = btnAuth.isSelected();
-                boolean oldStatus = Config.REQ_AUTH;
-                if(isSelected){
-                    Config.REQ_AUTH = true;
-                    btnAuth.setText("AUTH");
-                }else{
-                    Config.REQ_AUTH = false;
-                    btnAuth.setText("AUTH");
-                }
-                btnAuth.setSelected(isSelected);
-                boolean newStatus = Config.REQ_AUTH;
-                //判断状态是否改变,改变了就输出
-                if(oldStatus != newStatus){
-                    Utils.showStdoutMsg(1, String.format("[*] Click Button [%s]: %s --> %s", "AUTH", oldStatus, newStatus));
-                }
+            //设置 目标 行 的格式
+            GridBagLayout gbl_panel_1 = new GridBagLayout();
+            //gbl_panel_1.columnWidths = new int[] { 40, 225, 0, 0, 0 };
+            gbl_panel_1.rowHeights = new int[] {LineHeight};
+            //gbl_panel_1.columnWeights = new double[] { 0.0D, 0.0D, 0.0D, 0.0D, 1.0D, 0.0D, 0.0D,0.0D,0.0D,0.0D,0.0D,0.0D,Double.MIN_VALUE };
+            gbl_panel_1.rowWeights = new double[] { 0.0D};
+            targetPanel.setLayout(gbl_panel_1);
+
+            //设置目标行的内容
+            if (true){
+                int innerX = 0;
+                JLabel lbTargetHost = new JLabel("TargetHost:");
+                targetPanel.add(lbTargetHost,getGridBagConstraints(GridBagConstraints.HORIZONTAL,GridBagConstraints.WEST,5,innerX,0));
+                innerX += 1;
+
+                tfTargetHost = new JTextField(30);
+                tfTargetHost.setText(Config.TARGET_HOST_REGX);
+                targetPanel.add(tfTargetHost,getGridBagConstraints(GridBagConstraints.HORIZONTAL,GridBagConstraints.WEST,5,innerX,0));
+                innerX += 1;
+
+
+                // 转发url总数，默认0
+                JLabel lbRequest = new JLabel("Total:");
+                targetPanel.add(lbRequest,getGridBagConstraints(GridBagConstraints.HORIZONTAL,GridBagConstraints.WEST,5,innerX,0));
+                innerX += 1;
+
+                lbRequestCount = new JLabel("0");
+                lbRequestCount.setForeground(new Color(0,0,255));
+                targetPanel.add(lbRequestCount,getGridBagConstraints(GridBagConstraints.HORIZONTAL,GridBagConstraints.WEST,5,innerX,0));
+                innerX += 1;
+
+                // 转发成功url数，默认0
+                JLabel lbSuccess = new JLabel("Success:");
+                targetPanel.add(lbSuccess,getGridBagConstraints(GridBagConstraints.HORIZONTAL,GridBagConstraints.WEST,5,innerX,0));
+
+                lbRequestCount.setForeground(new Color(0,0,255));
+                innerX += 1;
+
+
+                lbSuccessCount = new JLabel("0");
+                lbSuccessCount.setForeground(new Color(0, 255, 0));
+                targetPanel.add(lbSuccessCount,getGridBagConstraints(GridBagConstraints.HORIZONTAL,GridBagConstraints.WEST,5,innerX,0));
+                innerX += 1;
+
+                // 转发失败url数，默认0
+                JLabel lbFail = new JLabel("Fail:");
+                targetPanel.add(lbFail,getGridBagConstraints(GridBagConstraints.HORIZONTAL,GridBagConstraints.WEST,5,innerX,0));
+                innerX += 1;
+
+
+                lbFailCount = new JLabel("0");
+                lbFailCount.setForeground(new Color(255, 0, 0));
+                targetPanel.add(lbFailCount,getGridBagConstraints(GridBagConstraints.HORIZONTAL,GridBagConstraints.WEST,5,innerX,0));
+                innerX += 1;
             }
-        });
 
-        //根据配置文件设置AUTH按钮的默认选择行为
-        if(Config.SELECTED_AUTH){
-            btnAuth.setSelected(true);
         }
 
-        GridBagConstraints gbc_btnAuth = new GridBagConstraints();
-        gbc_btnAuth.fill = 2;
-        gbc_btnAuth.insets = new Insets(0, 0, 0, 5);
-        gbc_btnAuth.gridx = 15;
-        gbc_btnAuth.gridy = 0;
-        ConfigPanel.add(btnAuth, gbc_btnAuth);
-        ///////////////////////////////
-        GridBagConstraints gbc_lb1 = new GridBagConstraints();
-//        子组件对于整体外层组件的浮动
-        gbc_lb1.anchor = 15;
-        gbc_lb1.insets = new Insets(0, 0, 0, 5);
-        gbc_lb1.gridx = 16;
-        gbc_lb1.gridy = 0;
-        ConfigPanel.add(new JLabel(""), gbc_lb1);
-        ///////////////////////////////
-        btnConn = new JToggleButton("Run");
-        btnConn.addChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent arg0) {
-                boolean isSelected = btnConn.isSelected();
+        //设置 按钮 面板
+        if(true){
+            //按钮面板
+            JPanel buttonPanel = new JPanel();
 
-                if(isSelected){
-                    btnConn.setText("Stop");
-                    Config.IS_RUNNING = true;
-                    Config.PROXY_HOST = tfHost.getText();
-                    Config.PROXY_PORT = Integer.valueOf(tfPort.getText());
-                    Config.PROXY_TIMEOUT = Integer.valueOf(tfTimeout.getText());
-                    Config.PROXY_USERNAME = tfUsername.getText();
-                    Config.PROXY_PASSWORD = tfPassword.getText();
-                    Config.TARGET_HOST_REGX = tfTargetHost.getText();
-                    Config.BLACK_URL_REGX = tfBlackUrl.getText();
-                    Config.BLACK_SUFFIX_REGX = tfBlackSuffix.getText();
-                    Config.INTERVAL_TIME = Integer.valueOf(tfIntervalTime.getText());
-                    setAllEnabled(false);
-                }else{
-                    btnConn.setText("Run");
-                    Config.IS_RUNNING = false;
-                    setAllEnabled(true);
+            //把按钮面板添加到配置面板中
+            topPanel.add(buttonPanel, getGridBagConstraints(LineFill, GridBagConstraints.WEST,5, 0, topPanelY));
+            topPanelY += 1;
+
+            //设置按钮面板的格式
+            GridBagLayout gbl_panel = new GridBagLayout();
+            //列数量和列宽| 列数和 innerX的最终值是一样的  列数不完善,暂时忽略
+            //gbl_panel.columnWidths = new int[] { 40, 100, 0, 40, 30, 25, 0, 0, 0};
+            //行数量和行高 | 因为在一行,所以应该固定是0
+            gbl_panel.rowHeights = new int[] {LineHeight};
+            //列权重 | 列数不完善,暂时忽略
+            // gbl_panel.columnWeights = new double[] {0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D};
+            //行权重
+            gbl_panel.rowWeights = new double[] {1.0D};
+            buttonPanel.setLayout(gbl_panel);
+
+            //设置 按钮 行的内容
+            if(true){
+                int innerX = 0; //内部列号 起始
+
+                //增加URL HASH 去重开关
+                btnHash = new JToggleButton("HASH");
+                btnHash.addChangeListener(new ChangeListener() {
+                    public void stateChanged(ChangeEvent arg0) {
+                        boolean isSelected = btnHash.isSelected();
+                        boolean oldStatus = Config.REQ_HASH;
+
+                        if(isSelected){
+                            Config.REQ_HASH = true;
+                            btnHash.setText("HASH");
+                        }else{
+                            Config.REQ_HASH = false;
+                            btnHash.setText("HASH");
+                        }
+                        btnHash.setSelected(isSelected);
+
+                        boolean newStatus = Config.REQ_HASH;
+                        //判断状态是否改变,改变了就输出
+                        if(oldStatus != newStatus){
+                            Utils.showStdoutMsg(1, String.format("[*] Click Button [%s]: %s --> %s", "HASH", oldStatus, newStatus));
+                        }
+                    }
+                });
+                //根据配置文件设置HASH按钮的默认选择行为
+                if(Config.SELECTED_HASH){
+                    btnHash.setSelected(true);
                 }
-                btnConn.setSelected(isSelected);
-            }
-        });
 
-        GridBagConstraints gbc_btnConn = new GridBagConstraints();
-        gbc_btnConn.fill = 2;
-        gbc_btnConn.insets = new Insets(0, 0, 0, 5);
-        gbc_btnConn.gridx = 17;
-        gbc_btnConn.gridy = 0;
-        ConfigPanel.add(btnConn, gbc_btnConn);
+                buttonPanel.add(btnHash, getGridBagConstraints(GridBagConstraints.HORIZONTAL,GridBagConstraints.WEST,5,innerX,0));
+                innerX += 1;
 
-        btnClear = new JButton("Clear");
-        btnClear.addActionListener(new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                int n = JOptionPane.showConfirmDialog(null, "Are you sure you want to clear the data？", "Passive Scan Client prompt", JOptionPane.YES_NO_OPTION);
-                if(n == 0) {
-                    Config.REQUEST_TOTAL = 0;
-                    lbRequestCount.setText("0");
-                    Config.SUCCESS_TOTAL = 0;
-                    lbSuccessCount.setText("0");
-                    Config.FAIL_TOTAL = 0;
-                    lbFailCount.setText("0");
-                    BurpExtender.log.clear();
-                    logTable.getHttpLogTableModel().fireTableDataChanged();//通知模型更新
-                    logTable.updateUI();//刷新表格
-                    requestViewer.setMessage("".getBytes(),true);
-                    responseViewer.setMessage("".getBytes(),false);
-                    proxyRspViewer.setText("".getBytes());
-                    clearHashSet(true);  //新增URL去重
+                //增加无参数URL去除开关
+                btnParam = new JToggleButton("PARAM");
+                btnParam.addChangeListener(new ChangeListener() {
+                    public void stateChanged(ChangeEvent arg0) {
+                        boolean isSelected = btnParam.isSelected();
+                        boolean oldStatus = Config.REQ_PARAM;
+                        if(isSelected){
+                            Config.REQ_PARAM = true;
+                            btnParam.setText("PARAM");
+                        }else{
+                            Config.REQ_PARAM = false;
+                            btnParam.setText("PARAM");
+                        }
+                        btnParam.setSelected(isSelected);
+                        //判断状态是否改变,改变了就输出
+                        boolean newStatus = Config.REQ_PARAM;
+                        if(oldStatus != newStatus) {
+                            Utils.showStdoutMsg(1, String.format("[*] Click Button [%s]: %s --> %s", "PARAM", oldStatus, newStatus));
+                        }
+                    }
+                });
+                //根据配置文件设置PARAM按钮的默认选择行为
+                if(Config.SELECTED_PARAM){
+                    btnParam.setSelected(true);
                 }
+
+                buttonPanel.add(btnParam, getGridBagConstraints(GridBagConstraints.HORIZONTAL,GridBagConstraints.WEST,5,innerX,0));
+                innerX += 1;
+
+                //增加重复参数URL去除开关
+                btnSmart = new JToggleButton("SMART");
+                btnSmart.addChangeListener(new ChangeListener() {
+                    public void stateChanged(ChangeEvent arg0) {
+                        boolean isSelected = btnSmart.isSelected();
+                        boolean oldStatus = Config.REQ_SMART;
+                        if(isSelected){
+                            Config.REQ_SMART = true;
+                            btnSmart.setText("SMART");
+                        }else{
+                            Config.REQ_SMART = false;
+                            btnSmart.setText("SMART");
+                        }
+                        btnSmart.setSelected(isSelected);
+                        boolean newStatus = Config.REQ_SMART;
+                        //判断状态是否改变,改变了就输出
+                        if(oldStatus != newStatus){
+                            Utils.showStdoutMsg(1, String.format("[*] Click Button [%s]: %s --> %s", "SMART", oldStatus, newStatus));
+                        }
+                    }
+                });
+                //根据配置文件设置SMART按钮的默认选择行为
+                if(Config.SELECTED_SMART){
+                    btnSmart.setSelected(true);
+                }
+                buttonPanel.add(btnSmart, getGridBagConstraints(GridBagConstraints.HORIZONTAL,GridBagConstraints.WEST,5,innerX,0));
+                innerX += 1;
+
+                //增加去重时关注认证信息的开关
+                btnAuth = new JToggleButton("AUTH");
+                btnAuth.addChangeListener(new ChangeListener() {
+                    public void stateChanged(ChangeEvent arg0) {
+                        boolean isSelected = btnAuth.isSelected();
+                        boolean oldStatus = Config.REQ_AUTH;
+                        if(isSelected){
+                            Config.REQ_AUTH = true;
+                            btnAuth.setText("AUTH");
+                        }else{
+                            Config.REQ_AUTH = false;
+                            btnAuth.setText("AUTH");
+                        }
+                        btnAuth.setSelected(isSelected);
+                        boolean newStatus = Config.REQ_AUTH;
+                        //判断状态是否改变,改变了就输出
+                        if(oldStatus != newStatus){
+                            Utils.showStdoutMsg(1, String.format("[*] Click Button [%s]: %s --> %s", "AUTH", oldStatus, newStatus));
+                        }
+                    }
+                });
+                //根据配置文件设置AUTH按钮的默认选择行为
+                if(Config.SELECTED_AUTH){
+                    btnAuth.setSelected(true);
+                }
+
+                buttonPanel.add(btnAuth, getGridBagConstraints(GridBagConstraints.HORIZONTAL,GridBagConstraints.WEST,5,innerX,0));
+                innerX += 1;
+
+
+                // 增加运行按钮
+                btnConn = new JToggleButton("Run");
+                btnConn.addChangeListener(new ChangeListener() {
+                    public void stateChanged(ChangeEvent arg0) {
+                        boolean isSelected = btnConn.isSelected();
+
+                        if(isSelected){
+                            btnConn.setText("Stop");
+                            Config.IS_RUNNING = true;
+                            Config.PROXY_HOST = tfHost.getText();
+                            Config.PROXY_PORT = Integer.valueOf(tfPort.getText());
+                            Config.PROXY_TIMEOUT = Integer.valueOf(tfTimeout.getText());
+                            Config.PROXY_USERNAME = tfUsername.getText();
+                            Config.PROXY_PASSWORD = tfPassword.getText();
+                            Config.TARGET_HOST_REGX = tfTargetHost.getText();
+                            Config.BLACK_URL_REGX = tfBlackUrl.getText();
+                            Config.BLACK_SUFFIX_REGX = tfBlackSuffix.getText();
+                            Config.INTERVAL_TIME = Integer.valueOf(tfIntervalTime.getText());
+                            setAllEnabled(false);
+                        }else{
+                            btnConn.setText("Run");
+                            Config.IS_RUNNING = false;
+                            setAllEnabled(true);
+                        }
+                        btnConn.setSelected(isSelected);
+                    }
+                });
+
+                buttonPanel.add(btnConn, getGridBagConstraints(GridBagConstraints.HORIZONTAL,GridBagConstraints.WEST,5,innerX,0));
+                innerX += 1;
+
+                //增加清除按钮
+                btnClear = new JButton("Clear");
+                btnClear.addActionListener(new AbstractAction() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        int n = JOptionPane.showConfirmDialog(null, "Are you sure you want to clear the data？", "Passive Scan Client prompt", JOptionPane.YES_NO_OPTION);
+                        if(n == 0) {
+                            Config.REQUEST_TOTAL = 0;
+                            lbRequestCount.setText("0");
+                            Config.SUCCESS_TOTAL = 0;
+                            lbSuccessCount.setText("0");
+                            Config.FAIL_TOTAL = 0;
+                            lbFailCount.setText("0");
+                            BurpExtender.log.clear();
+                            logTable.getHttpLogTableModel().fireTableDataChanged();//通知模型更新
+                            logTable.updateUI();//刷新表格
+                            requestViewer.setMessage("".getBytes(),true);
+                            responseViewer.setMessage("".getBytes(),false);
+                            proxyRspViewer.setText("".getBytes());
+                            clearHashSet(true);  //新增URL去重
+                        }
+                    }
+                });
+
+                buttonPanel.add(btnClear, getGridBagConstraints(GridBagConstraints.HORIZONTAL,GridBagConstraints.WEST,5,innerX,0));
+                innerX += 1;
             }
-        });
-        GridBagConstraints gbc_btnClear = new GridBagConstraints();
-        gbc_btnClear.fill = 2;
-        gbc_btnClear.insets = new Insets(0, 0, 0, 5);
-        gbc_btnClear.gridx = 19;
-        gbc_btnClear.gridy = 0;
-        ConfigPanel.add(btnClear, gbc_btnClear);
-        ////////////////////////////////////////////////////////////////////
-        JPanel FilterPanel = new JPanel();
-        GridBagConstraints gbc_panel_1 = new GridBagConstraints();
-        gbc_panel_1.insets = new Insets(0, 5, 5, 5);
-        gbc_panel_1.fill = 2;
-        gbc_panel_1.gridx = 0;
-        gbc_panel_1.gridy = 1;
-        topPanel.add(FilterPanel, gbc_panel_1);
-        GridBagLayout gbl_panel_1 = new GridBagLayout();
-        gbl_panel_1.columnWidths = new int[] { 40, 225, 0, 0, 0 };
-        gbl_panel_1.rowHeights = new int[] { 0, 0 };
-        gbl_panel_1.columnWeights = new double[] { 0.0D, 0.0D, 0.0D, 0.0D, 0.0D,0.0D,1.0D, 0.0D, 0.0D,0.0D,0.0D,0.0D,0.0D,0.0D,Double.MIN_VALUE };
-        gbl_panel_1.rowWeights = new double[] { 0.0D, Double.MIN_VALUE };
-        FilterPanel.setLayout(gbl_panel_1);
+        }
 
-        JLabel lbTargetHost = new JLabel("TargetHost:");
-        GridBagConstraints gbc_lbTargetHost = new GridBagConstraints();
-        gbc_lbTargetHost.insets = new Insets(0, 0, 0, 5);
-        gbc_lbTargetHost.anchor = 15;
-        gbc_lbTargetHost.gridx = 0;
-        gbc_lbTargetHost.gridy = 0;
-        FilterPanel.add(lbTargetHost, gbc_lbTargetHost);
-
-        tfTargetHost = new JTextField(30);
-        tfTargetHost.setText(Config.TARGET_HOST_REGX);
-        GridBagConstraints gbc_tfTargetHost = new GridBagConstraints();
-        gbc_tfTargetHost.insets = new Insets(0, 0, 0, 5);
-        gbc_tfTargetHost.fill = 2;
-        gbc_tfTargetHost.gridx = 1;
-        gbc_tfTargetHost.gridy = 0;
-        FilterPanel.add(tfTargetHost, gbc_tfTargetHost);
-
-        //新增黑名单主机控制
-        JLabel lbBlackUrl = new JLabel("BlackUrl:");
-        GridBagConstraints gbc_lbBlackUrl = new GridBagConstraints();
-        gbc_lbBlackUrl.insets = new Insets(0, 0, 0, 5);
-        gbc_lbBlackUrl.anchor = 15;
-        gbc_lbBlackUrl.fill = 2;
-        gbc_lbBlackUrl.gridx = 2;
-        gbc_lbBlackUrl.gridy = 0;
-        FilterPanel.add(lbBlackUrl, gbc_lbBlackUrl);
-
-        tfBlackUrl = new JTextField(30);
-        tfBlackUrl.setText(Config.BLACK_URL_REGX);
-        GridBagConstraints gbc_tfBlackUrl = new GridBagConstraints();
-        gbc_tfBlackUrl.insets = new Insets(0, 0, 0, 5);
-        gbc_tfBlackUrl.fill = 2;
-        gbc_tfBlackUrl.gridx = 3;
-        gbc_tfBlackUrl.gridy = 0;
-        FilterPanel.add(tfBlackUrl, gbc_tfBlackUrl);
-        //新增黑名单主机控制
-
-        JLabel lbBlackSuffix = new JLabel("BlackSuffix:");
-        GridBagConstraints gbc_lbBlackSuffix = new GridBagConstraints();
-        gbc_lbBlackSuffix.insets = new Insets(0, 0, 0, 5);
-        gbc_lbBlackSuffix.anchor = 15;
-        gbc_lbBlackSuffix.fill = 2;
-        gbc_lbBlackSuffix.gridx = 4;
-        gbc_lbBlackSuffix.gridy = 0;
-        FilterPanel.add(lbBlackSuffix, gbc_lbBlackSuffix);
-
-        tfBlackSuffix = new JTextField(30);
-        tfBlackSuffix.setText(Config.BLACK_SUFFIX_REGX);
-        GridBagConstraints gbc_tfBlackSuffix = new GridBagConstraints();
-        gbc_tfBlackSuffix.insets = new Insets(0, 0, 0, 5);
-        gbc_tfBlackSuffix.fill = 2;
-        gbc_tfBlackSuffix.gridx = 5;
-        gbc_tfBlackSuffix.gridy = 0;
-        FilterPanel.add(tfBlackSuffix, gbc_tfBlackSuffix);
-
-        GridBagConstraints gbc_vb = new GridBagConstraints();
-        gbc_vb.insets = new Insets(0, 0, 0, 5);
-        gbc_vb.fill = 2;
-        gbc_vb.gridx = 6;
-        gbc_vb.gridy = 0;
-        FilterPanel.add(Box.createVerticalBox(), gbc_vb);
-
-        // 转发url总数，默认0
-        JLabel lbRequest = new JLabel("Total:");
-        GridBagConstraints gbc_lbRequest = new GridBagConstraints();
-        gbc_lbRequest.insets = new Insets(0, 0, 0, 5);
-        gbc_lbRequest.fill = 2;
-        gbc_lbRequest.gridx = 7;
-        gbc_lbRequest.gridy = 0;
-        FilterPanel.add(lbRequest, gbc_lbRequest);
-
-
-        lbRequestCount = new JLabel("0");
-        lbRequestCount.setForeground(new Color(0,0,255));
-        GridBagConstraints gbc_lbRequestCount = new GridBagConstraints();
-        gbc_lbRequestCount.insets = new Insets(0, 0, 0, 5);
-        gbc_lbRequestCount.fill = 2;
-        gbc_lbRequestCount.gridx = 8;
-        gbc_lbRequestCount.gridy = 0;
-        FilterPanel.add(lbRequestCount, gbc_lbRequestCount);
-
-        GridBagConstraints gbc_vb2 = new GridBagConstraints();
-        gbc_vb2.insets = new Insets(0, 0, 0, 5);
-        gbc_vb2.fill = 2;
-        gbc_vb2.gridx = 9;
-        gbc_vb2.gridy = 0;
-        FilterPanel.add(Box.createVerticalBox(), gbc_vb);
-
-        // 转发成功url数，默认0
-        JLabel lbSuccess = new JLabel("Success:");
-        GridBagConstraints gbc_lbSuccess = new GridBagConstraints();
-        gbc_lbSuccess.insets = new Insets(0, 0, 0, 5);
-        gbc_lbSuccess.fill = 2;
-        gbc_lbSuccess.gridx = 10;
-        gbc_lbSuccess.gridy = 0;
-        FilterPanel.add(lbSuccess, gbc_lbSuccess);
-
-        lbSuccessCount = new JLabel("0");
-        lbSuccessCount.setForeground(new Color(0, 255, 0));
-        GridBagConstraints gbc_lbSuccessCount = new GridBagConstraints();
-        gbc_lbSuccessCount.insets = new Insets(0, 0, 0, 5);
-        gbc_lbSuccessCount.fill = 2;
-        gbc_lbSuccessCount.gridx = 11;
-        gbc_lbSuccessCount.gridy = 0;
-        FilterPanel.add(lbSuccessCount, gbc_lbSuccessCount);
-
-        GridBagConstraints gbc_vb3 = new GridBagConstraints();
-        gbc_vb3.insets = new Insets(0, 0, 0, 5);
-        gbc_vb3.fill = 2;
-        gbc_vb3.gridx = 12;
-        gbc_vb3.gridy = 0;
-        FilterPanel.add(Box.createVerticalBox(), gbc_vb3);
-        // 转发失败url数，默认0
-        JLabel lbFail = new JLabel("Fail:");
-        GridBagConstraints gbc_lbFail = new GridBagConstraints();
-        gbc_lbFail.insets = new Insets(0, 0, 0, 5);
-        gbc_lbFail.fill = 2;
-        gbc_lbFail.gridx = 13;
-        gbc_lbFail.gridy = 0;
-        FilterPanel.add(lbFail, gbc_lbFail);
-
-        lbFailCount = new JLabel("0");
-        lbFailCount.setForeground(new Color(255, 0, 0));
-        GridBagConstraints gbc_lbFailCount = new GridBagConstraints();
-        gbc_lbFailCount.insets = new Insets(0, 0, 0, 5);
-        gbc_lbFailCount.fill = 2;
-        gbc_lbFailCount.gridx = 14;
-        gbc_lbFailCount.gridy = 0;
-        FilterPanel.add(lbFailCount, gbc_lbFailCount);
-
-        contentPane.add(topPanel,BorderLayout.NORTH);
         ////////////////////////////////////////////////////////////////////
         //topPanel end
         ////////////////////////////////////////////////////////////////////
-
         splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
         splitPane.setDividerLocation(0.5);
-        contentPane.add(splitPane, BorderLayout.CENTER);
+        //把响应信息面板加到主面板中
+        contentPanel.add(splitPane, BorderLayout.CENTER);
 
         HttpLogTableModel model = new HttpLogTableModel();
         logTable = new HttpLogTable(model);
@@ -560,7 +508,7 @@ public class GUI implements IMessageEditorController {
         JScrollPane jspLogTable = new JScrollPane(logTable);
         splitPane.setTopComponent(jspLogTable);
 
-
+        //添加最后的响应信息面板
         JTabbedPane tabs = new JTabbedPane();
         requestViewer = BurpExtender.callbacks.createMessageEditor(this, false);
         responseViewer = BurpExtender.callbacks.createMessageEditor(this, false);
@@ -574,11 +522,34 @@ public class GUI implements IMessageEditorController {
         BurpExtender.callbacks.customizeUiComponent(topPanel);
         BurpExtender.callbacks.customizeUiComponent(btnConn);
         BurpExtender.callbacks.customizeUiComponent(splitPane);
-        BurpExtender.callbacks.customizeUiComponent(contentPane);
+        BurpExtender.callbacks.customizeUiComponent(contentPanel);
+    }
+
+    private GridBagConstraints getGridBagConstraints(int fill, int anchor, int top, int left, int bottom, int right, int grid_x, int grid_y) {
+        GridBagConstraints gbc = new GridBagConstraints();
+        // fill属性用来处理 GridBagLayout 网格布局时子节点渲染的占位大小
+        gbc.fill = fill;
+        //GridBagConstraints.HORIZONTAL 表示水平填充 撑满父组件
+        //LineFill 不填充额外的空间
+        //组件对齐方式
+        gbc.anchor = anchor;
+        // GridBagConstraints.WEST; 组件左对齐
+        //内边距设置
+        gbc.insets = new Insets(top, left, bottom, right); //insets 内边距 代表上、左、下、右四个方向的外部间距。
+        //所在列
+        gbc.gridx = grid_x; //组件应该放在哪个网格列
+        //所在行
+        gbc.gridy = grid_y; //组件应该放在哪个网格行
+        return gbc;
+    }
+
+    //无内框 设置方案
+    private GridBagConstraints getGridBagConstraints(int fill, int anchor, int right, int grid_x, int grid_y) {
+        return getGridBagConstraints(fill,anchor,0,0,0,right,grid_x,grid_y);
     }
 
     public Component getComponent(){
-        return contentPane;
+        return contentPanel;
     }
 
     public IHttpService getHttpService() {
