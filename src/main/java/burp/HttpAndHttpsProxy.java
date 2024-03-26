@@ -157,28 +157,27 @@ public class HttpAndHttpsProxy {
     //public static Map<String,String> HttpsProxy(Set reqBodyHashSet, String url_body, String url, List<String> headers,byte[] body, String proxy, int port,String username,String password){
         Map<String,String> mapResult = new HashMap<>();
         String status;
-        StringBuilder rspHeader = new StringBuilder();
-        StringBuilder result = new StringBuilder();
+        String rspHeader = null;
+        String respBody;
 
-        HttpsURLConnection httpsConn = null;
+        HttpsURLConnection urlConnection = null;
         PrintWriter out = null;
-        BufferedReader in = null;
         BufferedReader reader = null;
         try {
             URL urlClient = new URL(url);
-            SSLContext sc = SSLContext.getInstance("SSL");
+            SSLContext sslContext = SSLContext.getInstance("SSL");
             //指定信任https
-            sc.init(null, new TrustManager[] { new TrustAnyTrustManager() }, new java.security.SecureRandom());
+            sslContext.init(null, new TrustManager[] { new TrustAnyTrustManager() }, new java.security.SecureRandom());
             //创建代理虽然是https也是Type.HTTP
             Proxy proxy1=new Proxy(Type.HTTP, new InetSocketAddress(proxy, port));
             //设置代理
-            httpsConn = (HttpsURLConnection) urlClient.openConnection(proxy1);
+            urlConnection = (HttpsURLConnection) urlClient.openConnection(proxy1);
 
             //设置账号密码
-            SetProxyAuth(username, password, httpsConn);
+            SetProxyAuth(username, password, urlConnection);
 
-            httpsConn.setSSLSocketFactory(sc.getSocketFactory());
-            httpsConn.setHostnameVerifier(new TrustAnyHostnameVerifier());
+            urlConnection.setSSLSocketFactory(sslContext.getSocketFactory());
+            urlConnection.setHostnameVerifier(new TrustAnyHostnameVerifier());
 
             //设置控制请求方法的Flag
             String methodFlag = "";
@@ -196,25 +195,25 @@ public class HttpAndHttpsProxy {
                 String[] h = header.split(":",2);
                 String header_key = h[0].trim();
                 String header_value = h[1].trim();
-                httpsConn.setRequestProperty(header_key, header_value);
+                urlConnection.setRequestProperty(header_key, header_value);
                 //BurpExtender.stdout.println(header_key + ":" + header_value);
             }
 
             if (methodFlag.equals("GET")){
                 //发送GET请求必须设置如下两行
-                httpsConn.setDoOutput(false);
-                httpsConn.setDoInput(true);
+                urlConnection.setDoOutput(false);
+                urlConnection.setDoInput(true);
 
                 //获取URLConnection对象的连接
-                httpsConn.connect();
+                urlConnection.connect();
             }
             else if(methodFlag.equals("POST")){
                 //发送POST请求必须设置如下两行
-                httpsConn.setDoOutput(true);
-                httpsConn.setDoInput(true);
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
 
                 //获取URLConnection对象对应的输出流
-                out = new PrintWriter(httpsConn.getOutputStream());
+                out = new PrintWriter(urlConnection.getOutputStream());
                 if(body != null) {
                     //发送请求参数
                     out.print(new String(body));
@@ -222,24 +221,22 @@ public class HttpAndHttpsProxy {
                 //flush输出流的缓冲
                 out.flush();
             }
-            //定义BufferedReader输入流来读取URL的响应
-            in = new BufferedReader(new InputStreamReader(httpsConn.getInputStream()));
-            String line;
-            while ((line = in.readLine()) != null) {
-                result.append(line);
-                result.append("\r\n");
-            }
+
+            //读取URL的响应
+            respBody = readBodyFromStream(urlConnection.getInputStream(), getEncoding(urlConnection.getContentType()));
+
             //断开连接
-            httpsConn.disconnect();
+            urlConnection.disconnect();
+
             //获取响应头
-            rspHeader.append(getHeaderByHeaderFields(httpsConn.getHeaderFields()));
+            rspHeader = getHeaderByHeaderFields(urlConnection.getHeaderFields());
 
             //BurpExtender.stdout.println("返回结果https：" + httpsConn.getResponseMessage());
-            status = String.valueOf(httpsConn.getResponseCode());
+            status = String.valueOf(urlConnection.getResponseCode());
             Utils.updateSuccessCount();
         } catch (Exception e) {
             //e.printStackTrace();
-            result = new StringBuilder(e.getMessage());
+            respBody = e.getMessage();
             Utils.showStderrMsg(1, "[!] First Times: " + e.getMessage());
             Utils.updateFailCount();
 
@@ -247,20 +244,20 @@ public class HttpAndHttpsProxy {
             String cause = "Response Error";
             DeleteErrorKey(ReqKeyHashMap, cause);
         } finally {
-            ErrorHandle(out, in, reader);
+            ErrorHandle(out, null, reader);
         }
 
         //再次获取状态码 // 影响服务器状态码的获取
         try {
-            status = String.valueOf(httpsConn.getResponseCode());
+            status = String.valueOf(urlConnection.getResponseCode());
         } catch (IOException e) {
             status = e.getMessage();
             Utils.showStderrMsg(1, "[!] Second Times: " + e.getMessage());
         }
 
         //修复rspHeader为空导致的空行
-        if("".equals(rspHeader.toString().trim())){
-            rspHeader = new StringBuilder("Failed to obtain the response header");
+        if("".equals(rspHeader.trim())){
+            rspHeader = "Failed to obtain the response header";
         }
 
         //不记录指定响应状态码的请求
@@ -269,42 +266,21 @@ public class HttpAndHttpsProxy {
             DeleteErrorKey(ReqKeyHashMap, cause);
         }
 
-        mapResult.put("status",status);
-        mapResult.put("header", rspHeader.toString());
-        mapResult.put("result", result.toString());
-        mapResult.put("proxyHost", String.format("%s:%s", proxy,port));
+        //保存结果
+        putMapResult(mapResult, status, rspHeader, respBody, proxy, port);
         return mapResult;
     }
 
-    public static void ErrorHandle(PrintWriter out, BufferedReader in, BufferedReader reader) {
-        try {
-            if (reader != null) {
-                reader.close();
-            }
-        } catch (IOException e) {
-        }
-        try {
-            if (in != null) {
-                in.close();
-            }
-        } catch (IOException e) {
-            //e.printStackTrace();
-        }
-        if (out != null) {
-            out.close();
-        }
-    }
 
     public static Map<String,String> HttpProxy(HashMap<String,String> ReqKeyHashMap, String url,List<String> headers,byte[] body, String proxy, int port,String username,String password) {
         //public static Map<String,String> HttpProxy(Set reqBodyHashSet, String url_body,String url,List<String> headers,byte[] body, String proxy, int port,String username,String password) {
         Map<String,String> mapResult = new HashMap<>();
         String status;
-        StringBuilder rspHeader = new StringBuilder();
-        StringBuilder result = new StringBuilder();
+        String rspHeader = "";
+        String respBody;
 
-        HttpURLConnection httpConn = null;
+        HttpURLConnection urlConnection = null;
         PrintWriter out = null;
-        BufferedReader in = null;
         BufferedReader reader = null;
         try {
             URL urlClient = new URL(url);
@@ -314,10 +290,10 @@ public class HttpAndHttpsProxy {
             //创建代理
             Proxy proxy1=new Proxy(Type.HTTP, new InetSocketAddress(proxy, port));
             //设置代理
-            httpConn = (HttpURLConnection) urlClient.openConnection(proxy1);
+            urlConnection = (HttpURLConnection) urlClient.openConnection(proxy1);
 
             //设置账号密码
-            SetProxyAuth(username, password, httpConn);
+            SetProxyAuth(username, password, urlConnection);
 
             //设置控制请求方法的Flag
             String methodFlag = "";
@@ -335,25 +311,24 @@ public class HttpAndHttpsProxy {
                 String[] h = header.split(":",2);
                 String header_key = h[0].trim();
                 String header_value = h[1].trim();
-                httpConn.setRequestProperty(header_key, header_value);
+                urlConnection.setRequestProperty(header_key, header_value);
                 //BurpExtender.stdout.println(header_key + ":" + header_value);
             }
 
             if (methodFlag.equals("GET")){
                 //发送GET请求必须设置如下两行
-                httpConn.setDoOutput(false);
-                httpConn.setDoInput(true);
+                urlConnection.setDoOutput(false);
+                urlConnection.setDoInput(true);
 
                 //获取URLConnection对象的连接
-                httpConn.connect();
-            }
-            else if(methodFlag.equals("POST")){
+                urlConnection.connect();
+            } else if(methodFlag.equals("POST")){
                 //发送POST请求必须设置如下两行
-                httpConn.setDoOutput(true);
-                httpConn.setDoInput(true);
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
 
                 //获取URLConnection对象对应的输出流
-                out = new PrintWriter(httpConn.getOutputStream());
+                out = new PrintWriter(urlConnection.getOutputStream());
                 if(body != null) {
                     //发送请求参数
                     out.print(new String(body));
@@ -361,25 +336,22 @@ public class HttpAndHttpsProxy {
                 //flush输出流的缓冲
                 out.flush();
             }
-            //定义BufferedReader输入流来读取URL的响应
-            in = new BufferedReader(new InputStreamReader(httpConn.getInputStream()));
-            String line;
-            while ((line = in.readLine()) != null) {
-                result.append(line);
-                result.append("\r\n");
-            }
+
+            //读取URL的响应
+            respBody = readBodyFromStream(urlConnection.getInputStream(), getEncoding(urlConnection.getContentType()));
+
             //断开连接
-            httpConn.disconnect();
+            urlConnection.disconnect();
 
             //获取响应头
-            rspHeader.append(getHeaderByHeaderFields(httpConn.getHeaderFields()));
+            rspHeader = getHeaderByHeaderFields(urlConnection.getHeaderFields());
 
             //BurpExtender.stdout.println("返回结果http：" + httpConn.getResponseMessage());
-            status = String.valueOf(httpConn.getResponseCode());
+            status = String.valueOf(urlConnection.getResponseCode());
             Utils.updateSuccessCount();
         } catch (Exception e) {
             //e.printStackTrace();
-            result = new StringBuilder(e.getMessage());
+            respBody = e.getMessage();
             Utils.showStderrMsg(1, "[!] First Times: " + e.getMessage());
             Utils.updateFailCount();
 
@@ -387,20 +359,20 @@ public class HttpAndHttpsProxy {
             String cause = "Response Error";
             DeleteErrorKey(ReqKeyHashMap, cause);
         } finally {
-            ErrorHandle(out, in, reader);
+            ErrorHandle(out, null, reader);
         }
 
         //再次获取状态码 // 影响服务器状态码的获取
         try {
-            status = String.valueOf(httpConn.getResponseCode());
+            status = String.valueOf(urlConnection.getResponseCode());
         } catch (IOException e) {
             status = e.getMessage();
             Utils.showStderrMsg(1, "[!] Second Times: " + e.getMessage());
         }
 
         //修复rspHeader为空导致的空行
-        if("".equals(rspHeader.toString().trim())){
-            rspHeader = new StringBuilder("Failed to obtain the response header");
+        if("".equals(rspHeader.trim())){
+            rspHeader = "Failed to obtain the response header";
         }
 
         //不记录指定响应状态码的请求
@@ -409,12 +381,11 @@ public class HttpAndHttpsProxy {
             DeleteErrorKey(ReqKeyHashMap, cause);
         }
 
-        mapResult.put("status",status);
-        mapResult.put("header", rspHeader.toString());
-        mapResult.put("result", result.toString());
-        mapResult.put("proxyHost", String.format("%s:%s", proxy,port));
+        //保存结果
+        putMapResult(mapResult, status, rspHeader, respBody, proxy, port);
         return mapResult;
     }
+
 
     public static void SetProxyAuth(String username, String password, HttpURLConnection httpConn) {
         if(username != null && password != null && username.trim().length() > 0 && password.trim().length() > 0){
@@ -445,6 +416,34 @@ public class HttpAndHttpsProxy {
         }
     }
 
+    //保存响应结果
+    private static void putMapResult(Map<String, String> mapResult, String status, String rspHeader, String result, String proxy, int port) {
+        mapResult.put("status", status);
+        mapResult.put("header", rspHeader.toString());
+        mapResult.put("result", result.toString());
+        mapResult.put("proxyHost", String.format("%s:%s", proxy, port));
+    }
+
+    //报错数据处理
+    public static void ErrorHandle(PrintWriter out, BufferedReader in, BufferedReader reader) {
+        try {
+            if (reader != null) {
+                reader.close();
+            }
+        } catch (IOException e) {
+        }
+        try {
+            if (in != null) {
+                in.close();
+            }
+        } catch (IOException e) {
+            //e.printStackTrace();
+        }
+        if (out != null) {
+            out.close();
+        }
+    }
+
     //不记录错误响应的请求
     private static void DeleteErrorKey(HashMap<String,String> reqKeyHashMap, String cause){
         if(Config.DEL_ERROR_KEY){
@@ -465,6 +464,7 @@ public class HttpAndHttpsProxy {
         }
     }
 
+    //从 http conn 对象的头字典整理出原始响应头
     private static String getHeaderByHeaderFields(Map<String, List<String>> mapHeaders){
         // 获取响应头字段映射
         //Map<String, List<String>> mapHeaders = httpsConn.getHeaderFields();
@@ -492,5 +492,40 @@ public class HttpAndHttpsProxy {
         }
         //BurpExtender.stdout.println(head_line + other_line);
         return head_line + other_line;
+    }
+
+    //从 http conn 对象信息中 获取响应体编码
+    private static String getEncoding(String contentType){
+        // 假设默认编码为UTF-8
+        String encoding = StandardCharsets.UTF_8.name();
+
+        // 尝试从内容类型中解析出字符编码
+        if (contentType != null && contentType.contains("charset=")) {
+            String charsetPart = contentType.split("charset=")[1];
+            if (charsetPart != null && !charsetPart.trim().isEmpty()) {
+                encoding = charsetPart.trim();
+            }
+        }
+
+        return encoding;
+    }
+
+    // 读取响应流并编码
+    public static String readBodyFromStream(InputStream inputStream, String encoding) throws Exception {
+        // 如果编码为null，则使用UTF-8作为默认编码
+        if (encoding == null) {
+            encoding = String.valueOf(StandardCharsets.UTF_8);
+        }
+
+        try (Reader reader = new InputStreamReader(inputStream, encoding)) {
+            try (BufferedReader bufferedReader = new BufferedReader(reader)) {
+                StringBuilder response = new StringBuilder();
+                String line;
+                while ((line = bufferedReader.readLine()) != null) {
+                    response.append(line).append(System.lineSeparator());
+                }
+                return response.toString();
+            }
+        }
     }
 }

@@ -6,8 +6,8 @@
 
     <groupId>me.gv7.tools.burpextend</groupId>
     <artifactId>passive-scan-client</artifactId>
-<!--    <version>0.4.13-jdk8</version>-->
-    <version>0.4.13-jdk17</version>
+    <version>0.4.15-jdk8</version>
+<!--    <version>0.4.13-jdk17</version>-->
 
     <dependencies>
         <!-- https://mvnrepository.com/artifact/net.portswigger.burp.extender/burp-extender-api -->
