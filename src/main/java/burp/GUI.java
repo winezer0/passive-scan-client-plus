@@ -125,10 +125,8 @@ public class GUI implements IMessageEditorController {
 
                         if(isSelected){
                             Config.REQ_HASH = true;
-                            btnHash.setText("HASH");
                         }else{
                             Config.REQ_HASH = false;
-                            btnHash.setText("HASH");
                         }
                         btnHash.setSelected(isSelected);
 
@@ -155,10 +153,8 @@ public class GUI implements IMessageEditorController {
                         boolean oldStatus = Config.REQ_PARAM;
                         if(isSelected){
                             Config.REQ_PARAM = true;
-                            btnParam.setText("PARAM");
                         }else{
                             Config.REQ_PARAM = false;
-                            btnParam.setText("PARAM");
                         }
                         btnParam.setSelected(isSelected);
                         //判断状态是否改变,改变了就输出
@@ -184,10 +180,8 @@ public class GUI implements IMessageEditorController {
                         boolean oldStatus = Config.REQ_SMART;
                         if(isSelected){
                             Config.REQ_SMART = true;
-                            btnSmart.setText("SMART");
                         }else{
                             Config.REQ_SMART = false;
-                            btnSmart.setText("SMART");
                         }
                         btnSmart.setSelected(isSelected);
                         boolean newStatus = Config.REQ_SMART;
@@ -212,10 +206,8 @@ public class GUI implements IMessageEditorController {
                         boolean oldStatus = Config.REQ_AUTH;
                         if(isSelected){
                             Config.REQ_AUTH = true;
-                            btnAuth.setText("AUTH");
                         }else{
                             Config.REQ_AUTH = false;
-                            btnAuth.setText("AUTH");
                         }
                         btnAuth.setSelected(isSelected);
                         boolean newStatus = Config.REQ_AUTH;
@@ -241,10 +233,8 @@ public class GUI implements IMessageEditorController {
                         boolean oldStatus = Config.IGNORE_RESP;
                         if(isSelected){
                             Config.IGNORE_RESP = true;
-                            btnIgnore.setText("IGNORE");
                         }else{
                             Config.IGNORE_RESP = false;
-                            btnIgnore.setText("IGNORE");
                         }
                         btnIgnore.setSelected(isSelected);
                         boolean newStatus = Config.IGNORE_RESP;
