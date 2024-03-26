@@ -63,6 +63,8 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
         Config.SELECTED_SMART = YamlReader.getInstance(callbacks).getBoolean(Config.SELECTED_SMART_STR);
         Config.SELECTED_AUTH = YamlReader.getInstance(callbacks).getBoolean(Config.SELECTED_AUTH_STR);
 
+        Config.SELECTED_IGNORE = YamlReader.getInstance(callbacks).getBoolean(Config.SELECTED_IGNORE_STR);
+
         //Config.DEL_ERROR_KEY = YamlReader.getInstance(callbacks).getBoolean(Config.DEL_ERROR_KEY_STR);
         Config.SHOW_MSG_LEVEL = YamlReader.getInstance(callbacks).getInteger(Config.SHOW_MSG_LEVEL_STR);
 
@@ -95,6 +97,8 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
                 Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.SELECTED_PARAM_STR, Config.SELECTED_PARAM));
                 Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.SELECTED_SMART_STR, Config.SELECTED_SMART));
                 Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.SELECTED_AUTH_STR, Config.SELECTED_AUTH));
+
+                Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.SELECTED_IGNORE_STR, Config.SELECTED_IGNORE));
 
                 Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.TARGET_HOST_REGX_STR, Config.TARGET_HOST_REGX));
                 Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.BLACK_URL_REGX_STR, Config.BLACK_URL_REGX));

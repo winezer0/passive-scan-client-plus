@@ -16,6 +16,8 @@ public class Config {
     public static boolean REQ_PARAM = false; //无参过滤模式
     public static boolean REQ_AUTH = false; //关注认证信息
 
+    public static boolean IGNORE_RESP = false; //忽略响应信息
+
     public static boolean REQ_HASH = false; //HASH去重模式
     public static String REQ_HASH_STR = "REQ_HASH"; //给内部代码使用的字符串
     public static boolean REQ_SMART = false; //参数去重模式
@@ -63,6 +65,9 @@ public class Config {
     public static String SELECTED_SMART_STR = "SELECTED_SMART";
     public static Boolean SELECTED_AUTH; //从配置文件获取,去重是否关注认证头信息 按钮的默认设置 注：按钮变量可合并到参数
     public static String SELECTED_AUTH_STR = "SELECTED_AUTH";
+
+    public static Boolean SELECTED_IGNORE; //从配置文件获取,是否忽略响应详细保存
+    public static String SELECTED_IGNORE_STR = "SELECTED_IGNORE";
 
     public static Boolean DEL_ERROR_KEY = true;
     //public static String DEL_ERROR_KEY_STR = "DEL_ERROR_KEY";

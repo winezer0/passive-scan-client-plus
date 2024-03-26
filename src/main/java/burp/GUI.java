@@ -24,6 +24,7 @@ public class GUI implements IMessageEditorController {
     private JToggleButton btnParam;
     private JToggleButton btnSmart;
     private JToggleButton btnAuth;
+    private JToggleButton btnIgnore;
     private JButton btnClear;
 
     private JSplitPane splitPane;
@@ -101,9 +102,9 @@ public class GUI implements IMessageEditorController {
             //设置按钮面板的格式
             GridBagLayout gbl_panel = new GridBagLayout();
             //列数量和列宽| 列数和 innerX的最终值是一样的  列数不完善,暂时忽略
-            gbl_panel.columnWidths = new int[] { lenInput, lenInput, lenInput, lenInput, lenInput, lenInput};
+            gbl_panel.columnWidths = new int[] { lenInput, lenInput, lenInput, lenInput, lenInput, lenInput, lenInput};
             //列权重 | 列数不完善,暂时忽略
-            gbl_panel.columnWeights = new double[] {1.0D, 1.0D, 1.0D, 1.0D, 1.0D, 1.0D}; //6个按钮
+            gbl_panel.columnWeights = new double[] {1.0D, 1.0D, 1.0D, 1.0D, 1.0D, 1.0D, 1.0D}; //6个按钮
             //行数量和行高 | 因为在一行,所以应该固定是0
             gbl_panel.rowHeights = new int[] {LineHeight};
             //行权重
@@ -228,8 +229,36 @@ public class GUI implements IMessageEditorController {
                 if(Config.SELECTED_AUTH){
                     btnAuth.setSelected(true);
                 }
-
                 buttonPanel.add(btnAuth, getGridBagConstraints(LineInnerFill,LineInnerAnchor, buttonRight,innerX,0));
+                innerX += 1;
+
+
+                //增加去重时关注认证信息的开关
+                btnIgnore = new JToggleButton("IGNORE");
+                btnIgnore.addChangeListener(new ChangeListener() {
+                    public void stateChanged(ChangeEvent arg0) {
+                        boolean isSelected = btnIgnore.isSelected();
+                        boolean oldStatus = Config.IGNORE_RESP;
+                        if(isSelected){
+                            Config.IGNORE_RESP = true;
+                            btnIgnore.setText("IGNORE");
+                        }else{
+                            Config.IGNORE_RESP = false;
+                            btnIgnore.setText("IGNORE");
+                        }
+                        btnIgnore.setSelected(isSelected);
+                        boolean newStatus = Config.IGNORE_RESP;
+                        //判断状态是否改变,改变了就输出
+                        if(oldStatus != newStatus){
+                            Utils.showStdoutMsg(1, String.format("[*] Click Button [%s]: %s --> %s", "IGNORE", oldStatus, newStatus));
+                        }
+                    }
+                });
+                //根据配置文件设置AUTH按钮的默认选择行为
+                if(Config.IGNORE_RESP){
+                    btnIgnore.setSelected(true);
+                }
+                buttonPanel.add(btnIgnore, getGridBagConstraints(LineInnerFill,LineInnerAnchor, buttonRight,innerX,0));
                 innerX += 1;
 
 

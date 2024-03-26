@@ -159,7 +159,7 @@ public class HttpAndHttpsProxy {
         Map<String,Object> mapResult = new HashMap<>();
         String status;
         String rspHeader = null;
-        byte[] respBody;
+        byte[] respBody = new byte[0];
 
         HttpsURLConnection urlConnection = null;
         PrintWriter out = null;
@@ -223,13 +223,16 @@ public class HttpAndHttpsProxy {
                 out.flush();
             }
 
-            //读取URL的响应
-            respBody = UtilsPlus.readBytesFromStream((urlConnection.getInputStream()));
+            //忽略响应存储
+            if(!Config.IGNORE_RESP){
+                //读取URL的响应
+                respBody = UtilsPlus.readBytesFromStream((urlConnection.getInputStream()));
 
-            // 检查是否有Content-Encoding头，并且值为gzip
-            String contentEncoding = urlConnection.getHeaderField("Content-Encoding");
-            if (contentEncoding != null && contentEncoding.equalsIgnoreCase("gzip")) {
-                respBody = UtilsPlus.gzipDecompress(respBody);
+                // 检查是否有Content-Encoding头，并且值为gzip
+                String contentEncoding = urlConnection.getHeaderField("Content-Encoding");
+                if (contentEncoding != null && contentEncoding.equalsIgnoreCase("gzip")) {
+                    respBody = UtilsPlus.gzipDecompress(respBody);
+                }
             }
 
             //断开连接
@@ -284,7 +287,7 @@ public class HttpAndHttpsProxy {
         Map<String,Object> mapResult = new HashMap<>();
         String status;
         String rspHeader = "";
-        byte[] respBody;
+        byte[] respBody = new byte[0];
 
         HttpURLConnection urlConnection = null;
         PrintWriter out = null;
@@ -344,13 +347,16 @@ public class HttpAndHttpsProxy {
                 out.flush();
             }
 
-            //读取URL的响应
-            respBody = UtilsPlus.readBytesFromStream(urlConnection.getInputStream());
+            //忽略响应存储
+            if(!Config.IGNORE_RESP){
+                //读取URL的响应
+                respBody = UtilsPlus.readBytesFromStream((urlConnection.getInputStream()));
 
-            // 检查是否有Content-Encoding头，并且值为gzip
-            String contentEncoding = urlConnection.getHeaderField("Content-Encoding");
-            if (contentEncoding != null && contentEncoding.equalsIgnoreCase("gzip")) {
-                respBody = UtilsPlus.gzipDecompress(respBody);
+                // 检查是否有Content-Encoding头，并且值为gzip
+                String contentEncoding = urlConnection.getHeaderField("Content-Encoding");
+                if (contentEncoding != null && contentEncoding.equalsIgnoreCase("gzip")) {
+                    respBody = UtilsPlus.gzipDecompress(respBody);
+                }
             }
 
             //断开连接
