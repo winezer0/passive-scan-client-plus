@@ -6,7 +6,7 @@
 
     <groupId>me.gv7.tools.burpextend</groupId>
     <artifactId>passive-scan-client</artifactId>
-    <version>0.4.15-jdk8</version>
+    <version>0.4.16-jdk8</version>
 <!--    <version>0.4.13-jdk17</version>-->
 
     <dependencies>

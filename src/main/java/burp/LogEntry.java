@@ -1,5 +1,7 @@
 package burp;
 
+import plus.UtilsPlus;
+
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -25,25 +27,11 @@ public class LogEntry {
         //this.proxyResponse = (String)mapResult.get("header") + mapResult.get("result");
         byte[] headBytes = ((String) mapResult.get("header")).getBytes();
         byte[] bodyBytes = (byte[]) mapResult.get("result");
-        this.proxyResponse = concatenateByteArrays(headBytes,bodyBytes);
+        this.proxyResponse = UtilsPlus.concatenateByteArrays(headBytes,bodyBytes);
         this.requestTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(new Date());
         this.proxyHost = (String) mapResult.get("proxyHost");
         this.length = String.format("%s|%s", headBytes.length, bodyBytes.length);
     }
 
 
-    public static byte[] concatenateByteArrays(byte[]... arrays) {
-        int length = 0;
-        for (byte[] array : arrays) {
-            length += array.length;
-        }
-
-        byte[] result = new byte[length];
-        int offset = 0;
-        for (byte[] array : arrays) {
-            System.arraycopy(array, 0, result, offset, array.length);
-            offset += array.length;
-        }
-        return result;
-    }
 }
