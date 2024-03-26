@@ -223,7 +223,7 @@ public class HttpAndHttpsProxy {
             }
 
             //读取URL的响应
-            respBody = readBodyFromStream(urlConnection.getInputStream(), getEncoding(urlConnection.getContentType()));
+            respBody = readBodyFromStream(urlConnection.getInputStream());
 
             //断开连接
             urlConnection.disconnect();
@@ -338,7 +338,7 @@ public class HttpAndHttpsProxy {
             }
 
             //读取URL的响应
-            respBody = readBodyFromStream(urlConnection.getInputStream(), getEncoding(urlConnection.getContentType()));
+            respBody = readBodyFromStream(urlConnection.getInputStream());
 
             //断开连接
             urlConnection.disconnect();
@@ -491,7 +491,7 @@ public class HttpAndHttpsProxy {
             }
         }
         //BurpExtender.stdout.println(head_line + other_line);
-        return head_line + other_line;
+        return head_line + other_line + "\r\n";
     }
 
     //从 http conn 对象信息中 获取响应体编码
@@ -522,7 +522,20 @@ public class HttpAndHttpsProxy {
                 StringBuilder response = new StringBuilder();
                 String line;
                 while ((line = bufferedReader.readLine()) != null) {
-                    response.append(line).append(System.lineSeparator());
+                    response.append(line).append("\n");
+                }
+                return response.toString();
+            }
+        }
+    }
+
+    public static String readBodyFromStream(InputStream inputStream) throws Exception {
+        try (Reader reader = new InputStreamReader(inputStream)) {
+            try (BufferedReader bufferedReader = new BufferedReader(reader)) {
+                StringBuilder response = new StringBuilder();
+                String line;
+                while ((line = bufferedReader.readLine()) != null) {
+                    response.append(line).append("\n");
                 }
                 return response.toString();
             }
