@@ -35,7 +35,7 @@ public class GUI implements IMessageEditorController {
 
     public static IMessageEditor requestViewer;
     public static IMessageEditor responseViewer;
-    public static ITextEditor proxyRspViewer;
+    public static IMessageEditor proxyRspViewer;
 
 
     public GUI() {
@@ -282,7 +282,7 @@ public class GUI implements IMessageEditorController {
                             logTable.updateUI();//刷新表格
                             requestViewer.setMessage("".getBytes(),true);
                             responseViewer.setMessage("".getBytes(),false);
-                            proxyRspViewer.setText("".getBytes());
+                            proxyRspViewer.setMessage("".getBytes(),false);
                             clearHashSet(true);  //新增URL去重
                         }
                     }
@@ -533,7 +533,8 @@ public class GUI implements IMessageEditorController {
         JTabbedPane tabs = new JTabbedPane();
         requestViewer = BurpExtender.callbacks.createMessageEditor(this, false);
         responseViewer = BurpExtender.callbacks.createMessageEditor(this, false);
-        proxyRspViewer = BurpExtender.callbacks.createTextEditor();
+        //proxyRspViewer = BurpExtender.callbacks.createTextEditor();
+        proxyRspViewer = BurpExtender.callbacks.createMessageEditor(this, false);
 
         tabs.addTab("Request", requestViewer.getComponent());
         tabs.addTab("Original response", responseViewer.getComponent());
