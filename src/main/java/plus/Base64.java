@@ -19,7 +19,7 @@
  * limitations under the License.
  */
 
-package burp;
+package plus;
 
 /**
  * This class provides encode/decode for RFC 2045 Base64 as

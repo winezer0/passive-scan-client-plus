@@ -1,5 +1,7 @@
-package burp;
+package plus;
 
+import burp.BurpExtender;
+import burp.IBurpExtenderCallbacks;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;

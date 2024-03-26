@@ -316,6 +316,7 @@ public class Utils {
         return subParamHashMap;
     }
 
+    //参数值处理
     public static void ParamValueHandle(Boolean useValue, HashMap subParamHashMap, Map.Entry<String, String> subObj, String tempKey) {
         String tempValue = subObj.getValue();
         String tempValueUrlDecode = decodeUrl(tempValue);
