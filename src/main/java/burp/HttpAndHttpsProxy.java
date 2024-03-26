@@ -422,7 +422,6 @@ public class HttpAndHttpsProxy {
         mapResult.put("header", rspHeader);
         mapResult.put("result", result);
         mapResult.put("proxyHost", String.format("%s:%s", proxy, port));
-        mapResult.put("length", String.valueOf(result.length()));
     }
 
     //报错数据处理

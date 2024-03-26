@@ -25,6 +25,6 @@ public class LogEntry {
         this.proxyResponse = mapResult.get("header") + "\r\n" + mapResult.get("result");
         this.requestTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(new Date());
         this.proxyHost = mapResult.get("proxyHost");
-        this.length = mapResult.get("length");
+        this.length = String.valueOf(this.proxyResponse.length());
     }
 }
