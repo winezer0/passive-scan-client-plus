@@ -52,8 +52,10 @@ public class GUI implements IMessageEditorController {
         ////////////////////////////////////////////////////////////////////
         JPanel topPanel = new JPanel();
         GridBagLayout gridBagLayout = new GridBagLayout();
+//        列数，行数
         gridBagLayout.columnWidths = new int[] { 0, 0 };
         gridBagLayout.rowHeights = new int[] { 40, 32, 0, 0 };
+//        各列占宽度比，各行占高度比
         gridBagLayout.columnWeights = new double[] { 1.0D, Double.MIN_VALUE };
         gridBagLayout.rowWeights = new double[] { 0.0D, 0.0D, 1.0D, Double.MIN_VALUE };
         topPanel.setLayout(gridBagLayout);
@@ -76,7 +78,9 @@ public class GUI implements IMessageEditorController {
         lbHost = new JLabel("Host:");
         GridBagConstraints gbc_lbHost = new GridBagConstraints();
         gbc_lbHost.fill = 2;
+//        insets  内边距
         gbc_lbHost.insets = new Insets(0, 0, 0, 5);
+//        坐标位置，从左上角开始布局
         gbc_lbHost.gridx = 0;
         gbc_lbHost.gridy = 0;
         ConfigPanel.add(lbHost, gbc_lbHost);
@@ -118,7 +122,7 @@ public class GUI implements IMessageEditorController {
         ConfigPanel.add(lbUsername, gbc_lbUsername);
 
         tfUsername = new JTextField();
-        tfUsername.setText("");
+        tfUsername.setText(Config.PROXY_USERNAME);
         tfUsername.setColumns(10);
         GridBagConstraints gbc_tfUsername = new GridBagConstraints();
         gbc_tfUsername.fill = 2;
@@ -136,7 +140,7 @@ public class GUI implements IMessageEditorController {
         ConfigPanel.add(lbPassword, gbc_lbPassword);
 
         tfPassword = new JTextField();
-        tfPassword.setText("");
+        tfPassword.setText(Config.PROXY_PASSWORD);
         tfPassword.setColumns(10);
         GridBagConstraints gbc_tfPassword = new GridBagConstraints();
         gbc_tfPassword.fill = 2;
@@ -162,8 +166,8 @@ public class GUI implements IMessageEditorController {
         gbc_tfTimeout.gridy = 0;
         ConfigPanel.add(tfTimeout, gbc_tfTimeout);
 
-        //增加间隔时间
-        lbIntervalTime = new JLabel("Interval lTime:");
+        // 增加间隔时间
+        lbIntervalTime = new JLabel("Interval Time:");
         GridBagConstraints gbc_lbIntervalTime = new GridBagConstraints();
         gbc_lbIntervalTime.fill = 2;
         gbc_lbIntervalTime.gridx = 10;
@@ -174,6 +178,7 @@ public class GUI implements IMessageEditorController {
         tfIntervalTime.setText(String.valueOf(Config.INTERVAL_TIME));
         tfIntervalTime.setColumns(5);
         GridBagConstraints gbc_tfIntervalTime = new GridBagConstraints();
+//        fill属性用来处理GridBagLayout网格布局时子节点渲染的占位大小，2为撑满父组件
         gbc_tfIntervalTime.fill = 2;
         gbc_tfIntervalTime.insets = new Insets(0, 0, 0, 5);
         gbc_tfIntervalTime.gridx = 11;
@@ -320,6 +325,7 @@ public class GUI implements IMessageEditorController {
         ConfigPanel.add(btnAuth, gbc_btnAuth);
         ///////////////////////////////
         GridBagConstraints gbc_lb1 = new GridBagConstraints();
+//        子组件对于整体外层组件的浮动
         gbc_lb1.anchor = 15;
         gbc_lb1.insets = new Insets(0, 0, 0, 5);
         gbc_lb1.gridx = 16;
@@ -389,7 +395,6 @@ public class GUI implements IMessageEditorController {
         gbc_btnClear.gridy = 0;
         ConfigPanel.add(btnClear, gbc_btnClear);
         ////////////////////////////////////////////////////////////////////
-
         JPanel FilterPanel = new JPanel();
         GridBagConstraints gbc_panel_1 = new GridBagConstraints();
         gbc_panel_1.insets = new Insets(0, 5, 5, 5);
@@ -466,6 +471,7 @@ public class GUI implements IMessageEditorController {
         gbc_vb.gridy = 0;
         FilterPanel.add(Box.createVerticalBox(), gbc_vb);
 
+        // 转发url总数，默认0
         JLabel lbRequest = new JLabel("Total:");
         GridBagConstraints gbc_lbRequest = new GridBagConstraints();
         gbc_lbRequest.insets = new Insets(0, 0, 0, 5);
@@ -491,6 +497,7 @@ public class GUI implements IMessageEditorController {
         gbc_vb2.gridy = 0;
         FilterPanel.add(Box.createVerticalBox(), gbc_vb);
 
+        // 转发成功url数，默认0
         JLabel lbSuccess = new JLabel("Success:");
         GridBagConstraints gbc_lbSuccess = new GridBagConstraints();
         gbc_lbSuccess.insets = new Insets(0, 0, 0, 5);
@@ -514,7 +521,7 @@ public class GUI implements IMessageEditorController {
         gbc_vb3.gridx = 12;
         gbc_vb3.gridy = 0;
         FilterPanel.add(Box.createVerticalBox(), gbc_vb3);
-
+        // 转发失败url数，默认0
         JLabel lbFail = new JLabel("Fail:");
         GridBagConstraints gbc_lbFail = new GridBagConstraints();
         gbc_lbFail.insets = new Insets(0, 0, 0, 5);
