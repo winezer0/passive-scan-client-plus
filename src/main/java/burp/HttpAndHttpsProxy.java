@@ -232,23 +232,7 @@ public class HttpAndHttpsProxy {
             //断开连接
             httpsConn.disconnect();
             //获取响应头
-            Map<String, List<String>> mapHeaders = httpsConn.getHeaderFields();
-            for (Map.Entry<String, List<String>> entry : mapHeaders.entrySet()) {
-                String key = entry.getKey();
-                List<String> values = entry.getValue();
-                StringBuilder value = new StringBuilder();
-                for(String v:values){
-                    value.append(v);
-                }
-
-                String header_line;
-                if(key == null) {
-                    header_line = String.format("%s\r\n", value);
-                }else{
-                    header_line = String.format("%s: %s\r\n", key, value);
-                }
-                rspHeader.append(header_line);
-            }
+            rspHeader.append(getHeaderByHeaderFields(httpsConn.getHeaderFields()));
 
             //BurpExtender.stdout.println("返回结果https：" + httpsConn.getResponseMessage());
             status = String.valueOf(httpsConn.getResponseCode());
@@ -386,24 +370,9 @@ public class HttpAndHttpsProxy {
             }
             //断开连接
             httpConn.disconnect();
-            //获取响应头
-            Map<String, List<String>> mapHeaders = httpConn.getHeaderFields();
-            for (Map.Entry<String, List<String>> entry : mapHeaders.entrySet()) {
-                String key = entry.getKey();
-                List<String> values = entry.getValue();
-                StringBuilder value = new StringBuilder();
-                for(String v:values){
-                    value.append(v);
-                }
 
-                String header_line;
-                if(key == null) {
-                    header_line = String.format("%s\r\n", value);
-                }else{
-                    header_line = String.format("%s: %s\r\n", key, value);
-                }
-                rspHeader.append(header_line);
-            }
+            //获取响应头
+            rspHeader.append(getHeaderByHeaderFields(httpConn.getHeaderFields()));
 
             //BurpExtender.stdout.println("返回结果http：" + httpConn.getResponseMessage());
             status = String.valueOf(httpConn.getResponseCode());
@@ -494,5 +463,34 @@ public class HttpAndHttpsProxy {
                 }
             }
         }
+    }
+
+    private static String getHeaderByHeaderFields(Map<String, List<String>> mapHeaders){
+        // 获取响应头字段映射
+        //Map<String, List<String>> mapHeaders = httpsConn.getHeaderFields();
+
+        //存放首行
+        String head_line = "";
+        //存放其他行
+        String other_line = "";
+
+        for (Map.Entry<String, List<String>> entry : mapHeaders.entrySet()) {
+            String key = entry.getKey();
+
+            List<String> values = entry.getValue();
+            StringBuilder value = new StringBuilder();
+            for(String v:values){
+                value.append(v);
+            }
+
+            if (key==null){
+                head_line = String.format("%s\r\n", mapHeaders.get(null).get(0));
+            } else {
+                other_line += String.format("%s: %s\r\n", key, value);
+                BurpExtender.stdout.println(String.format("%s: %s\r\n", key, value));
+            }
+        }
+        //BurpExtender.stdout.println(head_line + other_line);
+        return head_line + other_line;
     }
 }
