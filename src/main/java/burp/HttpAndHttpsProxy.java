@@ -487,7 +487,7 @@ public class HttpAndHttpsProxy {
                 head_line = String.format("%s\r\n", mapHeaders.get(null).get(0));
             } else {
                 other_line += String.format("%s: %s\r\n", key, value);
-                BurpExtender.stdout.println(String.format("%s: %s\r\n", key, value));
+                //BurpExtender.stdout.println(String.format("%s: %s\r\n", key, value));
             }
         }
         //BurpExtender.stdout.println(head_line + other_line);
