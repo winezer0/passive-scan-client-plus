@@ -148,7 +148,7 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
                                 //byte[] req = message.getRequest();
                                 //String req_str = new String(req);
                                 //向代理转发请求
-                                Map<String, String> mapResult = null;
+                                Map<String, Object> mapResult = null;
 
                                 String url = helpers.analyzeRequest(message.getHttpService(),message.getRequest()).getUrl().toString();
                                 Utils.showStdoutMsg(0, String.format("[+] Right Click Scanning Url [%s]", url));
@@ -226,7 +226,7 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
                     synchronized(log) {
                         int row = log.size();
                         String method = helpers.analyzeRequest(req_resp).getMethod();
-                        Map<String, String> mapResult = null;
+                        Map<String, Object> mapResult = null;
                         try {
                             mapResult = HttpAndHttpsProxy.Proxy(req_resp);
                         } catch (InterruptedException e) {

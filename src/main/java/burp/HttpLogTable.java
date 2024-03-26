@@ -23,7 +23,7 @@ public class HttpLogTable extends JTable {
         LogEntry logEntry = BurpExtender.log.get(row);
         GUI.requestViewer.setMessage(logEntry.requestResponse.getRequest(), true);
         GUI.responseViewer.setMessage(logEntry.requestResponse.getResponse(), false);
-        GUI.proxyRspViewer.setMessage(logEntry.proxyResponse.getBytes(), false);
+        GUI.proxyRspViewer.setMessage(logEntry.proxyResponse, false);
         GUI.currentlyDisplayedItem = logEntry.requestResponse;
     }
 }

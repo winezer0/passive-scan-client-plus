@@ -25,7 +25,7 @@ import static burp.Utils.*;
 //JAVA设置代理的两种方式（HTTP和HTTPS） https://blog.csdn.net/sbc1232123321/article/details/79334130
 public class HttpAndHttpsProxy {
 
-    public static Map<String,String> Proxy(IHttpRequestResponse requestResponse) throws InterruptedException{
+    public static Map<String,Object> Proxy(IHttpRequestResponse requestResponse) throws InterruptedException{
         byte[] request = requestResponse.getRequest();
         IHttpService httpService = requestResponse.getHttpService();
         IRequestInfo reqInfo = BurpExtender.helpers.analyzeRequest(httpService,request);
@@ -153,12 +153,12 @@ public class HttpAndHttpsProxy {
     }
 
     //感谢chen1sheng的pr，已经修改了我漏修复的https转发bug，并解决了header截断的bug。
-    public static Map<String,String> HttpsProxy(HashMap<String,String> ReqKeyHashMap, String url, List<String> headers,byte[] body, String proxy, int port,String username,String password){
+    public static Map<String,Object> HttpsProxy(HashMap<String,String> ReqKeyHashMap, String url, List<String> headers,byte[] body, String proxy, int port,String username,String password){
     //public static Map<String,String> HttpsProxy(Set reqBodyHashSet, String url_body, String url, List<String> headers,byte[] body, String proxy, int port,String username,String password){
-        Map<String,String> mapResult = new HashMap<>();
+        Map<String,Object> mapResult = new HashMap<>();
         String status;
         String rspHeader = null;
-        String respBody;
+        byte[] respBody;
 
         HttpsURLConnection urlConnection = null;
         PrintWriter out = null;
@@ -223,7 +223,7 @@ public class HttpAndHttpsProxy {
             }
 
             //读取URL的响应
-            respBody = readBodyFromStream(urlConnection.getInputStream());
+            respBody = readBytesFromStream((urlConnection.getInputStream()));
 
             //断开连接
             urlConnection.disconnect();
@@ -236,7 +236,7 @@ public class HttpAndHttpsProxy {
             Utils.updateSuccessCount();
         } catch (Exception e) {
             //e.printStackTrace();
-            respBody = e.getMessage();
+            respBody = e.getMessage().getBytes(StandardCharsets.UTF_8);
             Utils.showStderrMsg(1, "[!] First Times: " + e.getMessage());
             Utils.updateFailCount();
 
@@ -272,12 +272,12 @@ public class HttpAndHttpsProxy {
     }
 
 
-    public static Map<String,String> HttpProxy(HashMap<String,String> ReqKeyHashMap, String url,List<String> headers,byte[] body, String proxy, int port,String username,String password) {
+    public static Map<String,Object> HttpProxy(HashMap<String,String> ReqKeyHashMap, String url,List<String> headers,byte[] body, String proxy, int port,String username,String password) {
         //public static Map<String,String> HttpProxy(Set reqBodyHashSet, String url_body,String url,List<String> headers,byte[] body, String proxy, int port,String username,String password) {
-        Map<String,String> mapResult = new HashMap<>();
+        Map<String,Object> mapResult = new HashMap<>();
         String status;
         String rspHeader = "";
-        String respBody;
+        byte[] respBody;
 
         HttpURLConnection urlConnection = null;
         PrintWriter out = null;
@@ -338,7 +338,7 @@ public class HttpAndHttpsProxy {
             }
 
             //读取URL的响应
-            respBody = readBodyFromStream(urlConnection.getInputStream());
+            respBody = readBytesFromStream(urlConnection.getInputStream());
 
             //断开连接
             urlConnection.disconnect();
@@ -351,7 +351,7 @@ public class HttpAndHttpsProxy {
             Utils.updateSuccessCount();
         } catch (Exception e) {
             //e.printStackTrace();
-            respBody = e.getMessage();
+            respBody = e.getMessage().getBytes(StandardCharsets.UTF_8);
             Utils.showStderrMsg(1, "[!] First Times: " + e.getMessage());
             Utils.updateFailCount();
 
@@ -417,7 +417,7 @@ public class HttpAndHttpsProxy {
     }
 
     //保存响应结果
-    private static void putMapResult(Map<String, String> mapResult, String status, String rspHeader, String result, String proxy, int port) {
+    private static void putMapResult(Map<String, Object> mapResult, String status, String rspHeader, byte[] result, String proxy, int port) {
         mapResult.put("status", status);
         mapResult.put("header", rspHeader);
         mapResult.put("result", result);
