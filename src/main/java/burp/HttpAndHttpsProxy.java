@@ -288,6 +288,7 @@ public class HttpAndHttpsProxy {
         mapResult.put("status",status);
         mapResult.put("header", rspHeader.toString());
         mapResult.put("result", result.toString());
+        mapResult.put("proxyHost", String.format("%s:%s", proxy,port));
         return mapResult;
     }
 
@@ -442,6 +443,7 @@ public class HttpAndHttpsProxy {
         mapResult.put("status",status);
         mapResult.put("header", rspHeader.toString());
         mapResult.put("result", result.toString());
+        mapResult.put("proxyHost", String.format("%s:%s", proxy,port));
         return mapResult;
     }
 
