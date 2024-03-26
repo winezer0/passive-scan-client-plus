@@ -529,6 +529,7 @@ public class HttpAndHttpsProxy {
         }
     }
 
+    // 读取响应流 使用系统编码
     public static String readBodyFromStream(InputStream inputStream) throws Exception {
         try (Reader reader = new InputStreamReader(inputStream)) {
             try (BufferedReader bufferedReader = new BufferedReader(reader)) {
@@ -539,6 +540,18 @@ public class HttpAndHttpsProxy {
                 }
                 return response.toString();
             }
+        }
+    }
+
+    // 读取响应流 使用字节码
+    public static byte[] readBytesFromStream(InputStream inputStream) throws IOException {
+        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                byteArrayOutputStream.write(buffer, 0, bytesRead);
+            }
+            return byteArrayOutputStream.toByteArray();
         }
     }
 }
