@@ -419,9 +419,10 @@ public class HttpAndHttpsProxy {
     //保存响应结果
     private static void putMapResult(Map<String, String> mapResult, String status, String rspHeader, String result, String proxy, int port) {
         mapResult.put("status", status);
-        mapResult.put("header", rspHeader.toString());
-        mapResult.put("result", result.toString());
+        mapResult.put("header", rspHeader);
+        mapResult.put("result", result);
         mapResult.put("proxyHost", String.format("%s:%s", proxy, port));
+        mapResult.put("length", String.valueOf(result.length()));
     }
 
     //报错数据处理

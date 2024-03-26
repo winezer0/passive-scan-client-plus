@@ -14,6 +14,7 @@ public class LogEntry {
     final String proxyResponse;
     public String requestTime;
     public String proxyHost;
+    public String length;
 
     LogEntry(int id, IHttpRequestResponsePersisted requestResponse, URL url, String method, Map<String,String> mapResult) {
         this.id = id;
@@ -24,5 +25,6 @@ public class LogEntry {
         this.proxyResponse = mapResult.get("header") + "\r\n" + mapResult.get("result");
         this.requestTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(new Date());
         this.proxyHost = mapResult.get("proxyHost");
+        this.length = mapResult.get("length");
     }
 }
