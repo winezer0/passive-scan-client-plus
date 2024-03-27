@@ -12,26 +12,25 @@ public class LogEntry {
     final IHttpRequestResponsePersisted requestResponse;
     final URL url;
     final String method;
-    final String status;
+    final String respStatus;
     byte[] proxyResponse;
     public String requestTime;
     public String proxyHost;
-    public String length;
+    public String respLength;
+    public String statusEqual;
 
     LogEntry(int id, IHttpRequestResponsePersisted requestResponse, URL url, String method, Map<String,Object> mapResult) {
         this.id = id;
         this.requestResponse = requestResponse;
         this.url = url;
         this.method = method;
-        this.status = (String) mapResult.get("status");
-        //this.proxyResponse = (String)mapResult.get("header") + mapResult.get("result");
+        this.respStatus = (String) mapResult.get("respStatus");
         byte[] headBytes = ((String) mapResult.get("header")).getBytes();
-        byte[] bodyBytes = (byte[]) mapResult.get("result");
+        byte[] bodyBytes = (byte[]) mapResult.get("respBody");
         this.proxyResponse = UtilsPlus.concatenateByteArrays(headBytes,bodyBytes);
         this.requestTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(new Date());
         this.proxyHost = (String) mapResult.get("proxyHost");
-        this.length = String.format("%s|%s", headBytes.length, bodyBytes.length);
+        this.respLength = String.format("%s|%s", headBytes.length, bodyBytes.length);
+        this.statusEqual = String.format("%s", mapResult.get("statusEqual"));
     }
-
-
 }

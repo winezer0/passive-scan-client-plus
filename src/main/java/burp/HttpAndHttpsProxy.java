@@ -144,13 +144,18 @@ public class HttpAndHttpsProxy {
 
         //延迟转发
         Thread.sleep(Config.INTERVAL_TIME);
+
+        Map<String, Object> resultMap;
         if(httpService.getProtocol().equals("https")){
             //修改 输出url去重处理
-            return HttpsProxy(ReqKeyHashMap, reqUrl, reqHeaders, reqBody, Config.PROXY_HOST, Config.PROXY_PORT,Config.PROXY_USERNAME,Config.PROXY_PASSWORD);
+            resultMap = HttpsProxy(ReqKeyHashMap, reqUrl, reqHeaders, reqBody, Config.PROXY_HOST, Config.PROXY_PORT, Config.PROXY_USERNAME, Config.PROXY_PASSWORD);
         }else {
             //修改 输出url去重处理
-            return HttpProxy(ReqKeyHashMap, reqUrl, reqHeaders, reqBody, Config.PROXY_HOST, Config.PROXY_PORT,Config.PROXY_USERNAME,Config.PROXY_PASSWORD);
+            resultMap = HttpProxy(ReqKeyHashMap, reqUrl, reqHeaders, reqBody, Config.PROXY_HOST, Config.PROXY_PORT,Config.PROXY_USERNAME,Config.PROXY_PASSWORD);
         }
+
+        putResultMapOuter(resultMap, requestResponse);
+        return resultMap;
     }
 
     //感谢chen1sheng的pr，已经修改了我漏修复的https转发bug，并解决了header截断的bug。
@@ -277,7 +282,7 @@ public class HttpAndHttpsProxy {
         }
 
         //保存结果
-        putMapResult(mapResult, status, rspHeader, respBody, proxy, port);
+        putResultMapInner(mapResult, status, rspHeader, respBody, proxy, port);
         return mapResult;
     }
 
@@ -401,7 +406,7 @@ public class HttpAndHttpsProxy {
         }
 
         //保存结果
-        putMapResult(mapResult, status, rspHeader, respBody, proxy, port);
+        putResultMapInner(mapResult, status, rspHeader, respBody, proxy, port);
         return mapResult;
     }
 
@@ -433,14 +438,6 @@ public class HttpAndHttpsProxy {
         public boolean verify(String hostname, SSLSession session) {
             return true;
         }
-    }
-
-    //保存响应结果
-    private static void putMapResult(Map<String, Object> mapResult, String status, String rspHeader, byte[] result, String proxy, int port) {
-        mapResult.put("status", status);
-        mapResult.put("header", rspHeader);
-        mapResult.put("result", result);
-        mapResult.put("proxyHost", String.format("%s:%s", proxy, port));
     }
 
     //报错数据处理
@@ -483,4 +480,21 @@ public class HttpAndHttpsProxy {
         }
     }
 
+    private static void putResultMapInner(Map<String, Object> mapResult, String status, String rspHeader, byte[] respBody, String proxy, int port) {
+        mapResult.put("respStatus", status);
+        mapResult.put("header", rspHeader);
+        mapResult.put("respBody", respBody);
+        mapResult.put("proxyHost", String.format("%s:%s", proxy, port));
+    }
+
+    private static void putResultMapOuter(Map<String, Object> mapResult, IHttpRequestResponse rawRequestResponse) {
+        //添加对比结果
+        byte[] rawResponse = rawRequestResponse.getResponse();
+        boolean statusEqual = false;
+        if (rawResponse.length > 0) {
+            IResponseInfo rawRespInfo = BurpExtender.helpers.analyzeResponse(rawResponse);
+            statusEqual = mapResult.get("respStatus").equals(String.valueOf(rawRespInfo.getStatusCode()));
+        }
+        mapResult.put("statusEqual", statusEqual);
+    }
 }

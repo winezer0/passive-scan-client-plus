@@ -8,7 +8,7 @@ public class HttpLogTableModel extends AbstractTableModel {
     }
 
     public int getColumnCount() {
-        return 7;
+        return 8;
     }
 
     @Override
@@ -19,17 +19,19 @@ public class HttpLogTableModel extends AbstractTableModel {
             case 0:
                 return "#";
             case 1:
-                return "Method";
-            case 2:
-                return "URL";
-            case 3:
-                return "Status";
-            case 4:
-                return "Time";
-            case 5:
                 return "ProxyHost";
+            case 2:
+                return "Method";
+            case 3:
+                return "URL";
+            case 4:
+                return "RespStatus";
+            case 5:
+                return "RespLength";
             case 6:
-                return "Length";
+                return "StatusEqual";
+            case 7:
+                return "Time";
             default:
                 return "";
         }
@@ -49,17 +51,19 @@ public class HttpLogTableModel extends AbstractTableModel {
             case 0:
                 return logEntry.id;
             case 1:
-                return logEntry.method;
-            case 2:
-                return logEntry.url.toString();
-            case 3:
-                return logEntry.status;
-            case 4:
-                return logEntry.requestTime;
-            case 5:
                 return logEntry.proxyHost;
+            case 2:
+                return logEntry.method;
+            case 3:
+                return logEntry.url.toString();
+            case 4:
+                return logEntry.respStatus;
+            case 5:
+                return logEntry.respLength;
             case 6:
-                return logEntry.length;
+                return logEntry.statusEqual;
+            case 7:
+                return logEntry.requestTime;
             default:
                 return "";
         }
