@@ -1,6 +1,7 @@
 package plus;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
@@ -143,5 +144,15 @@ public class UtilsPlus {
             }
             return byteArrayOutputStream.toByteArray();
         }
+    }
+
+    public static byte[] getBodyBytes(byte[] request, int bodyOffset) {
+        // 确保bodyOffset不会导致数组越界
+        int maxLength = request.length - bodyOffset;
+        int bodyLength = Math.max(0, maxLength);
+
+        // 从request数组中复制请求体的部分
+        byte[] body = Arrays.copyOfRange(request, bodyOffset, bodyOffset + bodyLength);
+        return body;
     }
 }

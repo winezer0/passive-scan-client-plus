@@ -8,7 +8,7 @@ public class HttpLogTableModel extends AbstractTableModel {
     }
 
     public int getColumnCount() {
-        return 8;
+        return 9;
     }
 
     @Override
@@ -29,8 +29,10 @@ public class HttpLogTableModel extends AbstractTableModel {
             case 5:
                 return "RespLength";
             case 6:
-                return "StatusEqual";
+                return "EqualStatus";
             case 7:
+                return "EqualLength";
+            case 8:
                 return "Time";
             default:
                 return "";
@@ -61,8 +63,10 @@ public class HttpLogTableModel extends AbstractTableModel {
             case 5:
                 return logEntry.respLength;
             case 6:
-                return logEntry.statusEqual;
+                return logEntry.equalStatus;
             case 7:
+                return logEntry.equalLength;
+            case 8:
                 return logEntry.requestTime;
             default:
                 return "";

@@ -17,7 +17,8 @@ public class LogEntry {
     public String requestTime;
     public String proxyHost;
     public String respLength;
-    public String statusEqual;
+    public String equalStatus;
+    public String equalLength;
 
     LogEntry(int id, IHttpRequestResponsePersisted requestResponse, URL url, String method, Map<String,Object> mapResult) {
         this.id = id;
@@ -31,6 +32,7 @@ public class LogEntry {
         this.requestTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(new Date());
         this.proxyHost = (String) mapResult.get("proxyHost");
         this.respLength = String.format("%s|%s", headBytes.length, bodyBytes.length);
-        this.statusEqual = String.format("%s", mapResult.get("statusEqual"));
+        this.equalStatus = String.format("%s", mapResult.get("equalStatus"));
+        this.equalLength = String.format("%s", mapResult.get("equalLength"));
     }
 }

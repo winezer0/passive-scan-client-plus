@@ -34,8 +34,8 @@ public class HttpAndHttpsProxy {
         String reqUrl = reqInfo.getUrl().toString();
         List<String> reqHeaders = reqInfo.getHeaders();
         List<IParameter> reqParams = reqInfo.getParameters();
-        byte[] reqBody = null;
-        String body = null;
+        byte[] reqBodyBytes = null;
+        String reqBodyString = null;
         //HASHMAP 记录当前请求的Key,传递给下一个函数支持错误删除
         HashMap<String, String> ReqKeyHashMap = new HashMap<>();
 
@@ -50,8 +50,10 @@ public class HttpAndHttpsProxy {
 
         if(reqInfo.getMethod().equals("POST")){
             int bodyOffset = reqInfo.getBodyOffset();
-            body = new String(request, bodyOffset, request.length - bodyOffset, StandardCharsets.UTF_8);
-            reqBody = body.getBytes(StandardCharsets.UTF_8);
+            //reqBodyString = new String(request, bodyOffset, request.length - bodyOffset, StandardCharsets.UTF_8);
+            //reqBodyBytes = reqBodyString.getBytes(StandardCharsets.UTF_8);
+            reqBodyBytes = UtilsPlus.getBodyBytes(request, bodyOffset);
+            reqBodyString = new String(reqBodyBytes, StandardCharsets.UTF_8);
         }
 
         //计算认证相关的头信息
@@ -81,10 +83,10 @@ public class HttpAndHttpsProxy {
             String reqParamsJsonStr;
             //额外处理 多层 Json格式的请求
             if(contentType == IRequestInfo.CONTENT_TYPE_JSON
-                    && !Utils.isEmpty(body)
-                    && Utils.countStr(Utils.decodeUrl(body),"{" ,2, true)
-                    && Utils.isJson(Utils.decodeUrl(body))){
-                HashMap reqParamsMap = Utils.JsonParamsToHashMap(body, false);
+                    && !Utils.isEmpty(reqBodyString)
+                    && Utils.countStr(Utils.decodeUrl(reqBodyString),"{" ,2, true)
+                    && Utils.isJson(Utils.decodeUrl(reqBodyString))){
+                HashMap reqParamsMap = Utils.JsonParamsToHashMap(reqBodyString, false);
                 ParamsHashMapAddIParams(reqParamsMap, reqParams);
                 reqParamsJsonStr = Utils.paramsHashMapToJsonStr(reqParamsMap, false);
             }else if(Utils.paramValueHasJson(reqParams)){
@@ -122,7 +124,7 @@ public class HttpAndHttpsProxy {
                 reqUrlKey = String.format("%s", reqUrl);
             }
             //计算请求信息Hash
-            String reqInfoHash = Utils.calcReqInfoHash(reqUrlKey, reqBody);
+            String reqInfoHash = Utils.calcReqInfoHash(reqUrlKey, reqBodyBytes);
             //新增 输出url去重处理  记录请求URL和body对应hash
             if (Config.reqInfoHashSet.contains(reqInfoHash)) {
                 Utils.showStderrMsg(1, String.format("[-] Ignored By URL&Body(md5): %s", reqInfoHash));
@@ -148,10 +150,10 @@ public class HttpAndHttpsProxy {
         Map<String, Object> resultMap;
         if(httpService.getProtocol().equals("https")){
             //修改 输出url去重处理
-            resultMap = HttpsProxy(ReqKeyHashMap, reqUrl, reqHeaders, reqBody, Config.PROXY_HOST, Config.PROXY_PORT, Config.PROXY_USERNAME, Config.PROXY_PASSWORD);
+            resultMap = HttpsProxy(ReqKeyHashMap, reqUrl, reqHeaders, reqBodyBytes, Config.PROXY_HOST, Config.PROXY_PORT, Config.PROXY_USERNAME, Config.PROXY_PASSWORD);
         }else {
             //修改 输出url去重处理
-            resultMap = HttpProxy(ReqKeyHashMap, reqUrl, reqHeaders, reqBody, Config.PROXY_HOST, Config.PROXY_PORT,Config.PROXY_USERNAME,Config.PROXY_PASSWORD);
+            resultMap = HttpProxy(ReqKeyHashMap, reqUrl, reqHeaders, reqBodyBytes, Config.PROXY_HOST, Config.PROXY_PORT,Config.PROXY_USERNAME,Config.PROXY_PASSWORD);
         }
 
         putResultMapOuter(resultMap, requestResponse);
@@ -490,11 +492,19 @@ public class HttpAndHttpsProxy {
     private static void putResultMapOuter(Map<String, Object> mapResult, IHttpRequestResponse rawRequestResponse) {
         //添加对比结果
         byte[] rawResponse = rawRequestResponse.getResponse();
-        boolean statusEqual = false;
+        boolean equalStatus = false;  //代理响应状态码是否和原始响应状态码相同
+        boolean equalLength = false;  //代理响应长度是否和原始响应长度相同
         if (rawResponse.length > 0) {
             IResponseInfo rawRespInfo = BurpExtender.helpers.analyzeResponse(rawResponse);
-            statusEqual = mapResult.get("respStatus").equals(String.valueOf(rawRespInfo.getStatusCode()));
+            //获取原始响应状态码
+            String respStatus = String.valueOf(rawRespInfo.getStatusCode());
+            equalStatus = mapResult.get("respStatus").equals(respStatus);
+            //获取原始响应体长度
+            int bodyOffset = rawRespInfo.getBodyOffset();
+            int respLength = UtilsPlus.getBodyBytes(rawResponse, bodyOffset).length;
+            equalLength = ((byte[])mapResult.get("respBody")).length == respLength;
         }
-        mapResult.put("statusEqual", statusEqual);
+        mapResult.put("equalStatus", equalStatus);
+        mapResult.put("equalLength", equalLength);
     }
 }
