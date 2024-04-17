@@ -114,23 +114,6 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
 
 
         executorService = Executors.newSingleThreadExecutor();
-        //必须等插件界面显示完毕，重置JTable列宽才生效
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                //按照比例显示列宽
-                float[] columnWidthPercentage = {5.0f, 5.0f, 55.0f, 20.0f, 15.0f};
-                int tW = GUI.logTable.getWidth();
-                TableColumn column;
-                TableColumnModel jTableColumnModel = GUI.logTable.getColumnModel();
-                int cantCols = jTableColumnModel.getColumnCount();
-                for (int i = 0; i < cantCols; i++) {
-                    column = jTableColumnModel.getColumn(i);
-                    int pWidth = Math.round(columnWidthPercentage[i] * tW);
-                    column.setPreferredWidth(pWidth);
-                }
-            }
-        });
     }
 
     //callbacks.registerContextMenuFactory(this);//必须注册右键菜单Factory
