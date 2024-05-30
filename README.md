@@ -1,11 +1,12 @@
 # Passive Scan Client | Burp被动扫描流量转发插件
 
+## 0x00 UI介绍(本分支)
+
+![image](https://github.com/winezer0/passive-scan-client-plus/assets/46115146/251adf85-4e0e-4582-909d-efa74f0bf9d2)
 
 ## 0x01 功能介绍(本分支)
 
 本分支详细更新记录请查看 README.Update.md
-
-![image](https://github.com/winezer0/passive-scan-client-plus/assets/46115146/251adf85-4e0e-4582-909d-efa74f0bf9d2)
 
 ```
 1、右键转发到PSC进行扫描
