@@ -46,18 +46,6 @@ Q3: ......
 
 本分支详细更新记录请查看 README.Update.md
 
-## 0x03 顽固问题
-
-```
-对于jdk17启动的burpsuite,依旧无法运行本程序，原因未知，请使用jdk8-jdk15
-jdk11启动burpsuite 2022.6.1  可以运行PSC
-jdk12启动burpsuite 2022.11.1  可以运行PSC
-jdk17启动burpsuite 2022.11.1  不可运行PSC
-
-问题详情：https://github.com/c0ny1/passive-scan-client/issues
-```
-
-
 
 ## 0x04 下载编译
 
