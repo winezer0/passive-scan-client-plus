@@ -146,13 +146,13 @@ public class UtilsPlus {
         }
     }
 
-    public static byte[] getBodyBytes(byte[] request, int bodyOffset) {
+    public static byte[] getBodyBytes(byte[] respBytes, int bodyOffset) {
         // 确保bodyOffset不会导致数组越界
-        int maxLength = request.length - bodyOffset;
+        int maxLength = respBytes.length - bodyOffset;
         int bodyLength = Math.max(0, maxLength);
 
         // 从request数组中复制请求体的部分
-        byte[] body = Arrays.copyOfRange(request, bodyOffset, bodyOffset + bodyLength);
+        byte[] body = Arrays.copyOfRange(respBytes, bodyOffset, bodyOffset + bodyLength);
         return body;
     }
 }
