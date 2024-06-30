@@ -2,119 +2,49 @@ package burp;
 
 import plus.YamlReader;
 
-import java.awt.Component;
+import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.PrintWriter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import javax.swing.*;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
 
 
-public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContextMenuFactory {
+public class BurpExtender implements IBurpExtender, IProxyListener, IContextMenuFactory {
     public static IBurpExtenderCallbacks callbacks;
     public static IExtensionHelpers helpers;
     public static PrintWriter stdout;
     public static PrintWriter stderr;
-    public static GUI gui;
     public static final List<LogEntry> log = new ArrayList<LogEntry>();
-    public static BurpExtender burpExtender;
-    private ExecutorService executorService;
 
+    private ExecutorService executorService;
     public static String extensionName;
     public static String version;
 
     @Override
     public void registerExtenderCallbacks(IBurpExtenderCallbacks callbacks) {
-        burpExtender = this;
-        BurpExtender.callbacks = callbacks;
-        helpers = callbacks.getHelpers();
-        stdout = new PrintWriter(callbacks.getStdout(),true);
-        stderr = new PrintWriter(callbacks.getStderr(),true);
-        callbacks.registerContextMenuFactory(this);//必须注册右键菜单Factory
-
-
-        //读取配置文件
-        Config.EXTENSION_NAME = YamlReader.getInstance(callbacks).getString(Config.EXTENSION_NAME_STR);
-        Config.VERSION = YamlReader.getInstance(callbacks).getString(Config.VERSION_STR);
-
-        Config.PROXY_HOST = YamlReader.getInstance(callbacks).getString(Config.PROXY_HOST_STR);
-        Config.PROXY_PORT = YamlReader.getInstance(callbacks).getInteger(Config.PROXY_PORT_STR);
-        Config.PROXY_USERNAME = YamlReader.getInstance(callbacks).getString(Config.PROXY_USERNAME_STR);
-        Config.PROXY_PASSWORD = YamlReader.getInstance(callbacks).getString(Config.PROXY_PASSWORD_STR);
-
-        Config.TARGET_HOST_REGX = YamlReader.getInstance(callbacks).getString(Config.TARGET_HOST_REGX_STR);
-        Config.BLACK_URL_REGX = YamlReader.getInstance(callbacks).getString(Config.BLACK_URL_REGX_STR);
-        Config.BLACK_SUFFIX_REGX = YamlReader.getInstance(callbacks).getString(Config.BLACK_SUFFIX_REGX_STR);
-        Config.AUTH_INFO_REGX = YamlReader.getInstance(callbacks).getString(Config.AUTH_INFO_REGX_STR);
-        Config.DEL_STATUS_REGX = YamlReader.getInstance(callbacks).getString(Config.DEL_STATUS_REGX_STR);
-
-        Config.PROXY_TIMEOUT = YamlReader.getInstance(callbacks).getInteger(Config.PROXY_TIMEOUT_STR);
-        Config.HASH_MAP_LIMIT = YamlReader.getInstance(callbacks).getInteger(Config.HASH_MAP_LIMIT_STR);
-        Config.HASH_SET_LIMIT = YamlReader.getInstance(callbacks).getInteger(Config.HASH_SET_LIMIT_STR);
-        Config.INTERVAL_TIME = YamlReader.getInstance(callbacks).getInteger(Config.INTERVAL_TIME_STR);
-        Config.DECODE_MAX_TIMES = YamlReader.getInstance(callbacks).getInteger(Config.DECODE_MAX_TIMES_STR);
-
-        Config.SELECTED_HASH = YamlReader.getInstance(callbacks).getBoolean(Config.SELECTED_HASH_STR);
-        Config.SELECTED_PARAM = YamlReader.getInstance(callbacks).getBoolean(Config.SELECTED_PARAM_STR);
-        Config.SELECTED_SMART = YamlReader.getInstance(callbacks).getBoolean(Config.SELECTED_SMART_STR);
-        Config.SELECTED_AUTH = YamlReader.getInstance(callbacks).getBoolean(Config.SELECTED_AUTH_STR);
-
-        Config.SELECTED_IGNORE = YamlReader.getInstance(callbacks).getBoolean(Config.SELECTED_IGNORE_STR);
-
-        //Config.DEL_ERROR_KEY = YamlReader.getInstance(callbacks).getBoolean(Config.DEL_ERROR_KEY_STR);
-        Config.SHOW_MSG_LEVEL = YamlReader.getInstance(callbacks).getInteger(Config.SHOW_MSG_LEVEL_STR);
-
-
-        version = Config.VERSION;
-        extensionName= Config.EXTENSION_NAME;
-        callbacks.setExtensionName(extensionName + " " + version);
-        gui = new GUI();
+        this.callbacks = callbacks;
+        this.helpers = callbacks.getHelpers();
+        this.stdout = new PrintWriter(callbacks.getStdout(),true);
+        this.stderr = new PrintWriter(callbacks.getStderr(),true);
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                BurpExtender.callbacks.addSuiteTab(BurpExtender.this);
-                BurpExtender.callbacks.registerProxyListener(BurpExtender.this);
-                Utils.showStdoutMsg(0, Utils.getBanner());
-                Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.EXTENSION_NAME_STR, Config.EXTENSION_NAME));
-                Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.VERSION_STR, Config.VERSION));
-
-                Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.PROXY_HOST_STR, Config.PROXY_HOST));
-                Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.PROXY_PORT_STR, Config.PROXY_PORT));
-
-                Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.PROXY_USERNAME_STR, Config.PROXY_USERNAME));
-                Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.PROXY_PASSWORD_STR, Config.PROXY_PASSWORD));
-
-                Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.PROXY_TIMEOUT_STR, Config.PROXY_TIMEOUT));
-                Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.INTERVAL_TIME_STR, Config.INTERVAL_TIME));
-                Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.HASH_MAP_LIMIT_STR, Config.HASH_MAP_LIMIT));
-                Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.HASH_SET_LIMIT_STR, Config.HASH_SET_LIMIT));
-                Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.DECODE_MAX_TIMES_STR, Config.DECODE_MAX_TIMES));
-
-                Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.SELECTED_HASH_STR, Config.SELECTED_HASH));
-                Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.SELECTED_PARAM_STR, Config.SELECTED_PARAM));
-                Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.SELECTED_SMART_STR, Config.SELECTED_SMART));
-                Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.SELECTED_AUTH_STR, Config.SELECTED_AUTH));
-
-                Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.SELECTED_IGNORE_STR, Config.SELECTED_IGNORE));
-
-                Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.TARGET_HOST_REGX_STR, Config.TARGET_HOST_REGX));
-                Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.BLACK_URL_REGX_STR, Config.BLACK_URL_REGX));
-                Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.BLACK_SUFFIX_REGX_STR, Config.BLACK_SUFFIX_REGX));
-                Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.AUTH_INFO_REGX_STR, Config.AUTH_INFO_REGX));
-                Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.DEL_STATUS_REGX_STR, Config.DEL_STATUS_REGX));
-
-                //Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.DEL_ERROR_KEY_STR, Config.DEL_ERROR_KEY));
-                Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.SHOW_MSG_LEVEL_STR, Config.SHOW_MSG_LEVEL));
-                Utils.showStdoutMsg(1, "[*] ####################################");
+                initLoadConfigFile(callbacks); //加载配置文件
+                version = Config.VERSION;
+                extensionName= Config.EXTENSION_NAME;
+                callbacks.setExtensionName(extensionName + " " + version);
+                callbacks.addSuiteTab(new GUI(callbacks, extensionName));  //加载GUI窗口
+                callbacks.registerProxyListener(BurpExtender.this); //注册监听消息处理
+                callbacks.registerContextMenuFactory(BurpExtender.this); //注册右键菜单Factory
             }
         });
-
-
         executorService = Executors.newSingleThreadExecutor();
     }
+
 
     //callbacks.registerContextMenuFactory(this);//必须注册右键菜单Factory
     //实现右键 感谢原作者Conanjun
@@ -162,21 +92,7 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
         return Arrays.asList(i1);
     }
 
-
-    //
-    //实现ITab
-    //
-
     @Override
-    public String getTabCaption() {
-        return extensionName;
-    }
-
-    @Override
-    public Component getUiComponent() {
-        return gui.getComponent();
-    }
-
     public void processProxyMessage(boolean messageIsRequest, final IInterceptedProxyMessage iInterceptedProxyMessage) {
         if (!messageIsRequest && Config.IS_RUNNING) {
             IHttpRequestResponse rep_rsp = iInterceptedProxyMessage.getMessageInfo();
@@ -233,4 +149,72 @@ public class BurpExtender implements IBurpExtender,ITab,IProxyListener, IContext
             });
         }
     }
+
+
+    //读取配置文件
+    private void initLoadConfigFile(IBurpExtenderCallbacks callbacks) {
+        Config.EXTENSION_NAME = YamlReader.getInstance(callbacks).getString(Config.EXTENSION_NAME_STR);
+        Config.VERSION = YamlReader.getInstance(callbacks).getString(Config.VERSION_STR);
+
+        Config.PROXY_HOST = YamlReader.getInstance(callbacks).getString(Config.PROXY_HOST_STR);
+        Config.PROXY_PORT = YamlReader.getInstance(callbacks).getInteger(Config.PROXY_PORT_STR);
+        Config.PROXY_USERNAME = YamlReader.getInstance(callbacks).getString(Config.PROXY_USERNAME_STR);
+        Config.PROXY_PASSWORD = YamlReader.getInstance(callbacks).getString(Config.PROXY_PASSWORD_STR);
+
+        Config.TARGET_HOST_REGX = YamlReader.getInstance(callbacks).getString(Config.TARGET_HOST_REGX_STR);
+        Config.BLACK_URL_REGX = YamlReader.getInstance(callbacks).getString(Config.BLACK_URL_REGX_STR);
+        Config.BLACK_SUFFIX_REGX = YamlReader.getInstance(callbacks).getString(Config.BLACK_SUFFIX_REGX_STR);
+        Config.AUTH_INFO_REGX = YamlReader.getInstance(callbacks).getString(Config.AUTH_INFO_REGX_STR);
+        Config.DEL_STATUS_REGX = YamlReader.getInstance(callbacks).getString(Config.DEL_STATUS_REGX_STR);
+
+        Config.PROXY_TIMEOUT = YamlReader.getInstance(callbacks).getInteger(Config.PROXY_TIMEOUT_STR);
+        Config.HASH_MAP_LIMIT = YamlReader.getInstance(callbacks).getInteger(Config.HASH_MAP_LIMIT_STR);
+        Config.HASH_SET_LIMIT = YamlReader.getInstance(callbacks).getInteger(Config.HASH_SET_LIMIT_STR);
+        Config.INTERVAL_TIME = YamlReader.getInstance(callbacks).getInteger(Config.INTERVAL_TIME_STR);
+        Config.DECODE_MAX_TIMES = YamlReader.getInstance(callbacks).getInteger(Config.DECODE_MAX_TIMES_STR);
+
+        Config.SELECTED_HASH = YamlReader.getInstance(callbacks).getBoolean(Config.SELECTED_HASH_STR);
+        Config.SELECTED_PARAM = YamlReader.getInstance(callbacks).getBoolean(Config.SELECTED_PARAM_STR);
+        Config.SELECTED_SMART = YamlReader.getInstance(callbacks).getBoolean(Config.SELECTED_SMART_STR);
+        Config.SELECTED_AUTH = YamlReader.getInstance(callbacks).getBoolean(Config.SELECTED_AUTH_STR);
+
+        Config.SELECTED_IGNORE = YamlReader.getInstance(callbacks).getBoolean(Config.SELECTED_IGNORE_STR);
+
+        //Config.DEL_ERROR_KEY = YamlReader.getInstance(callbacks).getBoolean(Config.DEL_ERROR_KEY_STR);
+        Config.SHOW_MSG_LEVEL = YamlReader.getInstance(callbacks).getInteger(Config.SHOW_MSG_LEVEL_STR);
+
+        Utils.showStdoutMsg(0, Utils.getBanner(Config.EXTENSION_NAME, Config.VERSION));
+        Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.EXTENSION_NAME_STR, Config.EXTENSION_NAME));
+        Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.VERSION_STR, Config.VERSION));
+
+        Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.PROXY_HOST_STR, Config.PROXY_HOST));
+        Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.PROXY_PORT_STR, Config.PROXY_PORT));
+
+        Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.PROXY_USERNAME_STR, Config.PROXY_USERNAME));
+        Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.PROXY_PASSWORD_STR, Config.PROXY_PASSWORD));
+
+        Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.PROXY_TIMEOUT_STR, Config.PROXY_TIMEOUT));
+        Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.INTERVAL_TIME_STR, Config.INTERVAL_TIME));
+        Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.HASH_MAP_LIMIT_STR, Config.HASH_MAP_LIMIT));
+        Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.HASH_SET_LIMIT_STR, Config.HASH_SET_LIMIT));
+        Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.DECODE_MAX_TIMES_STR, Config.DECODE_MAX_TIMES));
+
+        Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.SELECTED_HASH_STR, Config.SELECTED_HASH));
+        Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.SELECTED_PARAM_STR, Config.SELECTED_PARAM));
+        Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.SELECTED_SMART_STR, Config.SELECTED_SMART));
+        Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.SELECTED_AUTH_STR, Config.SELECTED_AUTH));
+
+        Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.SELECTED_IGNORE_STR, Config.SELECTED_IGNORE));
+
+        Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.TARGET_HOST_REGX_STR, Config.TARGET_HOST_REGX));
+        Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.BLACK_URL_REGX_STR, Config.BLACK_URL_REGX));
+        Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.BLACK_SUFFIX_REGX_STR, Config.BLACK_SUFFIX_REGX));
+        Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.AUTH_INFO_REGX_STR, Config.AUTH_INFO_REGX));
+        Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.DEL_STATUS_REGX_STR, Config.DEL_STATUS_REGX));
+
+        //Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.DEL_ERROR_KEY_STR, Config.DEL_ERROR_KEY));
+        Utils.showStdoutMsg(1, String.format("[*] INIT %s: %s", Config.SHOW_MSG_LEVEL_STR, Config.SHOW_MSG_LEVEL));
+        Utils.showStdoutMsg(1, "[*] ####################################");
+    }
+
 }

@@ -250,12 +250,12 @@ public class HttpAndHttpsProxy {
 
             //BurpExtender.stdout.println("返回结果https：" + httpsConn.getResponseMessage());
             status = String.valueOf(urlConnection.getResponseCode());
-            Utils.updateSuccessCount();
+            GUI.updateSuccessCount();
         } catch (Exception e) {
             //e.printStackTrace();
             respBody = e.getMessage().getBytes(StandardCharsets.UTF_8);
             Utils.showStderrMsg(1, "[!] First Times: " + e.getMessage());
-            Utils.updateFailCount();
+            GUI.updateFailCount();
 
             //不记录错误响应的请求
             String cause = "Response Error";
@@ -374,12 +374,12 @@ public class HttpAndHttpsProxy {
 
             //BurpExtender.stdout.println("返回结果http：" + httpConn.getResponseMessage());
             status = String.valueOf(urlConnection.getResponseCode());
-            Utils.updateSuccessCount();
+            GUI.updateSuccessCount();
         } catch (Exception e) {
             //e.printStackTrace();
             respBody = e.getMessage().getBytes(StandardCharsets.UTF_8);
             Utils.showStderrMsg(1, "[!] First Times: " + e.getMessage());
-            Utils.updateFailCount();
+            GUI.updateFailCount();
 
             //不记录错误响应的请求
             String cause = "Response Error";

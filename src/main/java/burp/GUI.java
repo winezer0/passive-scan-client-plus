@@ -8,26 +8,29 @@ import javax.swing.border.LineBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-public class GUI implements IMessageEditorController {
-    private JPanel contentPanel;
-    private JTextField tfHost;
-    private JTextField tfPort;
-    private JTextField tfTimeout;
-    private JTextField tfIntervalTime;
-    private JTextField tfUsername;
-    private JTextField tfPassword;
-    private JTextField tfTargetHost;
-    private JTextField tfBlackUrl;
-    private JTextField tfBlackSuffix;
-    private JToggleButton btnConn;
-    private JToggleButton btnHash;
-    private JToggleButton btnParam;
-    private JToggleButton btnSmart;
-    private JToggleButton btnAuth;
-    private JToggleButton btnIgnore;
-    private JButton btnClear;
+public class GUI implements ITab,IMessageEditorController {
+    private final String tabName;
 
-    private JSplitPane splitPane;
+    private final JPanel contentPanel;
+    private final JTextField tfHost;
+    private final JTextField tfPort;
+    private final JTextField tfTimeout;
+    private final JTextField tfIntervalTime;
+    private final JTextField tfUsername;
+    private final JTextField tfPassword;
+    private final JTextField tfTargetHost;
+    private final JTextField tfBlackUrl;
+    private final JTextField tfBlackSuffix;
+    private final JToggleButton btnConn;
+    private final JToggleButton btnHash;
+    private final JToggleButton btnParam;
+    private final JToggleButton btnSmart;
+    private final JToggleButton btnAuth;
+    private final JToggleButton btnIgnore;
+    private final JButton btnClear;
+
+    private final JPanel topPanel;
+    private final JSplitPane splitPane;
     public static HttpLogTable logTable;
     public static IHttpRequestResponse currentlyDisplayedItem;
     public static JLabel lbRequestCount;
@@ -38,8 +41,10 @@ public class GUI implements IMessageEditorController {
     public static IMessageEditor responseViewer;
     public static IMessageEditor proxyRspViewer;
 
+    public GUI(IBurpExtenderCallbacks burpExtenderCallbacks, String tabName) {
+        //设置插件名称
+        this.tabName = tabName;
 
-    public GUI() {
         contentPanel = new JPanel();
         //外边框设置
         contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -51,7 +56,7 @@ public class GUI implements IMessageEditorController {
         ////////////////////////////////////////////////////////////////////
         //topPanel start 开始设置配置文件部分面板
         ////////////////////////////////////////////////////////////////////
-        JPanel topPanel = new JPanel();
+        topPanel = new JPanel();
         //把配置面板添加到主面板中
         contentPanel.add(topPanel,BorderLayout.NORTH);
         //自增配置面板内的行号
@@ -123,11 +128,7 @@ public class GUI implements IMessageEditorController {
                         boolean isSelected = btnHash.isSelected();
                         boolean oldStatus = Config.REQ_HASH;
 
-                        if(isSelected){
-                            Config.REQ_HASH = true;
-                        }else{
-                            Config.REQ_HASH = false;
-                        }
+                        Config.REQ_HASH = isSelected;
                         btnHash.setSelected(isSelected);
 
                         boolean newStatus = Config.REQ_HASH;
@@ -151,11 +152,7 @@ public class GUI implements IMessageEditorController {
                     public void stateChanged(ChangeEvent arg0) {
                         boolean isSelected = btnParam.isSelected();
                         boolean oldStatus = Config.REQ_PARAM;
-                        if(isSelected){
-                            Config.REQ_PARAM = true;
-                        }else{
-                            Config.REQ_PARAM = false;
-                        }
+                        Config.REQ_PARAM = isSelected;
                         btnParam.setSelected(isSelected);
                         //判断状态是否改变,改变了就输出
                         boolean newStatus = Config.REQ_PARAM;
@@ -178,11 +175,7 @@ public class GUI implements IMessageEditorController {
                     public void stateChanged(ChangeEvent arg0) {
                         boolean isSelected = btnSmart.isSelected();
                         boolean oldStatus = Config.REQ_SMART;
-                        if(isSelected){
-                            Config.REQ_SMART = true;
-                        }else{
-                            Config.REQ_SMART = false;
-                        }
+                        Config.REQ_SMART = isSelected;
                         btnSmart.setSelected(isSelected);
                         boolean newStatus = Config.REQ_SMART;
                         //判断状态是否改变,改变了就输出
@@ -204,11 +197,7 @@ public class GUI implements IMessageEditorController {
                     public void stateChanged(ChangeEvent arg0) {
                         boolean isSelected = btnAuth.isSelected();
                         boolean oldStatus = Config.REQ_AUTH;
-                        if(isSelected){
-                            Config.REQ_AUTH = true;
-                        }else{
-                            Config.REQ_AUTH = false;
-                        }
+                        Config.REQ_AUTH = isSelected;
                         btnAuth.setSelected(isSelected);
                         boolean newStatus = Config.REQ_AUTH;
                         //判断状态是否改变,改变了就输出
@@ -231,11 +220,7 @@ public class GUI implements IMessageEditorController {
                     public void stateChanged(ChangeEvent arg0) {
                         boolean isSelected = btnIgnore.isSelected();
                         boolean oldStatus = Config.IGNORE_RESP;
-                        if(isSelected){
-                            Config.IGNORE_RESP = true;
-                        }else{
-                            Config.IGNORE_RESP = false;
-                        }
+                        Config.IGNORE_RESP = isSelected;
                         btnIgnore.setSelected(isSelected);
                         boolean newStatus = Config.IGNORE_RESP;
                         //判断状态是否改变,改变了就输出
@@ -302,7 +287,7 @@ public class GUI implements IMessageEditorController {
                             requestViewer.setMessage("".getBytes(),true);
                             responseViewer.setMessage("".getBytes(),false);
                             proxyRspViewer.setMessage("".getBytes(),false);
-                            clearHashSet(true);  //新增URL去重
+                            clearHashSet();  //新增URL去重
                         }
                     }
                 });
@@ -527,7 +512,6 @@ public class GUI implements IMessageEditorController {
 
         }
 
-
         ////////////////////////////////////////////////////////////////////
         //topPanel end
         ////////////////////////////////////////////////////////////////////
@@ -560,10 +544,19 @@ public class GUI implements IMessageEditorController {
         tabs.addTab("Proxy response",proxyRspViewer.getComponent());
         splitPane.setBottomComponent(tabs);
 
-        BurpExtender.callbacks.customizeUiComponent(topPanel);
-        //BurpExtender.callbacks.customizeUiComponent(btnConn);
-        BurpExtender.callbacks.customizeUiComponent(splitPane);
-        BurpExtender.callbacks.customizeUiComponent(contentPanel);
+        burpExtenderCallbacks.customizeUiComponent(topPanel);
+        burpExtenderCallbacks.customizeUiComponent(splitPane);
+        burpExtenderCallbacks.customizeUiComponent(contentPanel);
+    }
+
+    @Override
+    public String getTabCaption() {
+        return this.tabName;
+    }
+
+    @Override
+    public Component getUiComponent() {
+        return this.getComponent();
     }
 
     private GridBagConstraints getGridBagConstraints(int fill, int anchor, int top, int left, int bottom, int right, int grid_x, int grid_y) {
@@ -614,18 +607,37 @@ public class GUI implements IMessageEditorController {
         tfIntervalTime.setEnabled(is);
     }
 
-    //新增URL去重
-    public void clearHashSet(boolean bool){
-        if(bool){
-            int HashSetSizeBefore = Config.reqInfoHashSet.size();
-            Config.reqInfoHashSet.clear();
-            int HashSetSizeAfter = Config.reqInfoHashSet.size();
-            Utils.showStdoutMsg(0, String.format("[*] Clear HashSet By Button, HashSet Size %s --> %s.",HashSetSizeBefore, HashSetSizeAfter));
-
-            int HashMapSizeBefore = Config.reqInfoHashMap.size();
-            Config.reqInfoHashMap.clear();
-            int HashMapSizeAfter = Config.reqInfoHashMap.size();
-            Utils.showStdoutMsg(0, String.format("[*] Clear HashSet By Button, HashMap Size %s --> %s.",HashMapSizeBefore, HashMapSizeAfter));
+    //更新失败计数
+    public static void updateFailCount(){
+        synchronized(Config.SUCCESS_TOTAL){
+            Config.REQUEST_TOTAL++;
+            Config.FAIL_TOTAL++;
+            lbRequestCount.setText(String.valueOf(Config.REQUEST_TOTAL));
+            lbFailCount.setText(String.valueOf(Config.FAIL_TOTAL));
         }
     }
+
+    //更新成功计数
+    public static void updateSuccessCount(){
+        synchronized(Config.FAIL_TOTAL){
+            Config.REQUEST_TOTAL++;
+            Config.SUCCESS_TOTAL++;
+            lbRequestCount.setText(String.valueOf(Config.REQUEST_TOTAL));
+            lbSuccessCount.setText(String.valueOf(Config.SUCCESS_TOTAL));
+        }
+    }
+
+    //新增URL去重
+    private void clearHashSet(){
+        int HashSetSizeBefore = Config.reqInfoHashSet.size();
+        Config.reqInfoHashSet.clear();
+        int HashSetSizeAfter = Config.reqInfoHashSet.size();
+        Utils.showStdoutMsg(0, String.format("[*] Clear HashSet By Button, HashSet Size %s --> %s.",HashSetSizeBefore, HashSetSizeAfter));
+
+        int HashMapSizeBefore = Config.reqInfoHashMap.size();
+        Config.reqInfoHashMap.clear();
+        int HashMapSizeAfter = Config.reqInfoHashMap.size();
+        Utils.showStdoutMsg(0, String.format("[*] Clear HashSet By Button, HashMap Size %s --> %s.",HashMapSizeBefore, HashMapSizeAfter));
+    }
+
 }

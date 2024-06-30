@@ -39,34 +39,16 @@ public class Utils {
         }
     }
 
-    public static String getBanner(){
+    public static String getBanner(String extensionName, String version){
         String bannerInfo =
-                "[+] " + BurpExtender.extensionName + " is loaded\n"
+                "[+] " + extensionName + " is loaded\n"
                         + "[+] #####################################\n"
-                        + "[+]    " + BurpExtender.extensionName + " v" + BurpExtender.version +"\n"
+                        + "[+]    " + extensionName + " v" + version +"\n"
                         + "[+]    anthor: c0ny1\n"
                         + "[+]    github: https://github.com/c0ny1/passive-scan-client\n"
                         + "[+]    update: https://github.com/winezer0/passive-scan-client-plus\n"
                         + "[+] ####################################";
         return bannerInfo;
-    }
-
-    public static void updateSuccessCount(){
-        synchronized(Config.FAIL_TOTAL){
-            Config.REQUEST_TOTAL++;
-            Config.SUCCESS_TOTAL++;
-            GUI.lbRequestCount.setText(String.valueOf(Config.REQUEST_TOTAL));
-            GUI.lbSuccessCount.setText(String.valueOf(Config.SUCCESS_TOTAL));
-        }
-    }
-
-    public static void updateFailCount(){
-        synchronized(Config.SUCCESS_TOTAL){
-            Config.REQUEST_TOTAL++;
-            Config.FAIL_TOTAL++;
-            GUI.lbRequestCount.setText(String.valueOf(Config.REQUEST_TOTAL));
-            GUI.lbFailCount.setText(String.valueOf(Config.FAIL_TOTAL));
-        }
     }
 
     public static void showStderrMsg(Integer msgLevel,String msg){
