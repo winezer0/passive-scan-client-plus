@@ -31,6 +31,8 @@ public class BurpExtender implements IBurpExtender, IProxyListener, IContextMenu
         this.helpers = callbacks.getHelpers();
         this.stdout = new PrintWriter(callbacks.getStdout(),true);
         this.stderr = new PrintWriter(callbacks.getStderr(),true);
+        this.executorService = Executors.newSingleThreadExecutor(); //创建线程的执行器服务
+
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 initLoadConfigFile(callbacks); //加载配置文件
@@ -42,7 +44,6 @@ public class BurpExtender implements IBurpExtender, IProxyListener, IContextMenu
                 callbacks.registerContextMenuFactory(BurpExtender.this); //注册右键菜单Factory
             }
         });
-        executorService = Executors.newSingleThreadExecutor();
     }
 
 
