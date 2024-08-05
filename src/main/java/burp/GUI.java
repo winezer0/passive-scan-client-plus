@@ -123,6 +123,7 @@ public class GUI implements ITab,IMessageEditorController {
                 int innerX = 0; //内部列号 起始
                 //增加URL HASH 去重开关
                 btnHash = new JToggleButton("HASH");
+                btnHash.setToolTipText("忽略转发HASH值相同的请求URL");
                 btnHash.addChangeListener(new ChangeListener() {
                     public void stateChanged(ChangeEvent arg0) {
                         boolean isSelected = btnHash.isSelected();
@@ -148,6 +149,7 @@ public class GUI implements ITab,IMessageEditorController {
 
                 //增加无参数URL去除开关
                 btnParam = new JToggleButton("PARAM");
+                btnParam.setToolTipText("忽略转发没有参数的请求URL");
                 btnParam.addChangeListener(new ChangeListener() {
                     public void stateChanged(ChangeEvent arg0) {
                         boolean isSelected = btnParam.isSelected();
@@ -171,6 +173,7 @@ public class GUI implements ITab,IMessageEditorController {
 
                 //增加重复参数URL去除开关
                 btnSmart = new JToggleButton("SMART");
+                btnSmart.setToolTipText("忽略转发参数重复的请求URL");
                 btnSmart.addChangeListener(new ChangeListener() {
                     public void stateChanged(ChangeEvent arg0) {
                         boolean isSelected = btnSmart.isSelected();
@@ -193,6 +196,7 @@ public class GUI implements ITab,IMessageEditorController {
 
                 //增加去重时关注认证信息的开关
                 btnAuth = new JToggleButton("AUTH");
+                btnAuth.setToolTipText("转发URL完全相同但认证信息不同的请求");
                 btnAuth.addChangeListener(new ChangeListener() {
                     public void stateChanged(ChangeEvent arg0) {
                         boolean isSelected = btnAuth.isSelected();
@@ -214,8 +218,9 @@ public class GUI implements ITab,IMessageEditorController {
                 innerX += 1;
 
 
-                //增加去重时关注认证信息的开关
+                //增加显示转发响应结果的内容开关
                 btnIgnore = new JToggleButton("IGNORE");
+                btnIgnore.setToolTipText("忽略显示转发到代理服务器时的响应");
                 btnIgnore.addChangeListener(new ChangeListener() {
                     public void stateChanged(ChangeEvent arg0) {
                         boolean isSelected = btnIgnore.isSelected();
@@ -239,6 +244,7 @@ public class GUI implements ITab,IMessageEditorController {
 
                 // 增加运行按钮
                 btnConn = new JToggleButton("Run");
+                btnConn.setToolTipText("被动监听运行模式控制开关");
                 btnConn.addChangeListener(new ChangeListener() {
                     public void stateChanged(ChangeEvent arg0) {
                         boolean isSelected = btnConn.isSelected();
@@ -270,6 +276,7 @@ public class GUI implements ITab,IMessageEditorController {
 
                 //增加清除按钮
                 btnClear = new JButton("Clear");
+                btnClear.setToolTipText("清除所有请求转发记录");
                 btnClear.addActionListener(new AbstractAction() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
@@ -341,6 +348,7 @@ public class GUI implements ITab,IMessageEditorController {
 
                 //HOST输入框
                 JLabel lbHost = new JLabel("ProxyHost:");
+                lbHost.setToolTipText("被转发的代理服务监听IP");
                 proxyPanel.add(lbHost, getGridBagConstraints(LineInnerFill,LineInnerAnchor, lenRight,innerX,0));
                 innerX += 1;
 
@@ -352,6 +360,7 @@ public class GUI implements ITab,IMessageEditorController {
 
                 //Port输入框
                 JLabel lbPort = new JLabel("ProxyPort:");
+                lbPort.setToolTipText("被转发的代理服务监听端口");
                 proxyPanel.add(lbPort, getGridBagConstraints(LineInnerFill,LineInnerAnchor, lenRight,innerX,0));
                 innerX += 1;
 
@@ -363,6 +372,7 @@ public class GUI implements ITab,IMessageEditorController {
 
                 //用户名输入框
                 JLabel lbUsername = new JLabel("ProxyUser:");
+                lbUsername.setToolTipText("被转发的代理服务监听账号");
                 proxyPanel.add(lbUsername, getGridBagConstraints(LineInnerFill,LineInnerAnchor, lenRight,innerX,0));
                 innerX += 1;
 
@@ -374,6 +384,7 @@ public class GUI implements ITab,IMessageEditorController {
 
                 //密码输入框
                 JLabel lbPassword = new JLabel("ProxyPwd:");
+                lbPassword.setToolTipText("被转发的代理服务监听密码");
                 proxyPanel.add(lbPassword, getGridBagConstraints(LineInnerFill,LineInnerAnchor, lenRight,innerX,0));
                 innerX += 1;
 
@@ -385,6 +396,7 @@ public class GUI implements ITab,IMessageEditorController {
 
                 //超时输入框
                 JLabel lbTimeout = new JLabel("Timeout:");
+                lbTimeout.setToolTipText("请求转发超时时间");
                 proxyPanel.add(lbTimeout, getGridBagConstraints(LineInnerFill,LineInnerAnchor, lenRight,innerX,0));
                 innerX += 1;
 
@@ -396,6 +408,7 @@ public class GUI implements ITab,IMessageEditorController {
 
                 //增加间隔时间
                 JLabel lbIntervalTime = new JLabel("Interval Time:");
+                lbIntervalTime.setToolTipText("请求转发间隔时间");
                 proxyPanel.add(lbIntervalTime, getGridBagConstraints(LineInnerFill,LineInnerAnchor, lenRight,innerX,0));
                 innerX += 1;
 
@@ -427,6 +440,7 @@ public class GUI implements ITab,IMessageEditorController {
                 int innerX = 0;
                 //新增黑名单主机控制
                 JLabel lbBlackUrl = new JLabel("BlackUrls:");
+                lbBlackUrl.setToolTipText("禁止转发的黑名单URL正则");
                 filterPanel.add(lbBlackUrl, getGridBagConstraints(LineInnerFill,LineInnerAnchor, lenRight,innerX,0));
                 innerX += 1;
 
@@ -437,6 +451,7 @@ public class GUI implements ITab,IMessageEditorController {
 
                 //黑名单后缀处理
                 JLabel lbBlackSuffix = new JLabel("BlackSuffix:");
+                lbBlackSuffix.setToolTipText("禁止转发的黑名单后缀正则");
                 filterPanel.add(lbBlackSuffix, getGridBagConstraints(LineInnerFill,LineInnerAnchor, lenRight,innerX,0));
                 innerX += 1;
 
@@ -466,6 +481,7 @@ public class GUI implements ITab,IMessageEditorController {
             if (true){
                 int innerX = 0;
                 JLabel lbTargetHost = new JLabel("TargetHost:");
+                lbTargetHost.setToolTipText("允许被转发的请求目标HOST正则");
                 targetPanel.add(lbTargetHost,getGridBagConstraints(LineInnerFill,LineInnerAnchor, lenRight,innerX,0));
                 innerX += 1;
 
@@ -477,6 +493,7 @@ public class GUI implements ITab,IMessageEditorController {
 
                 // 转发url总数，默认0
                 JLabel lbRequest = new JLabel("Total:");
+                lbRequest.setToolTipText("监听转发请求总数");
                 targetPanel.add(lbRequest,getGridBagConstraints(LineInnerFill,LineInnerAnchor, lenRight,innerX,0));
                 innerX += 1;
 
@@ -487,6 +504,7 @@ public class GUI implements ITab,IMessageEditorController {
 
                 // 转发成功url数，默认0
                 JLabel lbSuccess = new JLabel("Success:");
+                lbSuccess.setToolTipText("转发请求成功总数");
                 targetPanel.add(lbSuccess,getGridBagConstraints(LineInnerFill,LineInnerAnchor, lenRight,innerX,0));
 
                 lbRequestCount.setForeground(new Color(0,0,255));
@@ -500,6 +518,7 @@ public class GUI implements ITab,IMessageEditorController {
 
                 // 转发失败url数，默认0
                 JLabel lbFail = new JLabel("Fail:");
+                lbFail.setToolTipText("转发请求失败总数");
                 targetPanel.add(lbFail,getGridBagConstraints(LineInnerFill,LineInnerAnchor, lenRight,innerX,0));
                 innerX += 1;
 
