@@ -37,9 +37,13 @@ public class GUI implements ITab,IMessageEditorController {
     public static JLabel lbSuccessCount;
     public static JLabel lbFailCount;
 
-    public static IMessageEditor requestViewer;
-    public static IMessageEditor responseViewer;
-    public static IMessageEditor proxyRspViewer;
+    private static JSplitPane OriginalMsgViewerPane;  //请求消息|响应消息 二合一 面板
+    public static IMessageEditor originalRequestViewer;
+    public static IMessageEditor originalResponseViewer;
+
+    private static JSplitPane proxyMsgViewerPane;  //请求消息|响应消息 二合一 面板
+    public static IMessageEditor proxyRequestViewer;
+    public static IMessageEditor proxyResponseViewer;
 
     public GUI(IBurpExtenderCallbacks burpExtenderCallbacks, String tabName) {
         //设置插件名称
@@ -220,7 +224,7 @@ public class GUI implements ITab,IMessageEditorController {
 
                 //增加显示转发响应结果的内容开关
                 btnIgnore = new JToggleButton("IGNORE");
-                btnIgnore.setToolTipText("忽略显示转发到代理服务器时的响应");
+                btnIgnore.setToolTipText("忽略保存转发到代理服务器时的响应");
                 btnIgnore.addChangeListener(new ChangeListener() {
                     public void stateChanged(ChangeEvent arg0) {
                         boolean isSelected = btnIgnore.isSelected();
@@ -291,9 +295,12 @@ public class GUI implements ITab,IMessageEditorController {
                             BurpExtender.log.clear();
                             logTable.getHttpLogTableModel().fireTableDataChanged();//通知模型更新
                             logTable.updateUI();//刷新表格
-                            requestViewer.setMessage("".getBytes(),true);
-                            responseViewer.setMessage("".getBytes(),false);
-                            proxyRspViewer.setMessage("".getBytes(),false);
+
+                            proxyRequestViewer.setMessage("".getBytes(),true);
+                            originalRequestViewer.setMessage("".getBytes(),true);
+
+                            proxyResponseViewer.setMessage("".getBytes(),false);
+                            originalResponseViewer.setMessage("".getBytes(),false);
                             clearHashSet();  //新增URL去重
                         }
                     }
@@ -553,14 +560,23 @@ public class GUI implements ITab,IMessageEditorController {
 
         //添加最后的响应信息面板
         JTabbedPane tabs = new JTabbedPane();
-        requestViewer = BurpExtender.callbacks.createMessageEditor(this, false);
-        responseViewer = BurpExtender.callbacks.createMessageEditor(this, false);
-        //proxyRspViewer = BurpExtender.callbacks.createTextEditor();
-        proxyRspViewer = BurpExtender.callbacks.createMessageEditor(this, false);
+        proxyRequestViewer = BurpExtender.callbacks.createMessageEditor(this, false);
+        proxyResponseViewer = BurpExtender.callbacks.createMessageEditor(this, false);
 
-        tabs.addTab("Request", requestViewer.getComponent());
-        tabs.addTab("Original response", responseViewer.getComponent());
-        tabs.addTab("Proxy response",proxyRspViewer.getComponent());
+        originalRequestViewer = BurpExtender.callbacks.createMessageEditor(this, false);
+        originalResponseViewer = BurpExtender.callbacks.createMessageEditor(this, false);
+
+        //添加请求和响应信息面板到一个面板中
+        proxyMsgViewerPane = new JSplitPane(1);
+        proxyMsgViewerPane.setLeftComponent(proxyRequestViewer.getComponent());
+        proxyMsgViewerPane.setRightComponent(proxyResponseViewer.getComponent());
+
+        OriginalMsgViewerPane = new JSplitPane(1);
+        OriginalMsgViewerPane.setLeftComponent(originalRequestViewer.getComponent());
+        OriginalMsgViewerPane.setRightComponent(originalResponseViewer.getComponent());
+
+        tabs.addTab("ProxyMsg", proxyMsgViewerPane);
+        tabs.addTab("Original", OriginalMsgViewerPane);
         splitPane.setBottomComponent(tabs);
 
         burpExtenderCallbacks.customizeUiComponent(topPanel);
@@ -659,4 +675,23 @@ public class GUI implements ITab,IMessageEditorController {
         Utils.showStdoutMsg(0, String.format("[*] Clear HashSet By Button, HashMap Size %s --> %s.",HashMapSizeBefore, HashMapSizeAfter));
     }
 
+    /**
+     * 当左边极小时 设置请求体和响应体各占一半空间
+     */
+    public static void msgViewerAutoSetSplitCenter(JSplitPane msgViewerPane) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                if (msgViewerPane.getLeftComponent().getWidth() <= 20)
+                    msgViewerPane.setDividerLocation(msgViewerPane.getParent().getWidth() / 2);
+            }
+        });
+    }
+
+    public static void proxyMsgViewerAutoSetSplitCenter(){
+        msgViewerAutoSetSplitCenter(proxyMsgViewerPane);
+    }
+
+    public static void originalMsgViewerAutoSetSplitCenter() {
+        msgViewerAutoSetSplitCenter(OriginalMsgViewerPane);
+    }
 }
